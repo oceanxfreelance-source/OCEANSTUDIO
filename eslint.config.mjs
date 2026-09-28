@@ -11,5 +11,5 @@ export default [
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_", ignoreRestSiblings: true }],
     },
   },
-  { ignores: [".next/**", "node_modules/**", "playwright-report/**", "test-results/**", "tmp/**"] },
+  { ignores: [".next/**", "node_modules/**", "playwright-report/**", "test-results/**", "tmp/**", "next-env.d.ts", "**/*.mjs"] },
 ];

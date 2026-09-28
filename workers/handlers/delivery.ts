@@ -15,6 +15,8 @@ import { deliveryState } from "@/lib/auth/client";
 import { registerObject } from "@/server/storage-registry";
 import type { JobContext } from "../context";
 
+const DEFAULT_WATERMARK: WatermarkSpec = { text: "OCEANX STUDIO", opacity: 0.35, position: "center", scale: 0.05 };
+
 async function stillLive(deliveryId: string) {
   const d = await db.delivery.findUniqueOrThrow({ where: { id: deliveryId } });
   const state = deliveryState(d);
@@ -35,7 +37,11 @@ export async function prepareDelivery(ctx: JobContext): Promise<void> {
   }
   const s = storage();
   const files = await db.deliveryFile.findMany({ where: { deliveryId }, include: { version: true }, orderBy: { sortOrder: "asc" } });
-  const watermark = d.watermarkPreviews ? await db.watermark.findFirst({ where: { isDefault: true } }) : null;
+  // Watermark previews only (never the delivered files). Falls back to a default
+  // mark when the admin enabled watermarking but never customised it.
+  const watermark: WatermarkSpec | null = d.watermarkPreviews
+    ? (((await db.watermark.findFirst({ where: { isDefault: true } })) as unknown as WatermarkSpec | null) ?? DEFAULT_WATERMARK)
+    : null;
   const wdir = join(ctx.workDir, "wm");
   await mkdir(wdir, { recursive: true });
 
@@ -67,7 +73,7 @@ export async function prepareDelivery(ctx: JobContext): Promise<void> {
           if (!src) continue;
           const dest = keys.deliveryPreview(deliveryId, f.id, variant);
           if (watermark) {
-            const marked = await watermarkJpeg(await s.getBuffer(src), watermark as unknown as WatermarkSpec);
+            const marked = await watermarkJpeg(await s.getBuffer(src), watermark);
             await s.putBuffer(dest, marked, "image/jpeg");
           } else {
             await s.copy(src, dest, "image/jpeg");

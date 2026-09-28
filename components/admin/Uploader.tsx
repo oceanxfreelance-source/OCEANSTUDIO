@@ -212,7 +212,17 @@ export function Uploader({ projectId, onUploaded }: { projectId: string; onUploa
           drag ? "border-ocean-400 bg-ocean-400/5" : "border-ink-600 hover:border-ink-500",
         )}
       >
-        <input type="file" multiple accept={ACCEPT} className="sr-only" onChange={(e) => e.target.files && add(e.target.files)} />
+        <input
+          type="file"
+          multiple
+          accept={ACCEPT}
+          className="sr-only"
+          onChange={(e) => {
+            const files = e.target.files ? Array.from(e.target.files) : [];
+            e.target.value = ""; // allow re-selecting the same file (e.g. after a cancel)
+            if (files.length) add(files);
+          }}
+        />
         <span className="text-sm text-mist-200">Drop originals here or click to browse</span>
         <span className="mt-1 text-xs text-mist-400">NEF · DNG · CR2 · CR3 · ARW · RAF · ORF · RW2 · JPG · PNG · TIFF · WEBP · MP4 · MOV · M4V · AVI · MKV — multi-GB files supported</span>
         <span className="mt-1 text-xs text-mist-400">Originals are stored exactly as uploaded and are never modified.</span>

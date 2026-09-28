@@ -22,8 +22,7 @@ export function derivativeFilename(original: string, r: Pick<PhotoPipelineResult
   const parts = [stem(original)];
   if (r.versionType === "RAW_DEVELOPED") parts.push("developed");
   if (r.scale > 1) parts.push(`${r.scale}x`);
-  if (r.versionType === "AI_ENHANCED" || r.versionType === "ENHANCED") parts.push(r.isAi ? "ai-enhanced" : "enhanced");
-  if (r.versionType === "UPSCALED" && r.scale <= 1) parts.push("upscaled");
+  if (r.versionType === "AI_ENHANCED" || r.versionType === "ENHANCED" || r.versionType === "UPSCALED") parts.push(r.isAi ? "ai-enhanced" : "enhanced");
   if (r.colorPreset) parts.push(r.colorPreset.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
   else if (r.versionType === "COLOR_GRADED") parts.push("graded");
   return `${parts.join("_")}.${r.extension}`;

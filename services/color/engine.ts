@@ -202,6 +202,9 @@ export function compileEngine(p: EngineParams): CompiledEngine {
   const mono = ex.monochrome;
   const hueSat = ex.hueSaturation ?? [];
   const linearInput = p.linearInput === true;
+  // The highlight shoulder only engages when exposure / white balance can push
+  // values past white; a neutral grade must leave pixels untouched.
+  const useShoulder = expMul * Math.max(wb[0], wb[1], wb[2]) > 1.0001;
   const identityTone = a.shadows === 0 && a.highlights === 0 && a.whites === 0 && a.blacks === 0 && a.contrast === 0 && !ex.fade;
 
   return {
@@ -226,9 +229,9 @@ export function compileEngine(p: EngineParams): CompiledEngine {
           b = b * (1 - hazeAdd) + hazeAdd * 0.82;
         }
         // 4. highlight shoulder, back to display encoding
-        r = lut(toSrgbLut, shoulder(r));
-        g = lut(toSrgbLut, shoulder(g));
-        b = lut(toSrgbLut, shoulder(b));
+        r = lut(toSrgbLut, useShoulder ? shoulder(r) : r);
+        g = lut(toSrgbLut, useShoulder ? shoulder(g) : g);
+        b = lut(toSrgbLut, useShoulder ? shoulder(b) : b);
         // 5. tone curve on luminance, applied as a ratio to preserve hue
         let y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
         if (!identityTone) {

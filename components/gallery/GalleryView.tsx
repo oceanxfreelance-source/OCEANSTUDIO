@@ -171,7 +171,7 @@ export function GalleryView({ token, initial }: { token: string; initial: Galler
                   <button onClick={() => download({ packageId: p.id })} disabled={busy === p.id} className="flex h-12 w-full items-center justify-between rounded-xl bg-ink-750 px-4 text-sm hover:bg-ink-700 disabled:opacity-60">
                     <span className="truncate">{p.totalParts > 1 ? `Part ${p.partNumber} of ${p.totalParts}` : "All files (ZIP)"}</span>
                     <span className="tabular text-xs text-mist-400">
-                      {p.fileCount} files · {formatBytes(p.size)}
+                      {p.fileCount} {p.fileCount === 1 ? "file" : "files"} · {formatBytes(p.size)}
                     </span>
                   </button>
                 </li>

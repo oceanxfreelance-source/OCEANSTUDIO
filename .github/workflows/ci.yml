@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: oceanx
+          POSTGRES_PASSWORD: oceanx
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U oceanx" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    env:
+      TEST_DATABASE_URL: postgresql://oceanx:oceanx@localhost:5432/postgres
+      # build-time placeholders only (runtime tests set their own isolated env)
+      DATABASE_URL: postgresql://oceanx:oceanx@localhost:5432/postgres
+      AUTH_SECRET: ci-build-secret-ci-build-secret-ci-build-secret
+      STORAGE_BUCKET: ci
+      STORAGE_ACCESS_KEY: ci
+      STORAGE_SECRET_KEY: ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: System tools (LibRaw, ExifTool, FFmpeg) and S3 emulator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libraw-bin libimage-exiftool-perl ffmpeg
+          pip install "moto[server]"
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run test:integration
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e

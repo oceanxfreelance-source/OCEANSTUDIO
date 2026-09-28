@@ -32,7 +32,7 @@ export function middleware(req: NextRequest) {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
+    ...((process.env.APP_URL ?? "").startsWith("https://") ? ["upgrade-insecure-requests"] : []),
   ].join("; ");
 
   const { pathname } = req.nextUrl;
@@ -48,7 +48,7 @@ export function middleware(req: NextRequest) {
   headers.set("x-nonce", nonce);
   headers.set("content-security-policy", csp);
   const res = NextResponse.next({ request: { headers } });
-  res.headers.set("Content-Security-Policy", dev ? csp.replace("upgrade-insecure-requests", "") : csp);
+  res.headers.set("Content-Security-Policy", csp);
   res.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
   return res;
 }

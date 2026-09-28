@@ -13,3 +13,5 @@ next-env.d.ts
 /playwright-report
 /tmp
 .DS_Store
+tests/e2e/.e2e-state.json
+tests/e2e/.e2e-delivery.json

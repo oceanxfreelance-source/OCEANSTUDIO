@@ -6,6 +6,11 @@ export function cx(...c: (string | false | null | undefined)[]) {
   return c.filter(Boolean).join(" ");
 }
 
+/** Full width unless the caller sets an explicit width (avoids conflicting utility classes). */
+function widthOr(className?: string) {
+  return /(^|\s)(max-)?w-/.test(className ?? "") ? className : cx("w-full", className);
+}
+
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 const variants: Record<Variant, string> = {
   primary: "bg-ocean-400 text-ink-950 hover:bg-ocean-300 disabled:bg-ink-600 disabled:text-mist-400",
@@ -62,7 +67,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   return (
     <input
       ref={ref}
-      className={cx("h-9 w-full rounded-lg border border-ink-600 bg-ink-900 px-3 text-sm text-mist-100 placeholder:text-mist-400 focus:border-ocean-500 focus:outline-none", className)}
+      className={cx("h-9 rounded-lg border border-ink-600 bg-ink-900 px-3 text-sm text-mist-100 placeholder:text-mist-400 focus:border-ocean-500 focus:outline-none", widthOr(className))}
       {...rest}
     />
   );
@@ -70,7 +75,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
 
 export function Select({ className, children, ...rest }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select className={cx("h-9 w-full rounded-lg border border-ink-600 bg-ink-900 px-3 text-sm text-mist-100 focus:border-ocean-500 focus:outline-none", className)} {...rest}>
+    <select className={cx("h-9 rounded-lg border border-ink-600 bg-ink-900 px-3 text-sm text-mist-100 focus:border-ocean-500 focus:outline-none", widthOr(className))} {...rest}>
       {children}
     </select>
   );
@@ -95,7 +100,7 @@ export function Toggle({ checked, onChange, label, description, disabled }: { ch
         onClick={() => onChange(!checked)}
         className={cx("relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors", checked ? "bg-ocean-400" : "bg-ink-600")}
       >
-        <span className={cx("absolute top-0.5 size-4 rounded-full bg-white transition-transform", checked ? "translate-x-4.5" : "translate-x-0.5")} />
+        <span className={cx("absolute left-0 top-0.5 size-4 rounded-full bg-white transition-transform", checked ? "translate-x-4.5" : "translate-x-0.5")} />
       </button>
     </div>
   );
