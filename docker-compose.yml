@@ -1,0 +1,30 @@
+# Local infrastructure for development: PostgreSQL, Redis and an S3-compatible
+# object store (moto) — plus the worker. Run the web app with `npm run dev`.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: oceanx
+      POSTGRES_PASSWORD: oceanx
+      POSTGRES_DB: oceanx
+    ports: ["5432:5432"]
+    volumes: [pg:/var/lib/postgresql/data]
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+  s3:
+    image: motoserver/moto:latest
+    ports: ["9000:5000"]
+  worker:
+    build: { context: ., dockerfile: Dockerfile.worker }
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://oceanx:oceanx@postgres:5432/oceanx
+      REDIS_URL: redis://redis:6379
+      STORAGE_ENDPOINT: http://s3:5000
+      STORAGE_PUBLIC_ENDPOINT: http://localhost:9000
+    depends_on: [postgres, redis, s3]
+    volumes: [work:/work]
+volumes:
+  pg: {}
+  work: {}

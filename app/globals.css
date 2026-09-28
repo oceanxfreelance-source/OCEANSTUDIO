@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink-950: #07090b;
+  --color-ink-900: #0b0e11;
+  --color-ink-850: #0f1216;
+  --color-ink-800: #13171c;
+  --color-ink-750: #181d23;
+  --color-ink-700: #1f252c;
+  --color-ink-600: #2a3139;
+  --color-ink-500: #3a434d;
+  --color-mist-400: #7d8793;
+  --color-mist-300: #9ea7b2;
+  --color-mist-200: #c6ccd3;
+  --color-mist-100: #e7eaee;
+  --color-ocean-300: #8fe0ea;
+  --color-ocean-400: #5ccbd9;
+  --color-ocean-500: #2fb3c4;
+  --color-ocean-600: #1d8e9d;
+  --color-sand-400: #e3c07f;
+  --color-coral-400: #ef7d6d;
+  --color-kelp-400: #7fcf97;
+  --font-sans: "Inter", ui-sans-serif, -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --animate-fade-in: fade-in 180ms ease-out;
+  --animate-rise: rise 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--color-ink-900);
+  color: var(--color-mist-100);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-ocean-500) 45%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ocean-400);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+input[type="range"] {
+  accent-color: var(--color-ocean-400);
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-mist-400);
+  font-weight: 600;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.checker {
+  background-image: linear-gradient(45deg, #15191e 25%, transparent 25%), linear-gradient(-45deg, #15191e 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #15191e 75%), linear-gradient(-45deg, transparent 75%, #15191e 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
