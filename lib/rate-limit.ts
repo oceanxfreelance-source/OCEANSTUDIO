@@ -1,3 +1,4 @@
+import { db } from "./db";
 import { tooManyRequests } from "./errors";
 import { logger } from "./logger";
 import { getRedis } from "./redis";
@@ -19,8 +20,8 @@ export const RULES = {
   adminApi: { name: "admin-api", limit: 1200, windowSeconds: 60 },
 } satisfies Record<string, RateLimitRule>;
 
-// In-memory fallback for local development without Redis. In production a
-// shared Redis is required because serverless instances do not share memory.
+// Without Redis: production uses a Postgres counter table (serverless
+// instances do not share memory); local development/tests use memory.
 const memory = new Map<string, { count: number; resetAt: number }>();
 
 export async function consume(rule: RateLimitRule, identifier: string): Promise<{ allowed: boolean; retryAfter: number }> {
@@ -35,8 +36,12 @@ export async function consume(rule: RateLimitRule, identifier: string): Promise<
     } catch (err) {
       logger.error({ err }, "rate limiter redis failure; falling back to memory");
     }
-  } else if (process.env.NODE_ENV === "production") {
-    logger.warn("REDIS_URL not configured: rate limiting is per-instance only");
+  } else if (process.env.NODE_ENV === "production" || process.env.RATE_LIMIT_STORE === "postgres") {
+    try {
+      return await consumePostgres(key, rule);
+    } catch (err) {
+      logger.error({ err }, "rate limiter postgres failure; falling back to memory");
+    }
   }
   const t = Date.now();
   const entry = memory.get(key);
@@ -48,6 +53,22 @@ export async function consume(rule: RateLimitRule, identifier: string): Promise<
   return { allowed: entry.count <= rule.limit, retryAfter: Math.ceil((entry.resetAt - t) / 1000) };
 }
 
+/** Atomic fixed-window counter in Postgres (one upsert per request). */
+async function consumePostgres(key: string, rule: RateLimitRule): Promise<{ allowed: boolean; retryAfter: number }> {
+  const rows = await db.$queryRaw<{ count: number; reset_at: Date }[]>`
+    INSERT INTO rate_limits (key, count, reset_at)
+    VALUES (${key}, 1, (now() AT TIME ZONE 'UTC') + make_interval(secs => ${rule.windowSeconds}::double precision))
+    ON CONFLICT (key) DO UPDATE SET
+      count = CASE WHEN rate_limits.reset_at <= (now() AT TIME ZONE 'UTC') THEN 1 ELSE rate_limits.count + 1 END,
+      reset_at = CASE WHEN rate_limits.reset_at <= (now() AT TIME ZONE 'UTC') THEN EXCLUDED.reset_at ELSE rate_limits.reset_at END
+    RETURNING count, reset_at`;
+  const row = rows[0]!;
+  // Opportunistic pruning of stale windows (~1% of requests).
+  if (Math.random() < 0.01) await db.$executeRaw`DELETE FROM rate_limits WHERE reset_at < (now() AT TIME ZONE 'UTC') - interval '1 hour'`.catch(() => undefined);
+  const retryAfter = Math.max(1, Math.ceil((row.reset_at.getTime() - Date.now()) / 1000));
+  return { allowed: Number(row.count) <= rule.limit, retryAfter };
+}
+
 export async function enforce(rule: RateLimitRule, identifier: string): Promise<void> {
   const r = await consume(rule, identifier);
   if (!r.allowed) throw tooManyRequests(r.retryAfter);
@@ -56,6 +77,7 @@ export async function enforce(rule: RateLimitRule, identifier: string): Promise<
 export async function resetRateLimit(rule: RateLimitRule, identifier: string): Promise<void> {
   const key = `rl:${rule.name}:${identifier}`;
   memory.delete(key);
+  await db.rateLimit.deleteMany({ where: { key } }).catch(() => undefined);
   await getRedis()?.del(key).catch(() => undefined);
 }
 

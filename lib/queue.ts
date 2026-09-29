@@ -45,11 +45,19 @@ export function queueFor(jobType: JobType, mediaType?: MediaType | null): QueueN
   }
 }
 
+/** True when jobs are dispatched through Redis/BullMQ; false = the worker polls Postgres. */
+export function usesRedisQueue(): boolean {
+  return getRedis() !== null;
+}
+
 /**
- * Enqueue a processing job. The database row is the source of truth; the queue
- * only carries its id. Retries use a new BullMQ job id per attempt.
+ * Enqueue a processing job. The database row (status QUEUED) is the source of
+ * truth; with Redis the queue only carries its id for instant pickup. Without
+ * Redis this is a no-op and the worker's Postgres poller claims the row.
+ * Retries use a new BullMQ job id per attempt.
  */
 export async function enqueue(job: { id: string; jobType: JobType; attempts: number }, mediaType?: MediaType | null) {
+  if (!usesRedisQueue()) return;
   const q = getQueue(queueFor(job.jobType, mediaType));
   await q.add(job.jobType, { processingJobId: job.id } satisfies JobPayload, {
     jobId: `${job.id}-a${job.attempts}`,

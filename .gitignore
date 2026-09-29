@@ -15,3 +15,4 @@ next-env.d.ts
 .DS_Store
 tests/e2e/.e2e-state.json
 tests/e2e/.e2e-delivery.json
+dump.rdb

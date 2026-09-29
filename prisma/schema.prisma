@@ -555,3 +555,14 @@ model AppSetting {
 
   @@map("app_settings")
 }
+
+/// Fixed-window rate-limit counters, used when no Redis is configured
+/// (serverless instances do not share memory).
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime @map("reset_at")
+
+  @@index([resetAt])
+  @@map("rate_limits")
+}

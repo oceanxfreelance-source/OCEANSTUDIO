@@ -52,7 +52,7 @@ HEAVY PROCESSING RUNS IN WORKERS · SECURITY AND 48-HOUR EXPIRY ARE SERVER-SIDE
 
 ## 2. Installation
 
-Requirements: Node 22, PostgreSQL 14+, Redis 6+, an S3-compatible bucket, and for the worker: `libraw-bin` (`dcraw_emu`, `raw-identify`), `libimage-exiftool-perl`, `ffmpeg` (with `vidstab`).
+Requirements: Node 22, PostgreSQL 14+, an S3-compatible bucket, optionally Redis 6+, and for the worker: `libraw-bin` (`dcraw_emu`, `raw-identify`), `libimage-exiftool-perl`, `ffmpeg` (with `vidstab`).
 
 ```bash
 npm install
@@ -74,7 +74,7 @@ All variables are documented in [`.env.example`](.env.example). The important on
 | `AUTH_SECRET` | ≥32 chars. Keys token hashing (HMAC) and, unless `DELIVERY_ENCRYPTION_KEY` is set, AES-GCM encryption of delivery link/password |
 | `CRON_SECRET` | Bearer token for `/api/cron/cleanup` (Vercel Cron) |
 | `STORAGE_*` | Private S3-compatible bucket (endpoint, bucket, keys, region, path-style) |
-| `REDIS_URL` / `QUEUE_URL` | BullMQ queue + distributed rate limiting |
+| `REDIS_URL` / `QUEUE_URL` | Optional. BullMQ queue + distributed rate limiting (without it, Postgres is used for both) |
 | `AI_IMAGE_PROVIDER`, `AI_IMAGE_API_KEY` | `classical` (default, non-AI) or `replicate` |
 | `AI_VIDEO_PROVIDER`, `AI_VIDEO_API_KEY` | `ffmpeg` (default) or `replicate` |
 | `REPLICATE_MODEL_*` | Model references (`owner/name` or `owner/name:version`) |
@@ -116,7 +116,9 @@ processing/{jobId}/…                                  worker scratch
 
 ## 6. Queue setup
 
-Any Redis-compatible server (Redis, Upstash Redis with TCP, Valkey, ElastiCache). Queues: `oceanx-photo`, `oceanx-video`, `oceanx-delivery`, `oceanx-maintenance`. The database is the source of truth for jobs; queue messages only carry the job id. The same Redis also backs rate limiting across serverless instances.
+**Redis is optional.** Without `REDIS_URL`, jobs wait in the `processing_jobs` table (status `QUEUED`) and the worker polls Postgres every 5 s, claiming jobs atomically with `FOR UPDATE SKIP LOCKED` (several workers can run safely). It also marks jobs left `PROCESSING` by a dead worker for more than 90 minutes as failed so they can be retried, and runs the expiration sweep every minute. Rate limiting then uses the `rate_limits` table in production. This is the zero-cost setup: Postgres + bucket + one worker.
+
+With Redis, use any Redis-compatible server (Redis, Upstash Redis with TCP, Valkey, ElastiCache) for instant job pickup. Queues: `oceanx-photo`, `oceanx-video`, `oceanx-delivery`, `oceanx-maintenance`. The database is the source of truth for jobs; queue messages only carry the job id. The same Redis also backs rate limiting across serverless instances.
 
 ## 7. AI provider setup
 

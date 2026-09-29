@@ -5,6 +5,9 @@
  * and FFmpeg installed. Consumes the photo, video, delivery and maintenance
  * queues and runs the scheduled 48-hour expiration cleanup.
  *
+ * Without REDIS_URL the worker polls Postgres for QUEUED jobs instead (no
+ * extra service needed — see workers/poller.ts).
+ *
  *   npm run worker
  */
 process.env.OCEANX_SERVICE ??= "worker";
@@ -18,6 +21,7 @@ import { closeRedis, getRedis } from "@/lib/redis";
 import { cleanupDelivery, runDeliveryCleanup } from "@/server/cleanup";
 import { run } from "@/services/exec";
 import { dispatch } from "./dispatch";
+import { runPoller } from "./poller";
 
 async function checkTools() {
   for (const [cmd, args] of [["dcraw_emu", []], ["raw-identify", []], ["exiftool", ["-ver"]], ["ffmpeg", ["-version"]], ["ffprobe", ["-version"]]] as const) {
@@ -29,8 +33,20 @@ async function checkTools() {
 async function main() {
   const e = env();
   const connection = getRedis();
-  if (!connection) throw new Error("REDIS_URL (or QUEUE_URL) is required for the worker");
   await checkTools();
+
+  if (!connection) {
+    const ctrl = new AbortController();
+    const stop = (signal: string) => {
+      logger.info({ signal }, "worker shutting down after the current job");
+      ctrl.abort();
+    };
+    process.on("SIGTERM", () => stop("SIGTERM"));
+    process.on("SIGINT", () => stop("SIGINT"));
+    await runPoller({ intervalMs: Number(process.env.WORKER_POLL_INTERVAL_MS ?? 5000), signal: ctrl.signal });
+    await db.$disconnect();
+    process.exit(0);
+  }
 
   const processor = async (job: Job<JobPayload>) => dispatch(job.data.processingJobId);
   const workers = [
