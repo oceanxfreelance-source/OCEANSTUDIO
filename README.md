@@ -169,7 +169,7 @@ npm run worker       # second terminal
 
 * Import the repository; framework **Next.js**. `vercel.json` runs `prisma generate && prisma migrate deploy && next build`.
 * Set all web variables from §3 (the web app does not need AI keys or tool binaries).
-* `vercel.json` registers a **Cron** calling `/api/cron/cleanup` every 10 minutes; Vercel sends `Authorization: Bearer $CRON_SECRET`.
+* `vercel.json` registers a daily **Cron** calling `/api/cron/cleanup` (Hobby plans allow daily crons only; on Pro you can raise it to e.g. `*/10 * * * *`). Vercel sends `Authorization: Bearer $CRON_SECRET`. The worker sweeps every minute and expiry is enforced on every request regardless.
 * Nothing heavy runs on Vercel: uploads/downloads are direct to storage, processing is queued.
 
 ## 12. Background worker deployment
@@ -193,7 +193,7 @@ Every object written is registered in `storage_objects` (category, size, tempora
 * `expires_at = created_at + 48 h` is stored on the delivery; the client countdown is display-only.
 * **Every** client request (page render, gallery, media, favorite, download, login) evaluates `current_time >= expires_at` on the server and returns *410 Gone* / the “GALLERY EXPIRED” page — it does not wait for cleanup.
 * Client sessions are bound to one delivery and expire with it; revocation invalidates them immediately.
-* Cleanup (`server/cleanup.ts`, run by the worker every minute **and** Vercel Cron every 10 minutes): mark `EXPIRED` → revoke sessions → `DELETING` → delete registered temporary objects + everything under `deliveries/{id}/` → verify the prefix is empty → `DELETED`. It is idempotent, lease-protected against concurrent runners, logged to the audit log, and failures are recorded and retried on the next sweep.
+* Cleanup (`server/cleanup.ts`, run by the worker every minute **and** by a Vercel Cron safety net): mark `EXPIRED` → revoke sessions → `DELETING` → delete registered temporary objects + everything under `deliveries/{id}/` → verify the prefix is empty → `DELETED`. It is idempotent, lease-protected against concurrent runners, logged to the audit log, and failures are recorded and retried on the next sweep.
 * **It can never delete a master**: every key goes through `assertDeletable()`, which rejects anything under `projects/`, any `/masters/` segment and anything outside `deliveries/{thisDeliveryId}/`; the storage client has no other delete path, and database triggers protect master rows.
 * “Create new 48-hour delivery” re-uses the permanent versions — no re-upload.
 
