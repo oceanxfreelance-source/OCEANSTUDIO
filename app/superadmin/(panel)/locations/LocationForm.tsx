@@ -1,5 +1,6 @@
 import { ActionForm, SubmitButton } from "@/components/admin/ActionForm";
 import { ImagePicker } from "@/components/admin/ImagePicker";
+import { VideoField } from "@/components/admin/VideoField";
 import { Card, Checkbox, Select, TextArea, TextField } from "@/components/admin/ui";
 import { LOCATION_KINDS } from "@/lib/constants";
 import type { FormState } from "@/lib/forms";
@@ -26,7 +27,7 @@ export function LocationForm({ action, location }: { action: (p: FormState, fd: 
           <div className="space-y-5">
             <TextField label="Name" name="name" required defaultValue={l?.name} placeholder="e.g. Machines" />
             <TextArea label="Description" name="description" rows={6} defaultValue={l?.description} />
-            <TextField label="Video link" name="videoUrl" type="url" defaultValue={l?.videoUrl ?? ""} placeholder="https://youtube.com/…" />
+            <VideoField label="Video" name="videoUrl" defaultValue={l?.videoUrl} />
           </div>
         </Card>
         <Card title="Images">

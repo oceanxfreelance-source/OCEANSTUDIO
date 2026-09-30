@@ -5,11 +5,13 @@ import { requireAdmin } from "@/lib/auth";
 import { CONTENT_FIELDS } from "@/lib/content";
 import { db } from "@/lib/db";
 import { idList, type FormState } from "@/lib/forms";
+import { deleteVideoIfUnused } from "@/lib/video-storage";
 
 /** Save one group of website text fields. */
 export async function saveContent(group: string, _prev: FormState, fd: FormData): Promise<FormState> {
   await requireAdmin();
   const fields = CONTENT_FIELDS.filter((f) => f.group === group);
+  const oldHeroVideo = (await db.setting.findUnique({ where: { key: "hero.videoUrl" } }))?.value;
   const errors: Record<string, string> = {};
   const writes = [];
   for (const f of fields) {
@@ -27,6 +29,7 @@ export async function saveContent(group: string, _prev: FormState, fd: FormData)
   }
   if (Object.keys(errors).length) return { error: "Please fix the highlighted fields.", fieldErrors: errors };
   await db.$transaction(writes);
+  if (fields.some((f) => f.key === "hero.videoUrl")) await deleteVideoIfUnused(oldHeroVideo, String(fd.get("hero.videoUrl") ?? "").trim());
   revalidatePath("/", "layout");
   return { ok: true, message: `${group} saved. The website is updated.` };
 }

@@ -81,6 +81,9 @@ export function WorkCard({ w, large = false, dark = false }: { w: WorkCardData; 
       <div className={cx("relative overflow-hidden bg-ink", large ? "aspect-[4/3] md:aspect-[16/10]" : "aspect-[4/5]")}>
         {w.cover ? (
           <Img media={w.cover} alt={w.title} sizes={large ? "(min-width: 768px) 66vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"} className="transition duration-[1.2s] ease-out group-hover:scale-[1.04]" />
+        ) : w.videoUrl && /\.(mp4|mov|m4v|webm)(\?|$)/i.test(w.videoUrl) ? (
+          // No cover photo: show the uploaded video's first frame.
+          <video src={`${w.videoUrl}#t=0.1`} muted playsInline preload="metadata" aria-hidden className="h-full w-full object-cover" />
         ) : (
           <CoverFallback label={w.category} />
         )}

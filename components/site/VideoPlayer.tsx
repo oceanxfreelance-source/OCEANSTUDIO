@@ -27,6 +27,22 @@ export function VideoPlayer({ source, poster, title }: { source: VideoSource; po
 
   const thumb = poster ?? (source.kind === "youtube" ? source.thumbnail : undefined);
 
+  // Uploaded video files: native player. Only a few KB load until play is pressed;
+  // without a poster the browser shows the video's first frame.
+  if (source.kind === "file") {
+    return (
+      <video
+        src={thumb ? source.url : `${source.url}#t=0.1`}
+        poster={thumb}
+        controls
+        playsInline
+        preload="metadata"
+        className="aspect-video w-full bg-black"
+        aria-label={title}
+      />
+    );
+  }
+
   if (!playing) {
     return (
       <button type="button" onClick={() => setPlaying(true)} className="group relative flex aspect-video w-full items-center justify-center overflow-hidden bg-ink text-foam" aria-label={`Play video: ${title}`}>
@@ -41,9 +57,6 @@ export function VideoPlayer({ source, poster, title }: { source: VideoSource; po
     );
   }
 
-  if (source.kind === "file") {
-    return <video src={source.url} poster={thumb} controls autoPlay playsInline preload="metadata" className="aspect-video w-full bg-black" />;
-  }
   return (
     <div className="relative aspect-video w-full bg-black">
       <iframe

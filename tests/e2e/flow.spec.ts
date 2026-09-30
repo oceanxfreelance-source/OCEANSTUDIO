@@ -120,7 +120,7 @@ test("admin: portfolio item with uploaded photo appears on Our Work", async ({ p
   await page.getByLabel("Category").selectOption("Surf");
   await page.getByLabel("Location").selectOption({ label: "Machines" });
   const jpeg = await sharp({ create: { width: 1600, height: 1000, channels: 3, background: "#2f7f86" } }).jpeg().toBuffer();
-  await page.locator('input[type="file"]').first().setInputFiles({ name: "wave.jpg", mimeType: "image/jpeg", buffer: jpeg });
+  await page.locator('input[type="file"][accept="image/*"]').first().setInputFiles({ name: "wave.jpg", mimeType: "image/jpeg", buffer: jpeg });
   await expect(page.locator('img[src*="/media/"]').first()).toBeVisible();
   await page.getByRole("button", { name: "Add to portfolio" }).click();
   await expect(page.getByText("Added to the portfolio.")).toBeVisible();
@@ -138,6 +138,21 @@ test("admin: portfolio item with uploaded photo appears on Our Work", async ({ p
   page.once("dialog", (d) => d.accept());
   await page.getByRole("button", { name: "Delete" }).click();
   await expect(page).toHaveURL(/\/superadmin\/portfolio$/);
+});
+
+test("admin: video upload is offered from the gallery and locked to admins", async ({ page, request }) => {
+  // Without a session the upload endpoint refuses to issue upload permission.
+  const anon = await request.post("/api/admin/video-upload", { data: {}, maxRedirects: 0, headers: { cookie: "ox_admin=forged" } });
+  expect(anon.status()).toBe(401);
+
+  await login(page);
+  await page.goto("/superadmin/portfolio/new");
+  const upload = page.getByRole("button", { name: "Upload video" });
+  await expect(upload).toBeVisible();
+  await expect(page.locator('input[type="file"][accept="video/*"]')).toHaveCount(1);
+  const chooser = page.waitForEvent("filechooser");
+  await upload.click();
+  expect((await chooser).isMultiple()).toBe(false);
 });
 
 test("admin: editing website text changes the home page", async ({ page }) => {

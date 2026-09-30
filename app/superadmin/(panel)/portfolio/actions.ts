@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { checkbox, fieldErrors, formToObject, idList, type FormState } from "@/lib/forms";
 import { uniqueSlug } from "@/lib/slug";
+import { deleteVideoIfUnused } from "@/lib/video-storage";
 import { portfolioSchema } from "@/lib/validation";
 
 export async function savePortfolioItem(id: string | null, _prev: FormState, fd: FormData): Promise<FormState> {
@@ -32,11 +33,13 @@ export async function savePortfolioItem(id: string | null, _prev: FormState, fd:
 
   let savedId = id;
   if (id) {
+    const before = await db.portfolioItem.findUnique({ where: { id }, select: { videoUrl: true } });
     await db.$transaction([
       db.portfolioItem.update({ where: { id }, data }),
       db.portfolioImage.deleteMany({ where: { itemId: id } }),
       db.portfolioImage.createMany({ data: imageIds.map((mediaId, position) => ({ itemId: id, mediaId, position })) }),
     ]);
+    await deleteVideoIfUnused(before?.videoUrl, data.videoUrl);
   } else {
     const slug = await uniqueSlug(v.title, async (s) => !!(await db.portfolioItem.findUnique({ where: { slug: s } })));
     const created = await db.portfolioItem.create({ data: { ...data, slug, images: { create: imageIds.map((mediaId, position) => ({ mediaId, position })) } } });
@@ -49,7 +52,8 @@ export async function savePortfolioItem(id: string | null, _prev: FormState, fd:
 
 export async function deletePortfolioItem(id: string) {
   await requireAdmin();
-  await db.portfolioItem.delete({ where: { id } });
+  const item = await db.portfolioItem.delete({ where: { id } });
+  await deleteVideoIfUnused(item.videoUrl);
   revalidatePath("/", "layout");
   redirect("/superadmin/portfolio");
 }

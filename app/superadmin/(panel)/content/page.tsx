@@ -1,5 +1,6 @@
 import { ActionForm, SubmitButton } from "@/components/admin/ActionForm";
 import { ImagePicker } from "@/components/admin/ImagePicker";
+import { VideoField } from "@/components/admin/VideoField";
 import { Card, PageHeader, TextArea, TextField } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth";
 import { CONTENT_FIELDS, getContent } from "@/lib/content";
@@ -32,6 +33,7 @@ export default async function ContentAdmin() {
                     const type = "type" in f ? f.type : "text";
                     const help = "help" in f ? f.help : undefined;
                     const value = c[f.key];
+                    if (f.key === "hero.videoUrl") return <VideoField key={f.key} name={f.key} label={f.label} defaultValue={value} hint="A short, silent drone clip (10–30 s, 1080p) plays behind the home page title on computers. Phones show the hero image instead." />;
                     if (type === "image") return <ImagePicker key={f.key} name={f.key} label={f.label} hint={help} initial={value ? [{ id: value }] : []} />;
                     if (type === "textarea") return <TextArea key={f.key} name={f.key} label={f.label} hint={help} defaultValue={value} rows={value.length > 300 ? 8 : 4} />;
                     return <TextField key={f.key} name={f.key} label={f.label} hint={help} defaultValue={value} type={type === "url" ? "url" : "text"} />;

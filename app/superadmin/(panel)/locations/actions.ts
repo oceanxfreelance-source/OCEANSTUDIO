@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { checkbox, fieldErrors, formToObject, idList, type FormState } from "@/lib/forms";
 import { uniqueSlug } from "@/lib/slug";
+import { deleteVideoIfUnused } from "@/lib/video-storage";
 import { locationSchema } from "@/lib/validation";
 
 export async function saveLocation(id: string | null, _prev: FormState, fd: FormData): Promise<FormState> {
@@ -29,11 +30,13 @@ export async function saveLocation(id: string | null, _prev: FormState, fd: Form
 
   let savedId = id;
   if (id) {
+    const before = await db.location.findUnique({ where: { id }, select: { videoUrl: true } });
     await db.$transaction([
       db.location.update({ where: { id }, data }),
       db.locationImage.deleteMany({ where: { locationId: id } }),
       db.locationImage.createMany({ data: imageIds.map((mediaId, position) => ({ locationId: id, mediaId, position })) }),
     ]);
+    await deleteVideoIfUnused(before?.videoUrl, data.videoUrl);
   } else {
     const slug = await uniqueSlug(v.name, async (s) => !!(await db.location.findUnique({ where: { slug: s } })));
     const created = await db.location.create({ data: { ...data, slug, images: { create: imageIds.map((mediaId, position) => ({ mediaId, position })) } } });
@@ -46,7 +49,8 @@ export async function saveLocation(id: string | null, _prev: FormState, fd: Form
 
 export async function deleteLocation(id: string) {
   await requireAdmin();
-  await db.location.delete({ where: { id } });
+  const location = await db.location.delete({ where: { id } });
+  await deleteVideoIfUnused(location.videoUrl);
   revalidatePath("/", "layout");
   redirect("/superadmin/locations");
 }

@@ -1,5 +1,6 @@
 import { ActionForm, SubmitButton } from "@/components/admin/ActionForm";
 import { ImagePicker } from "@/components/admin/ImagePicker";
+import { VideoField } from "@/components/admin/VideoField";
 import { Card, Checkbox, Select, TextArea, TextField } from "@/components/admin/ui";
 import { PORTFOLIO_CATEGORIES } from "@/lib/constants";
 import { dateInputValue } from "@/lib/format";
@@ -28,14 +29,7 @@ export function PortfolioForm({ action, item, locations }: { action: (p: FormSta
           <div className="space-y-5">
             <TextField label="Title" name="title" required defaultValue={w?.title} placeholder="e.g. Morning glass at Machines" />
             <TextArea label="Description" name="description" rows={6} defaultValue={w?.description} />
-            <TextField
-              label="Video link"
-              name="videoUrl"
-              type="url"
-              defaultValue={w?.videoUrl ?? ""}
-              placeholder="https://youtube.com/watch?v=…"
-              hint="YouTube or Vimeo links play on the page. A direct .mp4 link also works. Other links (Instagram, Drive) open in a new tab."
-            />
+            <VideoField label="Video" name="videoUrl" defaultValue={w?.videoUrl} />
           </div>
         </Card>
         <Card title="Images">

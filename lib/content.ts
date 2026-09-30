@@ -26,10 +26,10 @@ export const CONTENT_FIELDS = [
   {
     group: "Home — hero",
     key: "hero.videoUrl",
-    label: "Hero background video (MP4 link)",
+    label: "Hero background video",
     default: "",
     type: "url",
-    help: "Optional. A short, muted, compressed .mp4 (under ~8 MB). Only plays on larger screens — phones get the hero image.",
+    help: "Optional. A short silent drone clip. Only plays on larger screens — phones get the hero image.",
   },
   // Home — sections
   { group: "Home — sections", key: "home.introTitle", label: "Intro title", default: "You surf. We capture every wave." },
