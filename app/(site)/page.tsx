@@ -10,16 +10,17 @@ import { Testimonials } from "@/components/site/Testimonials";
 import { getContent } from "@/lib/content";
 import { db } from "@/lib/db";
 import { instagramUrl } from "@/lib/format";
-import { getFeaturedWork, getLocations, getPublicServices, getTestimonials } from "@/lib/public";
+import { getFeaturedWork, getLocations, getPublicServices, getReviewStats, getTestimonials } from "@/lib/public";
 import { parseVideoUrl } from "@/lib/video";
 
 export default async function HomePage() {
-  const [c, services, work, locations, testimonials] = await Promise.all([
+  const [c, services, work, locations, testimonials, reviewStats] = await Promise.all([
     getContent(),
     getPublicServices(),
     getFeaturedWork(5),
     getLocations(),
     getTestimonials(true),
+    getReviewStats(),
   ]);
   const heroImage = c["hero.imageId"]
     ? await db.mediaAsset.findUnique({ where: { id: c["hero.imageId"] }, select: { id: true, width: true, height: true, alt: true } })
@@ -48,10 +49,10 @@ export default async function HomePage() {
           <div className="mt-8 flex flex-col gap-8 md:mt-10 md:flex-row md:items-end md:justify-between">
             <p className="max-w-md text-lg leading-relaxed text-foam/80 md:text-xl">{c["hero.subtitle"]}</p>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href="/book" variant="light">
+              <ButtonLink href="/work" variant="light">
                 {c["hero.primaryCta"]}
               </ButtonLink>
-              <ButtonLink href="/work" variant="outline-light" arrow>
+              <ButtonLink href="/reviews" variant="outline-light" arrow>
                 {c["hero.secondaryCta"]}
               </ButtonLink>
             </div>
@@ -154,18 +155,18 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Testimonials ──────────────────────────────────── */}
-      {testimonials.length > 0 && <Testimonials items={testimonials} />}
+      {/* ── Reviews ───────────────────────────────────────── */}
+      {testimonials.length > 0 && <Testimonials items={testimonials} stats={reviewStats} />}
 
       {/* ── Call to action ────────────────────────────────── */}
       <section className="relative overflow-hidden bg-abyss py-28 text-foam md:py-40">
         <div aria-hidden className="absolute inset-0 bg-[radial-gradient(60%_80%_at_80%_100%,rgba(47,127,134,0.35),transparent_70%)]" />
         <div className="container-x relative" data-reveal>
-          <p className="eyebrow text-sea">Book a session</p>
+          <p className="eyebrow text-sea">Reviews</p>
           <h2 className="display mt-5 max-w-4xl text-5xl [font-stretch:115%] sm:text-6xl lg:text-7xl">{c["cta.title"]}</h2>
           <p className="mt-6 max-w-xl text-lg text-mist">{c["cta.body"]}</p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href="/book">{c["hero.primaryCta"]}</ButtonLink>
+            <ButtonLink href="/reviews#leave-a-review">LEAVE A REVIEW</ButtonLink>
             {ig && (
               <a
                 href={ig}
@@ -173,7 +174,7 @@ export default async function HomePage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-3 rounded-full border border-foam/40 px-7 py-4 text-[12px] font-semibold tracking-[0.16em] hover:border-foam"
               >
-                <Instagram className="h-4 w-4" /> MESSAGE ON INSTAGRAM
+                <Instagram className="h-4 w-4" /> FOLLOW ON INSTAGRAM
               </a>
             )}
           </div>

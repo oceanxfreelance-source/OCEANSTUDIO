@@ -38,7 +38,7 @@ export default async function SessionsAdmin({ searchParams }: { searchParams: Pr
         ))}
       </div>
       {sessions.length === 0 ? (
-        <Empty>No sessions here. Create one from a confirmed booking.</Empty>
+        <Empty>No sessions here yet.</Empty>
       ) : (
         <Table head={["Session", "Customer", "Date", "Service / location", "Price", "Status", "Delivery"]}>
           {sessions.map((s) => (

@@ -25,16 +25,16 @@ export default async function CustomersAdmin({ searchParams }: { searchParams: P
   const ids = customers.map((c) => c.id);
 
   // Per-customer stats in three grouped queries (not one query per row).
-  const [sessions, paid, bookings] = await Promise.all([
+  const [sessions, paid, dates] = await Promise.all([
     db.shootSession.groupBy({ by: ["customerId"], where: { customerId: { in: ids }, status: { not: "CANCELLED" } }, _count: true }),
     db.shootSession.groupBy({ by: ["customerId"], where: { customerId: { in: ids }, paymentStatus: "PAID", status: { not: "CANCELLED" } }, _sum: { price: true } }),
-    db.booking.groupBy({ by: ["customerId"], where: { customerId: { in: ids } }, _min: { createdAt: true }, _max: { createdAt: true } }),
+    db.shootSession.groupBy({ by: ["customerId"], where: { customerId: { in: ids } }, _min: { date: true }, _max: { date: true } }),
   ]);
   const stat = (id: string) => ({
     sessions: sessions.find((s) => s.customerId === id)?._count ?? 0,
     spent: paid.find((p) => p.customerId === id)?._sum.price ?? null,
-    first: bookings.find((b) => b.customerId === id)?._min.createdAt ?? null,
-    last: bookings.find((b) => b.customerId === id)?._max.createdAt ?? null,
+    first: dates.find((d) => d.customerId === id)?._min.date ?? null,
+    last: dates.find((d) => d.customerId === id)?._max.date ?? null,
   });
 
   return (
@@ -44,9 +44,9 @@ export default async function CustomersAdmin({ searchParams }: { searchParams: P
         <input name="q" defaultValue={q} placeholder="Search name, @instagram, email, country…" className="w-full rounded-lg border border-slate/30 bg-white px-3 py-2 text-sm md:w-80" />
       </form>
       {customers.length === 0 ? (
-        <Empty>{q ? "No customers match." : "No customers yet. They're created automatically from booking requests."}</Empty>
+        <Empty>{q ? "No customers match." : "No customers yet. Add the surfers you film to keep track of their sessions and deliveries."}</Empty>
       ) : (
-        <Table head={["Name", "Contact", "Country", "Sessions", "Total spent", "First booking", "Last booking"]}>
+        <Table head={["Name", "Contact", "Country", "Sessions", "Total spent", "First session", "Last session"]}>
           {customers.map((c) => {
             const s = stat(c.id);
             return (

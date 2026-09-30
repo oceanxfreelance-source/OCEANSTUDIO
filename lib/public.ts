@@ -5,7 +5,7 @@ import { db } from "./db";
 /**
  * Read-only queries for the PUBLIC website. Everything here filters to
  * published content only — drafts, hidden services and all business data
- * (bookings, customers, sessions) are never selected.
+ * (customers, sessions) are never selected.
  */
 
 const media = { select: { id: true, width: true, height: true, alt: true } } as const;
@@ -72,11 +72,18 @@ export const getLocation = cache((slug: string) =>
   }),
 );
 
+/** Average star rating and number of published reviews. */
+export const getReviewStats = cache(async () => {
+  const agg = await db.testimonial.aggregate({ where: { published: true }, _count: true, _avg: { rating: true } });
+  const rated = await db.testimonial.count({ where: { published: true, rating: { not: null } } });
+  return { count: agg._count, rated, average: agg._avg.rating ? Math.round(agg._avg.rating * 10) / 10 : null };
+});
+
 export const getTestimonials = cache((onlyFeatured = false) =>
   db.testimonial.findMany({
     where: { published: true, ...(onlyFeatured ? { featured: true } : {}) },
     orderBy: [{ featured: "desc" }, { date: "desc" }, { createdAt: "desc" }],
-    take: 12,
+    take: onlyFeatured ? 6 : 100,
     include: { avatar: media },
   }),
 );

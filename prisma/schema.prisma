@@ -225,11 +225,17 @@ model PortfolioImage {
   @@map("portfolio_images")
 }
 
+/// Guest reviews (stars + a note). Reviews sent from the website arrive with
+/// pending = true and published = false; the admin approves them before they
+/// appear. The admin can also add reviews directly.
 model Testimonial {
   id        String      @id @default(cuid())
   name      String
   instagram String?
   text      String
+  rating    Int? // 1–5 stars
+  source    String      @default("admin") // "guest" = sent from the website
+  pending   Boolean     @default(false) // waiting for the admin's approval
   avatarId  String?     @map("avatar_id")
   avatar    MediaAsset? @relation(fields: [avatarId], references: [id], onDelete: SetNull)
   date      DateTime?
@@ -237,6 +243,7 @@ model Testimonial {
   published Boolean     @default(true)
   createdAt DateTime    @default(now()) @map("created_at")
 
+  @@index([published, pending])
   @@map("testimonials")
 }
 
@@ -277,7 +284,9 @@ enum PaymentStatus {
   REFUNDED
 }
 
-/// A request sent from the public booking form.
+/// A booking request. The public booking form was removed (the website is a
+/// showcase, not a booking system); the table is kept so no data is lost and
+/// bookings can return later.
 model Booking {
   id            String         @id @default(cuid())
   reference     String         @unique // e.g. OX-B-00012 — friendly ID for the admin

@@ -43,17 +43,17 @@ export default async function ContactPage() {
                   </a>
                 </li>
               ))}
-              {rows.length === 0 && <li className="py-5 text-slate">Use the booking form and we&apos;ll get back to you.</li>}
+              {rows.length === 0 && <li className="py-5 text-slate">Contact details coming soon.</li>}
             </ul>
           </div>
           <div data-reveal className="flex flex-col justify-between bg-abyss p-8 text-foam md:p-12">
             <div>
-              <p className="eyebrow text-sea">Book a session</p>
+              <p className="eyebrow text-sea">Reviews</p>
               <p className="display mt-4 text-3xl [font-stretch:112%] md:text-4xl">{c["cta.title"]}</p>
               <p className="mt-4 text-mist">{c["cta.body"]}</p>
             </div>
-            <ButtonLink href="/book" arrow className="mt-10 self-start">
-              {c["hero.primaryCta"]}
+            <ButtonLink href="/reviews#leave-a-review" arrow className="mt-10 self-start">
+              LEAVE A REVIEW
             </ButtonLink>
           </div>
         </div>

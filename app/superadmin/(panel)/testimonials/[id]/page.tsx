@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { deleteTestimonial, saveTestimonial } from "../actions";
 import { TestimonialForm } from "../TestimonialForm";
 
-export const metadata = { title: "Edit testimonial" };
+export const metadata = { title: "Edit review" };
 
 export default async function EditTestimonial({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
@@ -16,10 +16,10 @@ export default async function EditTestimonial({ params }: { params: Promise<{ id
   return (
     <>
       <PageHeader
-        title={`Testimonial — ${t.name}`}
-        back={{ href: "/superadmin/testimonials", label: "Testimonials" }}
+        title={`Review — ${t.name}`}
+        back={{ href: "/superadmin/testimonials", label: "Reviews" }}
         actions={
-          <ConfirmButton action={deleteTestimonial.bind(null, t.id)} confirm="Delete this testimonial?">
+          <ConfirmButton action={deleteTestimonial.bind(null, t.id)} confirm="Delete this review?">
             Delete
           </ConfirmButton>
         }

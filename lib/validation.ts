@@ -70,25 +70,20 @@ const optionalPhone = z
   .transform((v) => (v ? v : undefined))
   .refine((v) => !v || /^\+?[\d\s()-]{6,25}$/.test(v), "Enter a valid phone number with country code");
 
-// ── public booking form ─────────────────────────────────────────────────
-export const bookingRequestSchema = z
-  .object({
-    fullName: trimmed(120).min(2, "Please enter your name"),
-    instagram: instagramHandle,
-    email: optionalEmail,
-    whatsapp: optionalPhone,
-    preferredDate: optionalDate.refine((d) => !d || d.getTime() >= Date.now() - 36 * 3600 * 1000, "Choose a date in the future"),
-    preferredTime: optionalText(40),
-    people: optionalInt(100),
-    serviceId: optionalText(40),
-    location: optionalText(120),
-    message: optionalText(3000),
-  })
-  .refine((v) => v.email || v.whatsapp || v.instagram, {
-    message: "Please give us at least one way to reach you (email, WhatsApp or Instagram).",
-    path: ["email"],
-  });
-export type BookingRequestInput = z.infer<typeof bookingRequestSchema>;
+// ── public review form ─────────────────────────────────────────────────
+const stars = z
+  .string()
+  .trim()
+  .regex(/^[1-5]$/, "Please choose 1 to 5 stars")
+  .transform(Number);
+
+export const reviewSchema = z.object({
+  name: trimmed(80).min(2, "Please enter your name"),
+  instagram: instagramHandle,
+  rating: z.string({ required_error: "Please choose 1 to 5 stars" }).pipe(stars),
+  text: trimmed(1500).min(10, "Please write a few words about your session (at least 10 characters)"),
+});
+export type ReviewInput = z.infer<typeof reviewSchema>;
 
 // ── admin: content ───────────────────────────────────────────────────────
 const status = z.enum(["ACTIVE", "COMING_SOON", "HIDDEN"]);
@@ -127,18 +122,17 @@ export const locationSchema = z.object({
 export const testimonialSchema = z.object({
   name: trimmed(100).min(2, "Name is required"),
   instagram: instagramHandle,
-  text: trimmed(2000).min(5, "Testimonial text is required"),
+  text: trimmed(2000).min(5, "Review text is required"),
+  rating: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ? Number(v) : undefined))
+    .refine((v) => v === undefined || (Number.isInteger(v) && v >= 1 && v <= 5), "Choose 1 to 5 stars"),
   date: optionalDate,
 });
 
 // ── admin: business ──────────────────────────────────────────────────────
-export const bookingUpdateSchema = z.object({
-  status: z.enum(["NEW", "CONTACTED", "CONFIRMED", "COMPLETED", "CANCELLED"]),
-  paymentStatus: z.enum(["UNPAID", "DEPOSIT", "PAID", "REFUNDED"]),
-  price: optionalMoney,
-  notes: trimmed(5000),
-});
-
 export const customerSchema = z.object({
   name: trimmed(120).min(2, "Name is required"),
   instagram: instagramHandle,
@@ -166,5 +160,4 @@ export const sessionSchema = z.object({
   deliveryStatus: z.enum(["NOT_READY", "PROCESSING", "READY", "SENT"]),
   deliveryLink: optionalUrl,
   notes: trimmed(5000),
-  bookingId: optionalText(40),
 });

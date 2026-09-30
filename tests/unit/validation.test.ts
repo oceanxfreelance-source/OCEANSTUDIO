@@ -1,36 +1,35 @@
 import { describe, expect, it } from "vitest";
-import { bookingRequestSchema, serviceSchema, sessionSchema } from "@/lib/validation";
+import { reviewSchema, serviceSchema, sessionSchema, testimonialSchema } from "@/lib/validation";
 
-describe("booking form validation", () => {
-  const base = { fullName: "Ali Hassan" };
+describe("review form validation", () => {
+  const base = { name: "Ali Hassan", rating: "5", text: "Amazing drone clips of my waves at Machines!" };
 
-  it("needs a name and at least one way to reply", () => {
-    expect(bookingRequestSchema.safeParse({ fullName: "" }).success).toBe(false);
-    const noContact = bookingRequestSchema.safeParse(base);
-    expect(noContact.success).toBe(false);
-    expect(noContact.error?.issues[0]?.message).toMatch(/at least one way/);
-    expect(bookingRequestSchema.safeParse({ ...base, instagram: "@ali.surf" }).success).toBe(true);
+  it("accepts a review with stars and a note", () => {
+    const r = reviewSchema.parse({ ...base, instagram: "@ali.surf" });
+    expect(r.rating).toBe(5);
+    expect(r.instagram).toBe("ali.surf");
   });
 
-  it("normalises Instagram handles and emails", () => {
-    const r = bookingRequestSchema.parse({ ...base, instagram: "https://instagram.com/Ali.Surf/", email: " Ali@Example.COM " });
-    expect(r.instagram).toBe("Ali.Surf");
-    expect(r.email).toBe("ali@example.com");
+  it("requires 1–5 stars", () => {
+    expect(reviewSchema.safeParse({ ...base, rating: "" }).success).toBe(false);
+    expect(reviewSchema.safeParse({ ...base, rating: "0" }).success).toBe(false);
+    expect(reviewSchema.safeParse({ ...base, rating: "6" }).success).toBe(false);
+    expect(reviewSchema.safeParse({ ...base, rating: "4.5" }).success).toBe(false);
+    const { rating: _r, ...noRating } = base;
+    expect(reviewSchema.safeParse(noRating).success).toBe(false);
   });
 
-  it("rejects bad input", () => {
-    expect(bookingRequestSchema.safeParse({ ...base, email: "not-an-email" }).success).toBe(false);
-    expect(bookingRequestSchema.safeParse({ ...base, whatsapp: "call me" }).success).toBe(false);
-    expect(bookingRequestSchema.safeParse({ ...base, email: "a@b.co", people: "2.5" }).success).toBe(false);
-    expect(bookingRequestSchema.safeParse({ ...base, email: "a@b.co", preferredDate: "2020-01-01" }).success).toBe(false);
-    expect(bookingRequestSchema.safeParse({ ...base, email: "a@b.co", message: "x".repeat(3001) }).success).toBe(false);
+  it("requires a name and a real note, with sane limits", () => {
+    expect(reviewSchema.safeParse({ ...base, name: "" }).success).toBe(false);
+    expect(reviewSchema.safeParse({ ...base, text: "ok" }).success).toBe(false);
+    expect(reviewSchema.safeParse({ ...base, text: "x".repeat(1501) }).success).toBe(false);
+    expect(reviewSchema.safeParse({ ...base, instagram: "not a handle!" }).success).toBe(false);
   });
 
-  it("accepts a complete request", () => {
-    const d = new Date(Date.now() + 5 * 86400_000).toISOString().slice(0, 10);
-    const r = bookingRequestSchema.parse({ ...base, whatsapp: "+960 777-1234", preferredDate: d, people: "3", message: "Hi" });
-    expect(r.people).toBe(3);
-    expect(r.preferredDate?.toISOString().slice(0, 10)).toBe(d);
+  it("admin reviews allow optional stars", () => {
+    expect(testimonialSchema.parse({ name: "Sam", text: "Great session", rating: "" }).rating).toBeUndefined();
+    expect(testimonialSchema.parse({ name: "Sam", text: "Great session", rating: "4" }).rating).toBe(4);
+    expect(testimonialSchema.safeParse({ name: "Sam", text: "Great session", rating: "9" }).success).toBe(false);
   });
 });
 

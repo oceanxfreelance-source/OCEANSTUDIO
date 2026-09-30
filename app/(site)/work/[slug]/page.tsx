@@ -81,13 +81,13 @@ export default async function WorkItemPage({ params }: Props) {
       )}
 
       <div className="container-x flex flex-col gap-4 border-t border-white/10 py-14 sm:flex-row sm:items-center sm:justify-between">
-        <p className="display text-2xl [font-stretch:110%]">Want something like this?</p>
+        <p className="display text-2xl [font-stretch:110%]">Surfed with us?</p>
         <div className="flex flex-col gap-3 sm:flex-row">
           <ButtonLink href="/work" variant="outline-light">
             MORE WORK
           </ButtonLink>
-          <ButtonLink href="/book" arrow>
-            BOOK A SESSION
+          <ButtonLink href="/reviews#leave-a-review" arrow>
+            LEAVE A REVIEW
           </ButtonLink>
         </div>
       </div>

@@ -4,12 +4,12 @@
 
 This repository holds two things:
 
-1. **The public website.** Visitors see Ocean X's work, services and where Ocean X works (Machines & Maabaidhoo), then send a booking request. Visitors never register or log in.
+1. **The public website.** Visitors see Ocean X's work, services and where Ocean X works (Machines & Maabaidhoo), and read and leave reviews. It is a showcase, not a booking system. Visitors never register or log in.
 2. **The private Superadmin** at `/superadmin`. Only the Ocean X owner uses it, to manage the website and the business.
 
 ```
-PUBLIC   Visitor → Website → Our Work / Services / Machines → Book a session → Ocean X replies
-PRIVATE  Owner   → /superadmin login → Dashboard → Bookings · Sessions · Customers · Content
+PUBLIC   Visitor → Website → Our Work / Services / Machines / Reviews → Leave a review · Contact
+PRIVATE  Owner   → /superadmin login → Dashboard → Reviews (approve) · Sessions · Customers · Content
 ```
 
 ---
@@ -18,23 +18,22 @@ PRIVATE  Owner   → /superadmin login → Dashboard → Bookings · Sessions ·
 
 | Public page | What it shows |
 | --- | --- |
-| `/` Home | Cinematic hero, intro, selected work, services, Machines & Maabaidhoo, testimonials, call to action |
+| `/` Home | Cinematic hero, intro, selected work, services, Machines & Maabaidhoo, featured reviews with stars, call to action |
 | `/work` | Portfolio with category filter (Surf, Ocean, Laamu, Travel, Commercial, Resort, Photography, Videography) |
 | `/services` | Services from the database: **Active** and **Coming soon** |
 | `/machines` | Machines & Maabaidhoo, managed from the admin (`/laamu` redirects here) |
 | `/about`, `/contact` | Editable text and contact details |
-| `/book` | Booking request form. No account; spam-protected and rate-limited |
+| `/reviews` | All approved reviews with stars and the average rating, plus a **Leave a review** form (name, optional Instagram, 1–5 stars, note). No account; spam-protected and rate-limited. `/book` redirects to Contact |
 
 | Superadmin section | What you can do |
 | --- | --- |
-| Dashboard | New requests, confirmed bookings, upcoming and completed sessions, revenue, services, recent customers and uploads |
-| Bookings | See every request, change its status (New → Contacted → Confirmed → Completed / Cancelled), set price and payment, add private notes, reply in one click on WhatsApp, Instagram or email |
-| Sessions & delivery | Create a session from a booking, record clips, price and payment, paste a Google Drive delivery link, send it on WhatsApp or email, mark it sent |
-| Customers | Private customer records (created automatically from bookings), with session count, total spent, and first and last booking |
+| Dashboard | Reviews waiting for approval, average rating, upcoming and completed sessions, revenue, services, recent customers and uploads |
+| Sessions & delivery | Create a session for a customer, record clips, price and payment, paste a Google Drive delivery link, send it on WhatsApp or email, mark it sent |
+| Customers | Private customer records, with session count, total spent, and first and last session |
 | Services | Add or edit services, switch **Coming soon → Active** in one click, set prices, images and display order |
-| Portfolio | Add work with photos and a YouTube, Vimeo or MP4 link, then feature, publish or unpublish it |
+| Portfolio | Add work with photos and a video (upload straight from the phone gallery, or a YouTube/Vimeo link), then feature, publish or unpublish it |
 | Locations | Add, edit, feature or publish places (Machines, Maabaidhoo) |
-| Testimonials | Real customer quotes; featured ones appear on the home page |
+| Reviews | Guest reviews arrive here as **waiting**; one tap to Approve (shows on the site) or Hide. Feature the best on the home page, or add reviews yourself |
 | Website content | Hero text and image, about text, contact details, Instagram, footer, SEO description |
 | Account | Change your password and sign out all devices |
 
@@ -57,8 +56,8 @@ PRIVATE  Owner   → /superadmin login → Dashboard → Bookings · Sessions ·
 - **Every** admin page and admin action checks the session in the database (`requireAdmin()`). Keeping the `/superadmin` URL secret is **not** part of the protection.
 - **Rate limiting:**
   - Login attempts: 10 per 15 minutes.
-  - Booking requests: 6 per hour.
-- The booking form uses a hidden honeypot field to stop spam bots.
+  - Guest reviews: 3 per hour, and they only appear after the admin approves them.
+- The review form uses a hidden honeypot field to stop spam bots.
 - **Input validation** on every form, plus security headers (CSP, clickjacking protection, HSTS).
 - Admin pages are marked `noindex`, and public queries only ever read published content.
 
@@ -92,7 +91,7 @@ The admin is at **http://localhost:3000/superadmin**.
 ```bash
 npm test                 # unit + database tests (validation, customer matching, passwords…)
 npm run build && npm start
-npx playwright test      # browser tests: booking flow, admin, services, portfolio upload, content, mobile
+npx playwright test      # browser tests: reviews + approval, admin, sessions, services, portfolio, video upload, content, mobile
 ```
 
 The browser tests sign in with `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`. GitHub Actions runs everything on each push (`.github/workflows/ci.yml`).
@@ -100,7 +99,7 @@ The browser tests sign in with `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`. GitHub 
 ## Project layout
 
 ```
-app/(site)/            public pages (home, work, services, machines, about, contact, book)
+app/(site)/            public pages (home, work, services, machines, reviews, about, contact)
 app/superadmin/        login + private admin panel
 app/api/admin/media    admin-only image upload
 app/media/[id]         serves optimised images (cached for a year)
@@ -123,8 +122,8 @@ tests/                 unit tests + Playwright browser tests
 The data model is designed so these can be added without rebuilding:
 
 - **Staff accounts:** `AdminUser.role` already supports OWNER / STAFF.
-- **Online payments and invoices:** bookings and sessions already store a price and a payment status.
-- **Email or WhatsApp notifications:** hook into `createBookingRequest()` in `lib/bookings.ts`.
+- **Online bookings, payments and invoices:** the `Booking` table is kept (unused) and sessions already store a price and payment status.
+- **Email or WhatsApp notifications:** hook into `submitReview()` in `app/(site)/reviews/actions.ts`.
 - **Private customer galleries:** sessions already hold a delivery link and delivery status.
 - **Maldives-wide locations:** locations already have an `atoll` field.
 - **Calendar and availability, revenue reports:** sessions store date, time and status.

@@ -11,7 +11,7 @@ export default async function LocationsAdmin() {
   const locations = await db.location.findMany({ orderBy: [{ displayOrder: "asc" }, { name: "asc" }], include: { _count: { select: { portfolio: true } } } });
   return (
     <>
-      <PageHeader title="Locations" subtitle="Places shown on the Machines & Maabaidhoo page and in the booking form." actions={<ButtonLink href="/superadmin/locations/new">+ Add location</ButtonLink>} />
+      <PageHeader title="Locations" subtitle="Places shown on the Machines & Maabaidhoo page." actions={<ButtonLink href="/superadmin/locations/new">+ Add location</ButtonLink>} />
       {locations.length === 0 ? (
         <Empty>No locations yet.</Empty>
       ) : (

@@ -25,7 +25,7 @@ export async function saveCustomer(id: string | null, _prev: FormState, fd: Form
 export async function deleteCustomer(id: string) {
   await requireAdmin();
   const c = await db.customer.findUniqueOrThrow({ where: { id }, include: { _count: { select: { bookings: true, sessions: true } } } });
-  if (c._count.bookings || c._count.sessions) throw new Error("Customers with bookings or sessions can't be deleted.");
+  if (c._count.bookings || c._count.sessions) throw new Error("Customers with sessions can't be deleted.");
   await db.customer.delete({ where: { id } });
   revalidatePath("/superadmin", "layout");
   redirect("/superadmin/customers");

@@ -10,7 +10,7 @@ export const metadata = { title: "Services" };
 
 export default async function ServicesAdmin() {
   await requireAdmin();
-  const services = await db.service.findMany({ orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }], include: { _count: { select: { bookings: true } } } });
+  const services = await db.service.findMany({ orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }] });
 
   return (
     <>
@@ -18,7 +18,7 @@ export default async function ServicesAdmin() {
       {services.length === 0 ? (
         <Empty>No services yet.</Empty>
       ) : (
-        <Table head={["Service", "Status", "Price", "Visibility", "Bookings", "Quick change"]}>
+        <Table head={["Service", "Status", "Price", "Visibility", "Quick change"]}>
           {services.map((s) => (
             <tr key={s.id} className="hover:bg-foam/40">
               <td className="px-4 py-3">
@@ -32,7 +32,6 @@ export default async function ServicesAdmin() {
               </td>
               <td className="px-4 py-3 text-slate">{priceLabel(s.price, s.priceType, s.currency)}</td>
               <td className="px-4 py-3">{s.published ? <Badge tone="green">Published</Badge> : <Badge>Draft</Badge>}</td>
-              <td className="px-4 py-3 text-slate">{s._count.bookings}</td>
               <td className="px-4 py-3">
                 <div className="flex gap-1">
                   {(["ACTIVE", "COMING_SOON", "HIDDEN"] as const)

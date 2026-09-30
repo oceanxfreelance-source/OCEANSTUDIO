@@ -27,7 +27,7 @@ export function Footer({ c }: { c: Content }) {
           <Link href="/machines" className="hover:text-white">Machines & Maabaidhoo</Link>
           <Link href="/about" className="hover:text-white">About</Link>
           <Link href="/contact" className="hover:text-white">Contact</Link>
-          <Link href="/book" className="hover:text-white">Book a session</Link>
+          <Link href="/reviews" className="hover:text-white">Reviews</Link>
         </nav>
         <div className="space-y-3 text-sm text-foam/75">
           {ig && (

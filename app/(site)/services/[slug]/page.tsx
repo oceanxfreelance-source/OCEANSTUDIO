@@ -55,10 +55,13 @@ export default async function ServicePage({ params }: Props) {
             <p className="eyebrow text-slate">{soon ? "Status" : "Pricing"}</p>
             <p className="display mt-3 text-3xl [font-stretch:110%]">{soon ? "Coming soon" : priceLabel(s.price, s.priceType, s.currency)}</p>
             <p className="mt-4 text-sm leading-relaxed text-slate">
-              {soon ? "We're getting this service ready. Register your interest and we'll let you know when it's available." : "Final pricing depends on location, timing and group size. Send a request and we'll confirm the details."}
+              {soon ? "We're getting this service ready — follow us to hear when it's available." : "Final pricing depends on timing and the number of surfers. Get in touch for details."}
             </p>
-            <ButtonLink href={`/book?service=${s.id}`} variant="dark" className="mt-7 w-full">
-              {soon ? "REGISTER INTEREST" : "BOOK THIS SERVICE"}
+            <ButtonLink href="/contact" variant="dark" className="mt-7 w-full">
+              CONTACT US
+            </ButtonLink>
+            <ButtonLink href="/work" variant="outline-dark" className="mt-3 w-full">
+              SEE OUR WORK
             </ButtonLink>
           </aside>
         </div>

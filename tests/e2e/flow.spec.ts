@@ -2,10 +2,9 @@ import { expect, test, type Page } from "@playwright/test";
 import sharp from "sharp";
 
 /**
- * The whole business flow, as a visitor and as the Superadmin:
- * visitor books (no account) → admin logs in → sees the request → creates a
- * session → adds a delivery link → marks it sent; plus service status,
- * portfolio upload and website text editing reflecting on the public site.
+ * The public showcase (work, services, reviews — no booking, no accounts) and
+ * the Superadmin: review moderation, customer → session → delivery, service
+ * status, portfolio upload and website text editing reflecting on the site.
  */
 const EMAIL = process.env.E2E_ADMIN_EMAIL ?? "owner@oceanx.test";
 const PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "local-test-password-123";
@@ -23,36 +22,65 @@ async function login(page: Page) {
   await expect(page.getByRole("heading", { name: /Hello/ })).toBeVisible();
 }
 
-test("public site: no accounts, no admin link", async ({ page }) => {
+test("public site: showcase only — no booking, no accounts, no admin link", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("CAPTURED BY THE OCEAN.");
   await expect(page.getByText("MACHINES • MAABAIDHOO • LAAMU").first()).toBeVisible();
-  await expect(page.getByRole("link", { name: "BOOK A SESSION" }).first()).toBeVisible();
-  await expect(page.getByRole("link", { name: /EXPLORE OUR WORK/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: "EXPLORE OUR WORK" })).toHaveAttribute("href", "/work");
+  await expect(page.getByRole("link", { name: /READ REVIEWS/ })).toHaveAttribute("href", "/reviews");
   const html = await page.content();
-  expect(html).not.toMatch(/superadmin|register|create account|sign up/i);
+  expect(html).not.toMatch(/superadmin|register|create account|sign up|book a session/i);
   await page.goto("/services");
   await expect(page.getByRole("heading", { name: "Drone Videography" })).toBeVisible();
+  const book = await page.request.get("/book", { maxRedirects: 0 });
+  expect(book.status()).toBe(307);
+  expect(book.headers()["location"]).toMatch(/\/contact$/);
 });
 
-test("visitor sends a booking request without an account", async ({ page }) => {
-  await page.goto("/book");
-  await page.getByRole("button", { name: "SEND REQUEST" }).click();
-  await expect(page.getByText("Please enter your name")).toBeVisible();
+test("guest leaves a review; it appears only after the admin approves it", async ({ page }) => {
+  const note = `Unreal drone clips of my waves at Machines ${run}`;
+  await page.goto("/reviews");
+  await page.getByRole("button", { name: "SEND REVIEW" }).click();
+  await expect(page.getByText("Please choose 1 to 5 stars")).toBeVisible();
 
-  await page.getByLabel("Full name").fill(`E2E Surfer ${run}`);
-  await page.getByLabel("Instagram username").fill(`@e2e_${run}`);
-  await page.getByLabel("WhatsApp").fill("+960 777 1234");
-  const d = new Date(Date.now() + 7 * 86400_000).toISOString().slice(0, 10);
-  await page.getByLabel("Preferred date").fill(d);
-  await page.getByLabel("Preferred time").selectOption("Sunrise");
-  await page.getByLabel("Number of surfers").fill("2");
-  await page.getByLabel("Service").selectOption({ label: "Drone Videography" });
-  await page.getByLabel("Location").selectOption("Machines");
-  await page.getByLabel("Message").fill("Two of us surfing Machines, would love drone clips.");
-  await page.getByRole("button", { name: "SEND REQUEST" }).click();
-  await expect(page.getByText("Thanks for reaching out to Ocean X. We'll get back to you shortly.")).toBeVisible();
-  await expect(page.getByText(/OX-B-\d{5}/)).toBeVisible();
+  await page.getByRole("button", { name: "4 stars" }).click();
+  await expect(page.getByText("Great", { exact: true })).toBeVisible();
+  await page.getByLabel("Your note").fill(note);
+  await page.getByLabel("Your name").fill(`E2E Guest ${run}`);
+  await page.getByLabel("Instagram (optional)").fill(`@e2e_${run}`);
+  await page.getByRole("button", { name: "SEND REVIEW" }).click();
+  await expect(page.getByText(/Thank you! Your review has been sent/)).toBeVisible();
+
+  // not public yet
+  await page.goto("/reviews");
+  await expect(page.getByText(note)).toHaveCount(0);
+
+  // admin approves + features it
+  await login(page);
+  await expect(page.getByText("REVIEWS TO APPROVE")).toBeVisible();
+  await page.getByRole("link", { name: /^Reviews/ }).first().click();
+  const card = page.locator("div.rounded-xl").filter({ hasText: note });
+  await expect(card.getByLabel("4 out of 5 stars")).toBeVisible();
+  await card.getByRole("button", { name: "Approve" }).click();
+  const approved = page.locator("div.rounded-xl").filter({ hasText: note });
+  await expect(approved.getByText("On website")).toBeVisible();
+  await approved.getByRole("button", { name: /Feature on home/ }).click();
+  await expect(page.locator("div.rounded-xl").filter({ hasText: note }).getByRole("button", { name: "★ Featured" })).toBeVisible();
+
+  // public: reviews page + home page, with stars and average
+  await page.goto("/reviews");
+  const pub = page.locator("figure").filter({ hasText: note });
+  await expect(pub).toBeVisible();
+  await expect(pub.getByRole("img", { name: "4 out of 5 stars" })).toBeVisible();
+  await expect(pub.getByRole("link", { name: `@e2e_${run}` })).toBeVisible();
+  await page.goto("/");
+  await expect(page.locator("figure").filter({ hasText: note })).toBeVisible();
+
+  // clean up
+  await page.goto("/superadmin/testimonials");
+  page.once("dialog", (d) => d.accept());
+  await page.locator("div.rounded-xl").filter({ hasText: note }).getByRole("button", { name: "Delete" }).click();
+  await expect(page.getByText(note)).toHaveCount(0);
 });
 
 test("admin: wrong password is rejected", async ({ page }) => {
@@ -63,29 +91,25 @@ test("admin: wrong password is rejected", async ({ page }) => {
   await expect(page.getByText("Incorrect email or password.")).toBeVisible();
 });
 
-test("admin: booking → session → delivery", async ({ page }) => {
+test("admin: customer → session → delivery", async ({ page }) => {
   await login(page);
-  await page.getByRole("link", { name: /Bookings/ }).first().click();
-  await expect(page.getByRole("heading", { name: "Bookings", exact: true })).toBeVisible();
-  await page.getByRole("link", { name: `E2E Surfer ${run}`, exact: true }).click();
-  await expect(page.getByText("Two of us surfing Machines")).toBeVisible();
-  await expect(page.getByText("@e2e_" + run).first()).toBeVisible();
-  await expect(page.getByRole("link", { name: "Reply on WhatsApp" })).toHaveAttribute("href", /wa\.me\/9607771234/);
+  await page.goto("/superadmin/customers/new");
+  await page.getByLabel("Name").fill(`E2E Surfer ${run}`);
+  await page.getByLabel("Instagram").fill(`e2e_${run}`);
+  await page.getByLabel("WhatsApp").fill("+960 777 1234");
+  await page.getByRole("button", { name: "Add customer" }).click();
+  await expect(page.getByRole("heading", { name: `E2E Surfer ${run}` })).toBeVisible();
 
-  await page.getByRole("link", { name: "Create session" }).first().click();
+  await page.getByRole("link", { name: "New session" }).click();
   await expect(page.getByLabel("Location")).toHaveValue("Machines");
+  await page.getByLabel("Date").fill(new Date(Date.now() + 3 * 86400_000).toISOString().slice(0, 10));
+  await page.getByLabel("Service").selectOption({ label: "Drone Videography" });
   await page.getByLabel("Price (USD)").fill("180");
   await page.getByLabel("Clips").fill("25");
   await page.getByRole("button", { name: "Create session" }).click();
   await expect(page.getByText("Session created.")).toBeVisible();
   await expect(page.getByRole("heading", { name: /OX-S-\d{5}/ })).toBeVisible();
 
-  // booking is now confirmed
-  await page.getByRole("link", { name: /Booking OX-B/ }).click();
-  await expect(page.getByText("Confirmed").first()).toBeVisible();
-  await page.goBack();
-
-  // complete + deliver
   await page.getByLabel("Session status").selectOption("COMPLETED");
   await page.getByLabel("Payment").selectOption("PAID");
   await page.getByLabel("Delivery link").fill("https://drive.google.com/drive/folders/example-e2e");
@@ -93,7 +117,7 @@ test("admin: booking → session → delivery", async ({ page }) => {
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(page.getByText("Session saved.")).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("link", { name: "Send via WhatsApp" })).toHaveAttribute("href", /drive\.google\.com/);
+  await expect(page.getByRole("link", { name: "Send via WhatsApp" })).toHaveAttribute("href", /wa\.me\/9607771234.*drive\.google\.com/);
   await page.getByRole("button", { name: "Mark as sent" }).click();
   await expect(page.getByText(/Marked as sent/)).toBeVisible();
 });
@@ -175,6 +199,6 @@ test("admin: logout ends the session", async ({ page }) => {
   await login(page);
   await page.getByRole("button", { name: "Log out" }).first().click();
   await expect(page).toHaveURL(/\/superadmin\/login$/);
-  await page.goto("/superadmin/bookings");
+  await page.goto("/superadmin/sessions");
   await expect(page).toHaveURL(/\/superadmin\/login$/);
 });

@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     db.portfolioItem.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
     db.location.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
   ]);
-  const pages = ["", "/work", "/services", "/machines", "/about", "/contact", "/book"].map((p) => ({
+  const pages = ["", "/work", "/services", "/machines", "/about", "/contact", "/reviews"].map((p) => ({
     url: `${base}${p}`,
     changeFrequency: "weekly" as const,
     priority: p === "" ? 1 : 0.8,

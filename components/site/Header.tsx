@@ -12,6 +12,7 @@ const NAV = [
   { href: "/work", label: "Our Work" },
   { href: "/services", label: "Services" },
   { href: "/machines", label: "Machines" },
+  { href: "/reviews", label: "Reviews" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -70,10 +71,10 @@ export function Header({ instagramUrl }: { instagramUrl: string | null }) {
             </a>
           )}
           <Link
-            href="/book"
+            href="/reviews#leave-a-review"
             className="hidden rounded-full bg-foam px-5 py-2.5 text-[12px] font-semibold tracking-[0.14em] text-abyss transition-colors hover:bg-white sm:inline-flex"
           >
-            BOOK A SESSION
+            LEAVE A REVIEW
           </Link>
           <button
             type="button"
@@ -101,8 +102,8 @@ export function Header({ instagramUrl }: { instagramUrl: string | null }) {
             </Link>
           ))}
         </nav>
-        <Link href="/book" className="mt-8 flex items-center justify-center rounded-full bg-foam py-4 text-sm font-semibold tracking-[0.14em] text-abyss">
-          BOOK A SESSION
+        <Link href="/reviews#leave-a-review" onClick={() => setOpen(false)} className="mt-8 flex items-center justify-center rounded-full bg-foam py-4 text-sm font-semibold tracking-[0.14em] text-abyss">
+          LEAVE A REVIEW
         </Link>
         {instagramUrl && (
           <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="mt-6 flex items-center justify-center gap-2 text-sm text-foam/70">

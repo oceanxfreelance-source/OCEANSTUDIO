@@ -70,9 +70,9 @@ export default async function LocationPage({ params }: Props) {
             </div>
           )}
           <div className="flex flex-col gap-3 border-t border-white/10 pt-10 sm:flex-row sm:items-center sm:justify-between">
-            <p className="display text-2xl [font-stretch:110%]">Shoot at {l.name}</p>
-            <ButtonLink href={`/book?location=${encodeURIComponent(l.name)}`} arrow>
-              BOOK A SESSION
+            <p className="display text-2xl [font-stretch:110%]">See our work at {l.name}</p>
+            <ButtonLink href="/work" arrow>
+              OUR WORK
             </ButtonLink>
           </div>
         </div>

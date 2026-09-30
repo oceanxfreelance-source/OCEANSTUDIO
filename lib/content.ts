@@ -20,8 +20,8 @@ export const CONTENT_FIELDS = [
   { group: "Home — hero", key: "hero.title", label: "Hero title", default: "CAPTURED BY THE OCEAN." },
   { group: "Home — hero", key: "hero.subtitle", label: "Hero subtitle", default: "Surf films and surf photography at Machines, Maabaidhoo — Laamu, Maldives." },
   { group: "Home — hero", key: "hero.location", label: "Location line", default: "MACHINES • MAABAIDHOO • LAAMU" },
-  { group: "Home — hero", key: "hero.primaryCta", label: "Main button", default: "BOOK A SESSION" },
-  { group: "Home — hero", key: "hero.secondaryCta", label: "Second button", default: "EXPLORE OUR WORK" },
+  { group: "Home — hero", key: "hero.primaryCta", label: "Main button", default: "EXPLORE OUR WORK" },
+  { group: "Home — hero", key: "hero.secondaryCta", label: "Second button", default: "READ REVIEWS" },
   { group: "Home — hero", key: "hero.imageId", label: "Hero image", default: "", type: "image", help: "A wide, cinematic photo. Shown on all devices." },
   {
     group: "Home — hero",
@@ -39,15 +39,15 @@ export const CONTENT_FIELDS = [
     label: "Intro text",
     type: "textarea",
     default:
-      "Ocean X films and photographs surfers at Machines, Maabaidhoo. Book a session, paddle out, and we'll capture your waves from the drone above the line-up — then send you the clips to keep.",
+      "Ocean X films and photographs surfers at Machines, Maabaidhoo — from the drone above the line-up to the moments between sets. Take a look at our work, and see what surfers say about their sessions with us.",
   },
-  { group: "Home — sections", key: "cta.title", label: "Call-to-action title", default: "Surfing Machines? Let's film your session." },
+  { group: "Home — sections", key: "cta.title", label: "Call-to-action title", default: "Surfed Machines with us?" },
   {
     group: "Home — sections",
     key: "cta.body",
     label: "Call-to-action text",
     type: "textarea",
-    default: "Tell us when you're in the water and how many surfers. We'll check the conditions and reply personally.",
+    default: "Tell other surfers how it went — leave a review with a few stars and a note.",
   },
   // About
   { group: "About", key: "about.title", label: "About title", default: "Born above the waves of Machines." },
@@ -71,11 +71,17 @@ export const CONTENT_FIELDS = [
     type: "textarea",
     default: "Machines is the wave. Maabaidhoo is home. Every Ocean X surf session happens here, in Laamu Atoll.",
   },
-  // Booking
-  { group: "Booking", key: "booking.intro", label: "Booking page intro", type: "textarea", default: "Tell us about your surf session. No account needed — we'll get back to you personally." },
-  { group: "Booking", key: "booking.success", label: "Confirmation message", type: "textarea", default: "Thanks for reaching out to Ocean X. We'll get back to you shortly." },
+  // Reviews
+  { group: "Reviews", key: "reviews.intro", label: "Reviews page intro", type: "textarea", default: "What surfers say about their sessions with Ocean X at Machines." },
+  {
+    group: "Reviews",
+    key: "reviews.thanks",
+    label: "Message after sending a review",
+    type: "textarea",
+    default: "Thank you! Your review has been sent and will appear on the site once we've checked it.",
+  },
   // Contact & social
-  { group: "Contact & social", key: "contact.text", label: "Contact text", type: "textarea", default: "For surf sessions and collaborations, message us any time." },
+  { group: "Contact & social", key: "contact.text", label: "Contact text", type: "textarea", default: "Questions about our surf filming, or want to work together? Message us any time." },
   { group: "Contact & social", key: "contact.email", label: "Email", default: "", help: "Leave empty to hide." },
   { group: "Contact & social", key: "contact.whatsapp", label: "WhatsApp number", default: "", help: "With country code, e.g. +960 7XX XXXX. Leave empty to hide." },
   { group: "Contact & social", key: "social.instagram", label: "Instagram username", default: "", help: "Without @, e.g. oceanx.maldives. Leave empty to hide." },

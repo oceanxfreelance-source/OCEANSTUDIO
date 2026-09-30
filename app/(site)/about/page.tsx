@@ -5,7 +5,7 @@ import { PageHero, Prose } from "@/components/site/Section";
 import { Testimonials } from "@/components/site/Testimonials";
 import { getContent } from "@/lib/content";
 import { db } from "@/lib/db";
-import { getPublicServices, getTestimonials } from "@/lib/public";
+import { getPublicServices, getReviewStats, getTestimonials } from "@/lib/public";
 
 export const metadata: Metadata = {
   title: "About",
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const [c, services, testimonials] = await Promise.all([getContent(), getPublicServices(), getTestimonials()]);
+  const [c, services, testimonials, reviewStats] = await Promise.all([getContent(), getPublicServices(), getTestimonials(true), getReviewStats()]);
   const image = c["about.imageId"]
     ? await db.mediaAsset.findUnique({ where: { id: c["about.imageId"] }, select: { id: true, width: true, height: true, alt: true } })
     : null;
@@ -27,8 +27,8 @@ export default async function AboutPage() {
           <div data-reveal>
             <Prose text={c["about.body"]} className="text-lg text-slate md:text-xl" />
             <div className="mt-10">
-              <ButtonLink href="/book" variant="dark" arrow>
-                WORK WITH US
+              <ButtonLink href="/work" variant="dark" arrow>
+                SEE OUR WORK
               </ButtonLink>
             </div>
           </div>
@@ -53,7 +53,7 @@ export default async function AboutPage() {
           </div>
         </div>
       </section>
-      {testimonials.length > 0 && <Testimonials items={testimonials} />}
+      {testimonials.length > 0 && <Testimonials items={testimonials} stats={reviewStats} />}
     </>
   );
 }

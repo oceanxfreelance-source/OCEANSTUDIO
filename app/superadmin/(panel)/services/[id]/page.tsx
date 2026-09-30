@@ -28,7 +28,7 @@ export default async function EditService({ params, searchParams }: { params: Pr
                 View on website ↗
               </Link>
             )}
-            <ConfirmButton action={deleteService.bind(null, service.id)} confirm={`Delete "${service.name}"? Existing bookings keep their record.`}>
+            <ConfirmButton action={deleteService.bind(null, service.id)} confirm={`Delete "${service.name}"? Past sessions keep their record.`}>
               Delete
             </ConfirmButton>
           </>

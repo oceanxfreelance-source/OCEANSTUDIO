@@ -8,17 +8,16 @@ import { db } from "@/lib/db";
 import { fieldErrors, formToObject, type FormState } from "@/lib/forms";
 import { sessionSchema } from "@/lib/validation";
 
-/** Create (id = null) or update a shoot session, keeping its booking in sync. */
+/** Create (id = null) or update a shoot session. */
 export async function saveSession(id: string | null, _prev: FormState, fd: FormData): Promise<FormState> {
   await requireAdmin();
   const parsed = sessionSchema.safeParse(formToObject(fd));
   if (!parsed.success) return { error: "Please fix the highlighted fields.", fieldErrors: fieldErrors(parsed.error.issues) };
   const v = parsed.data;
 
-  const [customer, service, booking, existing] = await Promise.all([
+  const [customer, service, existing] = await Promise.all([
     db.customer.findUnique({ where: { id: v.customerId } }),
     v.serviceId ? db.service.findUnique({ where: { id: v.serviceId } }) : null,
-    v.bookingId ? db.booking.findUnique({ where: { id: v.bookingId } }) : null,
     id ? db.shootSession.findUnique({ where: { id } }) : null,
   ]);
   if (!customer) return { error: "Choose a customer.", fieldErrors: { customerId: "Choose a customer" } };
@@ -42,18 +41,11 @@ export async function saveSession(id: string | null, _prev: FormState, fd: FormD
     notes: v.notes,
   };
 
-  const saved = await db.$transaction(async (tx) => {
-    const s = id
-      ? await tx.shootSession.update({ where: { id }, data })
-      : await tx.shootSession.create({ data: { ...data, bookingId: booking?.id ?? null, code: await nextReference(tx, "session", "OX-S") } });
-    // Keep the related booking's status in step with the session.
-    const bookingId = s.bookingId;
-    if (bookingId) {
-      const target = s.status === "COMPLETED" ? "COMPLETED" : s.status === "SCHEDULED" ? "CONFIRMED" : null;
-      if (target) await tx.booking.updateMany({ where: { id: bookingId, status: { in: target === "COMPLETED" ? ["NEW", "CONTACTED", "CONFIRMED"] : ["NEW", "CONTACTED"] } }, data: { status: target } });
-    }
-    return s;
-  });
+  const saved = await db.$transaction(async (tx) =>
+    id
+      ? tx.shootSession.update({ where: { id }, data })
+      : tx.shootSession.create({ data: { ...data, code: await nextReference(tx, "session", "OX-S") } }),
+  );
 
   revalidatePath("/superadmin", "layout");
   if (!id) redirect(`/superadmin/sessions/${saved.id}?created=1`);

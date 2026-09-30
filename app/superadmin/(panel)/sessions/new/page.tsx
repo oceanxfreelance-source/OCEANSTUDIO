@@ -6,39 +6,36 @@ import { SessionForm, type SessionValues } from "../SessionForm";
 
 export const metadata = { title: "New session" };
 
-export default async function NewSession({ searchParams }: { searchParams: Promise<{ booking?: string; customer?: string }> }) {
+export default async function NewSession({ searchParams }: { searchParams: Promise<{ customer?: string }> }) {
   await requireAdmin();
   const sp = await searchParams;
-  const [booking, customers, services] = await Promise.all([
-    sp.booking ? db.booking.findUnique({ where: { id: sp.booking } }) : null,
+  const [customers, services] = await Promise.all([
     db.customer.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, instagram: true } }),
     db.service.findMany({ orderBy: { displayOrder: "asc" }, select: { id: true, name: true } }),
   ]);
 
-  // Pre-fill from the booking request when coming from "Create session".
   const values: SessionValues = {
-    customerId: booking?.customerId ?? sp.customer ?? "",
-    serviceId: booking?.serviceId ?? null,
-    locationText: booking?.locationText ?? "",
-    date: booking?.preferredDate ?? null,
-    time: booking?.preferredTime ?? null,
-    people: booking?.people ?? null,
+    customerId: sp.customer ?? "",
+    serviceId: null,
+    locationText: "Machines",
+    date: null,
+    time: null,
+    people: null,
     clips: null,
-    price: booking?.price ?? null,
-    paymentStatus: booking?.paymentStatus ?? "UNPAID",
+    price: null,
+    paymentStatus: "UNPAID",
     status: "SCHEDULED",
     deliveryStatus: "NOT_READY",
     deliveryLink: null,
     notes: "",
-    bookingId: booking?.id ?? null,
   };
 
   return (
     <>
       <PageHeader
         title="New session"
-        subtitle={booking ? `From booking ${booking.reference} — ${booking.fullName}. Saving marks the booking as confirmed.` : undefined}
-        back={booking ? { href: `/superadmin/bookings/${booking.id}`, label: `Booking ${booking.reference}` } : { href: "/superadmin/sessions", label: "Sessions" }}
+        subtitle={customers.length === 0 ? "Add the customer first under Customers." : undefined}
+        back={{ href: "/superadmin/sessions", label: "Sessions" }}
       />
       <SessionForm action={saveSession.bind(null, null)} values={values} customers={customers} services={services} isNew />
     </>

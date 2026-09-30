@@ -43,10 +43,15 @@ export default async function ServicesPage() {
             </div>
           )}
           <div className="mt-24 flex flex-col items-start justify-between gap-6 border-t border-deep/10 pt-10 md:flex-row md:items-center">
-            <p className="max-w-xl text-lg text-slate">Want something that isn&apos;t listed — a surf trip edit, a group session, a brand shoot? Tell us about it.</p>
-            <ButtonLink href="/book" variant="dark" arrow>
-              SEND A REQUEST
-            </ButtonLink>
+            <p className="max-w-xl text-lg text-slate">Questions about any of our services? Get in touch — or see what surfers say about us.</p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <ButtonLink href="/reviews" variant="outline-dark">
+                READ REVIEWS
+              </ButtonLink>
+              <ButtonLink href="/contact" variant="dark" arrow>
+                CONTACT US
+              </ButtonLink>
+            </div>
           </div>
         </div>
       </section>

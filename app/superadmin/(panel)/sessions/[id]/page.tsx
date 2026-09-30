@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { Card, PageHeader } from "@/components/admin/ui";
@@ -14,7 +13,7 @@ export default async function SessionDetail({ params, searchParams }: { params: 
   await requireAdmin();
   const { id } = await params;
   const [s, customers, services] = await Promise.all([
-    db.shootSession.findUnique({ where: { id }, include: { customer: true, booking: { select: { id: true, reference: true } } } }),
+    db.shootSession.findUnique({ where: { id }, include: { customer: true } }),
     db.customer.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, instagram: true } }),
     db.service.findMany({ orderBy: { displayOrder: "asc" }, select: { id: true, name: true } }),
   ]);
@@ -34,11 +33,6 @@ export default async function SessionDetail({ params, searchParams }: { params: 
         back={{ href: "/superadmin/sessions", label: "Sessions" }}
         actions={
           <>
-            {s.booking && (
-              <Link href={`/superadmin/bookings/${s.booking.id}`} className="rounded-lg border border-slate/30 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-foam">
-                Booking {s.booking.reference}
-              </Link>
-            )}
             <ConfirmButton action={deleteSession.bind(null, s.id)} confirm={`Delete session ${s.code}?`}>
               Delete
             </ConfirmButton>

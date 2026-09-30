@@ -18,7 +18,6 @@ export type SessionValues = {
   deliveryStatus: string;
   deliveryLink: string | null;
   notes: string;
-  bookingId: string | null;
 };
 
 export function SessionForm({
@@ -37,7 +36,6 @@ export function SessionForm({
   const v = values;
   return (
     <ActionForm action={action} className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <input type="hidden" name="bookingId" value={v.bookingId ?? ""} />
       <div className="space-y-6">
         <Card title="Session">
           <div className="grid gap-5 sm:grid-cols-2">
