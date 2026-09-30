@@ -6,8 +6,10 @@ import { Pin } from "@/components/site/Icons";
 import { Img } from "@/components/site/Img";
 import { Prose } from "@/components/site/Section";
 import { VideoPlayer } from "@/components/site/VideoPlayer";
-import { formatDate } from "@/lib/format";
+import { formatDate, instagramDmUrl } from "@/lib/format";
 import { getPortfolioItem } from "@/lib/public";
+import { InstagramBookButton } from "@/components/site/InstagramBook";
+import { getContent } from "@/lib/content";
 import { parseVideoUrl } from "@/lib/video";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -27,11 +29,12 @@ export default async function WorkItemPage({ params }: Props) {
   const w = await getPortfolioItem((await params).slug);
   if (!w) notFound();
   const video = parseVideoUrl(w.videoUrl);
+  const dm = instagramDmUrl((await getContent())["social.instagram"]);
 
   return (
     <article className="bg-abyss text-foam">
       <header className="container-x pb-10 pt-32 md:pt-44">
-        <Link href={`/work?category=${w.category.toLowerCase()}`} className="eyebrow text-sea hover:text-foam">
+        <Link href={`/work?category=${w.category.toLowerCase()}`} className="eyebrow text-gold hover:text-foam">
           {w.category}
         </Link>
         <h1 className="display mt-5 max-w-5xl text-5xl [font-stretch:115%] sm:text-6xl lg:text-7xl">{w.title}</h1>
@@ -81,8 +84,9 @@ export default async function WorkItemPage({ params }: Props) {
       )}
 
       <div className="container-x flex flex-col gap-4 border-t border-white/10 py-14 sm:flex-row sm:items-center sm:justify-between">
-        <p className="display text-2xl [font-stretch:110%]">Surfed with us?</p>
+        <p className="display text-2xl [font-stretch:110%]">{dm ? "Want a film like this?" : "Surfed with us?"}</p>
         <div className="flex flex-col gap-3 sm:flex-row">
+          <InstagramBookButton dmUrl={dm} />
           <ButtonLink href="/work" variant="outline-light">
             MORE WORK
           </ButtonLink>

@@ -8,7 +8,7 @@ import { ReviewForm } from "./ReviewForm";
 
 export const metadata: Metadata = {
   title: "Reviews",
-  description: "Reviews from surfers filmed and photographed by Ocean X at Machines, Maabaidhoo — and a place to leave your own.",
+  description: "Reviews of Ocean X drone videography from surfers filmed at Machines, Maabaidhoo — and a place to leave your own.",
   alternates: { canonical: "/reviews" },
 };
 
@@ -35,7 +35,7 @@ export default async function ReviewsPage() {
             </div>
           )}
           {reviews.length === 0 ? (
-            <EmptyState title="No reviews yet" body="Surfed with us at Machines? Be the first to leave a review below." />
+            <EmptyState title="No reviews yet" body="Had a drone videography session with us at Machines? Be the first to review it below." />
           ) : (
             <ReviewGrid items={reviews} />
           )}
@@ -44,9 +44,11 @@ export default async function ReviewsPage() {
       <section id="leave-a-review" className="scroll-mt-20 bg-foam py-20 md:py-28">
         <div className="container-x grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:gap-24">
           <div>
-            <p className="eyebrow text-sea-deep">Leave a review</p>
-            <h2 className="display mt-4 text-4xl [font-stretch:112%] sm:text-5xl">Surfed with us?</h2>
-            <p className="mt-5 max-w-md text-lg text-slate">Give us some stars and a short note about your session. No account needed.</p>
+            <p className="eyebrow text-gold-deep">Leave a review</p>
+            <h2 className="display mt-4 text-4xl [font-stretch:112%] sm:text-5xl">How was your drone videography?</h2>
+            <p className="mt-5 max-w-md text-lg text-slate">
+              Rate the drone videography of your session at Machines and leave a short note — the clips, the angles, the experience. No account needed.
+            </p>
           </div>
           <ReviewForm thanks={c["reviews.thanks"]} />
         </div>

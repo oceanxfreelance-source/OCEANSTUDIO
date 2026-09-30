@@ -61,7 +61,7 @@ export default async function LocationPage({ params }: Props) {
           )}
           {l.portfolio.length > 0 && (
             <div>
-              <p className="eyebrow text-sea">Work at {l.name}</p>
+              <p className="eyebrow text-gold">Work at {l.name}</p>
               <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {l.portfolio.map((w) => (
                   <WorkCard key={w.id} w={{ ...w, location: null }} dark />

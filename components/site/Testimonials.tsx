@@ -53,7 +53,7 @@ export function Testimonials({ items, stats, title = "What surfers say" }: { ite
       <div className="container-x">
         <div data-reveal className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="eyebrow text-sea-deep">Reviews</p>
+            <p className="eyebrow text-gold-deep">Reviews</p>
             <h2 className="display mt-4 text-4xl [font-stretch:112%] sm:text-5xl">{title}</h2>
             {stats.average && (
               <p className="mt-4 flex items-center gap-3 text-slate">

@@ -6,7 +6,7 @@ export function Logo({ className }: { className?: string }) {
   return (
     <Link href="/" aria-label="OCEAN X — home" className={cx("group inline-flex items-center gap-2.5", className)}>
       <span className="display text-[19px] tracking-[0.18em] [font-stretch:125%]">
-        OCEAN<span className="ml-[0.35em] text-sea">X</span>
+        OCEAN<span className="ml-[0.35em] text-gold">X</span>
       </span>
     </Link>
   );

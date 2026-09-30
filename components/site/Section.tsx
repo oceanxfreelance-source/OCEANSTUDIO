@@ -20,7 +20,7 @@ export function SectionHeading({
   return (
     <div data-reveal className={cx("flex flex-col gap-6 md:flex-row md:items-end md:justify-between", className)}>
       <div className="max-w-3xl">
-        <p className={cx("eyebrow eyebrow-line", dark ? "text-sea" : "text-sea-deep")}>{eyebrow}</p>
+        <p className={cx("eyebrow eyebrow-line", dark ? "text-gold" : "text-gold-deep")}>{eyebrow}</p>
         <h2 className="display mt-4 text-4xl [font-stretch:112%] sm:text-5xl lg:text-6xl">{title}</h2>
         {intro && <p className={cx("mt-5 max-w-2xl text-base leading-relaxed md:text-lg", dark ? "text-mist" : "text-slate")}>{intro}</p>}
       </div>
@@ -33,9 +33,9 @@ export function SectionHeading({
 export function PageHero({ eyebrow, title, intro }: { eyebrow: string; title: string; intro?: string }) {
   return (
     <section className="relative overflow-hidden bg-abyss pb-14 pt-32 text-foam md:pb-20 md:pt-44">
-      <div aria-hidden className="absolute inset-0 bg-[radial-gradient(50%_60%_at_20%_0%,rgba(47,127,134,0.35),transparent_70%)]" />
+      <div aria-hidden className="absolute inset-0 bg-[radial-gradient(50%_60%_at_20%_0%,rgba(201,169,110,0.16),transparent_70%)]" />
       <div className="container-x relative">
-        <p className="hero-in eyebrow eyebrow-line text-sea" style={{ "--delay": "0.05s" } as React.CSSProperties}>
+        <p className="hero-in eyebrow eyebrow-line text-gold" style={{ "--delay": "0.05s" } as React.CSSProperties}>
           {eyebrow}
         </p>
         <h1 className="display mt-5 max-w-5xl text-5xl [font-stretch:115%] sm:text-6xl lg:text-7xl">

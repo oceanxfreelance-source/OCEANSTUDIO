@@ -47,7 +47,7 @@ export const CONTENT_FIELDS = [
     key: "cta.body",
     label: "Call-to-action text",
     type: "textarea",
-    default: "Tell other surfers how it went — leave a review with a few stars and a note.",
+    default: "Had a drone videography session with us? Tell other surfers how your clips turned out.",
   },
   // About
   { group: "About", key: "about.title", label: "About title", default: "Born above the waves of Machines." },
@@ -71,8 +71,18 @@ export const CONTENT_FIELDS = [
     type: "textarea",
     default: "Machines is the wave. Maabaidhoo is home. Every Ocean X surf session happens here, in Laamu Atoll.",
   },
+  // Booking via Instagram DM
+  { group: "Booking by Instagram", key: "book.title", label: "Booking title", default: "Want us to film your session?" },
+  {
+    group: "Booking by Instagram",
+    key: "book.body",
+    label: "Booking text",
+    type: "textarea",
+    help: "The 'Book via Instagram' buttons open a DM to the Instagram username set under Contact & social.",
+    default: "Send us a DM on Instagram with your dates and the number of surfers — we'll check the swell and get back to you.",
+  },
   // Reviews
-  { group: "Reviews", key: "reviews.intro", label: "Reviews page intro", type: "textarea", default: "What surfers say about their sessions with Ocean X at Machines." },
+  { group: "Reviews", key: "reviews.intro", label: "Reviews page intro", type: "textarea", default: "What surfers say about their drone videography sessions with Ocean X at Machines." },
   {
     group: "Reviews",
     key: "reviews.thanks",
@@ -84,7 +94,7 @@ export const CONTENT_FIELDS = [
   { group: "Contact & social", key: "contact.text", label: "Contact text", type: "textarea", default: "Questions about our surf filming, or want to work together? Message us any time." },
   { group: "Contact & social", key: "contact.email", label: "Email", default: "", help: "Leave empty to hide." },
   { group: "Contact & social", key: "contact.whatsapp", label: "WhatsApp number", default: "", help: "With country code, e.g. +960 7XX XXXX. Leave empty to hide." },
-  { group: "Contact & social", key: "social.instagram", label: "Instagram username", default: "", help: "Without @, e.g. oceanx.maldives. Leave empty to hide." },
+  { group: "Contact & social", key: "social.instagram", label: "Instagram username", default: "", help: "Without @, e.g. oceanx.maldives. Guests book by DM — this turns on the “Book via Instagram” buttons. Leave empty to hide." },
   { group: "Contact & social", key: "social.youtube", label: "YouTube link", default: "", type: "url" },
   { group: "Contact & social", key: "social.tiktok", label: "TikTok link", default: "", type: "url" },
   { group: "Contact & social", key: "social.facebook", label: "Facebook link", default: "", type: "url" },

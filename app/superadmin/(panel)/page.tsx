@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge, Card, Empty, PageHeader, Stat } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth";
+import { getContent } from "@/lib/content";
 import { db } from "@/lib/db";
 import { formatDate, money } from "@/lib/format";
 import { StarsInline } from "@/components/admin/StarsInline";
@@ -9,6 +10,7 @@ export const metadata = { title: "Dashboard" };
 
 export default async function Dashboard() {
   const admin = await requireAdmin();
+  const instagram = (await getContent())["social.instagram"];
   const today = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z");
   const monthStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
 
@@ -32,6 +34,15 @@ export default async function Dashboard() {
     <>
       <PageHeader title={`Hello, ${admin.name.split(" ")[0]}`} subtitle="Here's what's happening at Ocean X." />
 
+      {!instagram && (
+        <Link href="/superadmin/content#Contact%20%26%20social" className="mb-6 block rounded-xl border border-gold/50 bg-gold/10 p-5 hover:bg-gold/15">
+          <p className="font-semibold">Add your Instagram username</p>
+          <p className="mt-1 text-sm text-slate">
+            Guests book sessions by sending you a DM on Instagram. Add your username under Website content → Contact &amp; social and the “Book via Instagram” buttons appear across the site.
+          </p>
+        </Link>
+      )}
+
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Reviews to approve" value={pendingReviews} href="/superadmin/testimonials" tone={pendingReviews ? "accent" : "default"} />
         <Stat label="Average rating" value={reviewAgg._avg.rating ? `${reviewAgg._avg.rating.toFixed(1)} ★` : "—"} href="/superadmin/testimonials" />
@@ -45,7 +56,7 @@ export default async function Dashboard() {
       <p className="mt-2 text-xs text-slate">Revenue counts sessions marked as Paid.</p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <Card title={`Reviews waiting for approval (${pendingReviews})`} actions={<Link href="/superadmin/testimonials" className="text-sm text-sea-deep hover:underline">All reviews</Link>}>
+        <Card title={`Reviews waiting for approval (${pendingReviews})`} actions={<Link href="/superadmin/testimonials" className="text-sm text-gold-deep hover:underline">All reviews</Link>}>
           {latestPending.length === 0 ? (
             <Empty>No reviews waiting. New reviews from the website appear here. ({reviewAgg._count} published)</Empty>
           ) : (
@@ -67,7 +78,7 @@ export default async function Dashboard() {
           )}
         </Card>
 
-        <Card title="Upcoming sessions" actions={<Link href="/superadmin/sessions" className="text-sm text-sea-deep hover:underline">All sessions</Link>}>
+        <Card title="Upcoming sessions" actions={<Link href="/superadmin/sessions" className="text-sm text-gold-deep hover:underline">All sessions</Link>}>
           {upcomingSessions.length === 0 ? (
             <Empty>No sessions scheduled.</Empty>
           ) : (
@@ -92,7 +103,7 @@ export default async function Dashboard() {
           )}
         </Card>
 
-        <Card title="Recent customers" actions={<Link href="/superadmin/customers" className="text-sm text-sea-deep hover:underline">All customers</Link>}>
+        <Card title="Recent customers" actions={<Link href="/superadmin/customers" className="text-sm text-gold-deep hover:underline">All customers</Link>}>
           {recentCustomers.length === 0 ? (
             <Empty>No customers yet.</Empty>
           ) : (
@@ -112,7 +123,7 @@ export default async function Dashboard() {
           )}
         </Card>
 
-        <Card title="Recent portfolio uploads" actions={<Link href="/superadmin/portfolio/new" className="text-sm text-sea-deep hover:underline">+ Add work</Link>}>
+        <Card title="Recent portfolio uploads" actions={<Link href="/superadmin/portfolio/new" className="text-sm text-gold-deep hover:underline">+ Add work</Link>}>
           {recentWork.length === 0 ? (
             <Empty>No portfolio items yet.</Empty>
           ) : (

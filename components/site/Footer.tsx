@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Content } from "@/lib/content";
-import { instagramUrl, whatsappUrl } from "@/lib/format";
+import { instagramDmUrl, instagramUrl, whatsappUrl } from "@/lib/format";
 import { Instagram, Mail, WhatsApp } from "./Icons";
 import { Logo } from "./Logo";
 
@@ -28,6 +28,11 @@ export function Footer({ c }: { c: Content }) {
           <Link href="/about" className="link-underline w-fit hover:text-white">About</Link>
           <Link href="/contact" className="link-underline w-fit hover:text-white">Contact</Link>
           <Link href="/reviews" className="link-underline w-fit hover:text-white">Reviews</Link>
+          {instagramDmUrl(c["social.instagram"]) && (
+            <a href={instagramDmUrl(c["social.instagram"])!} target="_blank" rel="noopener noreferrer" className="link-underline w-fit text-gold hover:text-white">
+              Book via Instagram
+            </a>
+          )}
         </nav>
         <div className="space-y-3 text-sm text-foam/75">
           {ig && (

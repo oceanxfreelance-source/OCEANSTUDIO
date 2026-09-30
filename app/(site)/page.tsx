@@ -11,7 +11,8 @@ import { Prose, SectionHeading } from "@/components/site/Section";
 import { Testimonials } from "@/components/site/Testimonials";
 import { getContent } from "@/lib/content";
 import { db } from "@/lib/db";
-import { instagramUrl } from "@/lib/format";
+import { instagramDmUrl, instagramUrl } from "@/lib/format";
+import { InstagramBookButton } from "@/components/site/InstagramBook";
 import { getFeaturedWork, getLocations, getPublicServices, getReviewStats, getTestimonials } from "@/lib/public";
 import { parseVideoUrl } from "@/lib/video";
 
@@ -29,6 +30,7 @@ export default async function HomePage() {
     : null;
   const heroVideo = parseVideoUrl(c["hero.videoUrl"]);
   const ig = instagramUrl(c["social.instagram"]);
+  const dm = instagramDmUrl(c["social.instagram"]);
   const [lead, ...rest] = work;
 
   return (
@@ -76,7 +78,7 @@ export default async function HomePage() {
       <section className="bg-paper py-24 md:py-36">
         <div className="container-x grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-24">
           <div data-reveal>
-            <p className="eyebrow eyebrow-line text-sea-deep">Ocean X</p>
+            <p className="eyebrow eyebrow-line text-gold-deep">Ocean X</p>
             <h2 className="display mt-5 text-4xl [font-stretch:112%] sm:text-5xl lg:text-6xl">{c["home.introTitle"]}</h2>
           </div>
           <div data-reveal className="lg:pt-10">
@@ -88,7 +90,7 @@ export default async function HomePage() {
                     <Link href={`/services/${s.slug}`} className="group flex items-center justify-between py-4 transition-[padding] duration-300 hover:px-2">
                       <span className="font-medium">{s.name}</span>
                       <span className="flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-slate">
-                        {s.status === "ACTIVE" ? <span className="text-sea-deep">Available</span> : "Coming soon"}
+                        {s.status === "ACTIVE" ? <span className="text-gold-deep">Available</span> : "Coming soon"}
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </span>
                     </Link>
@@ -170,11 +172,25 @@ export default async function HomePage() {
       {/* ── Reviews ───────────────────────────────────────── */}
       {testimonials.length > 0 && <Testimonials items={testimonials} stats={reviewStats} />}
 
+      {/* ── Book via Instagram (shown once the Instagram username is set) ── */}
+      {dm && (
+        <section className="bg-ink py-24 text-foam md:py-32">
+          <div className="container-x flex flex-col items-start justify-between gap-10 md:flex-row md:items-end" data-reveal>
+            <div className="max-w-2xl">
+              <p className="eyebrow eyebrow-line text-gold">Book a session</p>
+              <h2 className="display mt-5 text-4xl [font-stretch:112%] sm:text-5xl lg:text-6xl">{c["book.title"]}</h2>
+              <p className="mt-5 text-lg text-mist">{c["book.body"]}</p>
+            </div>
+            <InstagramBookButton dmUrl={dm} label="DM US TO BOOK" />
+          </div>
+        </section>
+      )}
+
       {/* ── Call to action ────────────────────────────────── */}
       <section className="relative overflow-hidden bg-abyss py-28 text-foam md:py-40">
-        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(60%_80%_at_80%_100%,rgba(47,127,134,0.35),transparent_70%)]" />
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(60%_80%_at_80%_100%,rgba(201,169,110,0.16),transparent_70%)]" />
         <div className="container-x relative" data-reveal>
-          <p className="eyebrow text-sea">Reviews</p>
+          <p className="eyebrow text-gold">Reviews</p>
           <h2 className="display mt-5 max-w-4xl text-5xl [font-stretch:115%] sm:text-6xl lg:text-7xl">{c["cta.title"]}</h2>
           <p className="mt-6 max-w-xl text-lg text-mist">{c["cta.body"]}</p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">

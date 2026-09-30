@@ -2,7 +2,7 @@ import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { RevealObserver } from "@/components/site/Reveal";
 import { getContent } from "@/lib/content";
-import { instagramUrl } from "@/lib/format";
+import { instagramDmUrl, instagramUrl } from "@/lib/format";
 import { BRAND, siteUrl } from "@/lib/site";
 
 // Public pages read fresh content from the database; admin edits show up
@@ -32,7 +32,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded focus:bg-foam focus:px-4 focus:py-2 focus:text-abyss">
         Skip to content
       </a>
-      <Header instagramUrl={ig} />
+      <Header instagramUrl={ig} bookUrl={instagramDmUrl(c["social.instagram"])} />
       <main id="main">{children}</main>
       <Footer c={c} />
       <RevealObserver />

@@ -11,7 +11,7 @@ export function Stars({ value, size = "h-4 w-4", className }: { value: number; s
             <StarShape className="absolute inset-0 h-full w-full text-current opacity-20" />
             <span className="absolute inset-0 overflow-hidden" style={{ width: `${fill * 100}%` }}>
               <span className="star-fill block h-full" style={{ "--s": i } as React.CSSProperties}>
-                <StarShape className={cx("h-full text-amber-400", size)} />
+                <StarShape className={cx("h-full text-gold", size)} />
               </span>
             </span>
           </span>

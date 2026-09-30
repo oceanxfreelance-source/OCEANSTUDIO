@@ -53,6 +53,12 @@ export function instagramUrl(handle: string | null | undefined): string | null {
   return h ? `https://instagram.com/${encodeURIComponent(h)}` : null;
 }
 
+/** Opens a direct-message chat with the account in the Instagram app (or web). */
+export function instagramDmUrl(handle: string | null | undefined): string | null {
+  const url = instagramUrl(handle);
+  return url ? url.replace("https://instagram.com/", "https://ig.me/m/") : null;
+}
+
 export function whatsappUrl(number: string | null | undefined, text?: string): string | null {
   const digits = number?.replace(/[^\d]/g, "");
   if (!digits) return null;

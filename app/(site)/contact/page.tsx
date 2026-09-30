@@ -3,7 +3,8 @@ import { ButtonLink } from "@/components/site/Buttons";
 import { Instagram, Mail, Pin, WhatsApp } from "@/components/site/Icons";
 import { PageHero } from "@/components/site/Section";
 import { getContent } from "@/lib/content";
-import { instagramUrl, whatsappUrl } from "@/lib/format";
+import { instagramDmUrl, instagramUrl, whatsappUrl } from "@/lib/format";
+import { InstagramBookButton } from "@/components/site/InstagramBook";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   const c = await getContent();
   const ig = instagramUrl(c["social.instagram"]);
+  const dm = instagramDmUrl(c["social.instagram"]);
   const wa = whatsappUrl(c["contact.whatsapp"], "Hi Ocean X!");
   const rows = [
     ig && { icon: Instagram, label: "Instagram", value: `@${c["social.instagram"].replace(/^@/, "")}`, href: ig, external: true },
@@ -35,7 +37,7 @@ export default async function ContactPage() {
               {rows.map((r) => (
                 <li key={r.label}>
                   <a href={r.href} {...(r.external ? { target: "_blank", rel: "noopener noreferrer" } : {})} className="group flex items-center gap-5 py-5">
-                    <r.icon className="h-5 w-5 text-sea-deep" />
+                    <r.icon className="h-5 w-5 text-gold-deep" />
                     <span className="flex-1">
                       <span className="eyebrow block text-slate">{r.label}</span>
                       <span className="mt-1 block break-all text-lg">{r.value}</span>
@@ -48,13 +50,16 @@ export default async function ContactPage() {
           </div>
           <div data-reveal className="flex flex-col justify-between bg-abyss p-8 text-foam md:p-12">
             <div>
-              <p className="eyebrow text-sea">Reviews</p>
-              <p className="display mt-4 text-3xl [font-stretch:112%] md:text-4xl">{c["cta.title"]}</p>
-              <p className="mt-4 text-mist">{c["cta.body"]}</p>
+              <p className="eyebrow text-gold">{dm ? "Book a session" : "Reviews"}</p>
+              <p className="display mt-4 text-3xl [font-stretch:112%] md:text-4xl">{dm ? c["book.title"] : c["cta.title"]}</p>
+              <p className="mt-4 text-mist">{dm ? c["book.body"] : c["cta.body"]}</p>
             </div>
-            <ButtonLink href="/reviews#leave-a-review" arrow className="mt-10 self-start">
-              LEAVE A REVIEW
-            </ButtonLink>
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+              <InstagramBookButton dmUrl={dm} label="DM US TO BOOK" />
+              <ButtonLink href="/reviews#leave-a-review" variant={dm ? "outline-light" : "light"} arrow>
+                LEAVE A REVIEW
+              </ButtonLink>
+            </div>
           </div>
         </div>
       </section>

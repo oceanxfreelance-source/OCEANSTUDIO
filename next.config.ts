@@ -33,8 +33,6 @@ const nextConfig: NextConfig = {
     return [
       { source: "/laamu", destination: "/machines", permanent: true },
       { source: "/laamu/:slug", destination: "/machines/:slug", permanent: true },
-      // The site is a showcase now, not a booking system.
-      { source: "/book", destination: "/contact", permanent: false },
     ];
   },
   async headers() {

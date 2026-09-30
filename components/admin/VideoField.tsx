@@ -81,7 +81,7 @@ export function VideoField({ name, label, defaultValue, hint }: { name: string; 
           value={isFile ? "" : value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="https://…"
-          className="mt-2 block w-full rounded-lg border border-slate/30 bg-white px-3 py-2.5 text-sm text-deep shadow-sm placeholder:text-slate/50 focus:border-sea-deep focus:outline-none focus:ring-2 focus:ring-sea/30"
+          className="mt-2 block w-full rounded-lg border border-slate/30 bg-white px-3 py-2.5 text-sm text-deep shadow-sm placeholder:text-slate/50 focus:border-gold-deep focus:outline-none focus:ring-2 focus:ring-gold/30"
         />
       )}
       {/* accept="video/*" makes phones open the gallery / camera roll */}
@@ -90,7 +90,7 @@ export function VideoField({ name, label, defaultValue, hint }: { name: string; 
       {progress !== null && (
         <div className="mt-3">
           <div className="h-2 overflow-hidden rounded-full bg-foam">
-            <div className="h-full bg-sea-deep transition-[width]" style={{ width: `${progress}%` }} />
+            <div className="h-full bg-gold-deep transition-[width]" style={{ width: `${progress}%` }} />
           </div>
           <p className="mt-1.5 text-xs text-slate">Uploading… {progress}% — keep this page open.</p>
         </div>

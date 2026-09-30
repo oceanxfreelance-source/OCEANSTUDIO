@@ -91,7 +91,7 @@ export function ImagePicker({ name, initial = [], multiple = false, label, hint 
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="flex h-28 w-28 flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate/30 text-xs text-slate hover:border-sea-deep hover:text-deep"
+            className="flex h-28 w-28 flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate/30 text-xs text-slate hover:border-gold-deep hover:text-deep"
           >
             <span className="text-2xl leading-none">+</span>
             {busy > 0 ? "Uploading…" : multiple ? "Add photos" : "Add photo"}

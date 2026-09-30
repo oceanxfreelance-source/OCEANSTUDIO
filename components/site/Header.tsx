@@ -17,7 +17,7 @@ const NAV = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function Header({ instagramUrl }: { instagramUrl: string | null }) {
+export function Header({ instagramUrl, bookUrl }: { instagramUrl: string | null; bookUrl: string | null }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -83,12 +83,23 @@ export function Header({ instagramUrl }: { instagramUrl: string | null }) {
               <Instagram className="h-5 w-5" />
             </a>
           )}
-          <Link
-            href="/reviews#leave-a-review"
-            className="btn-lift hidden rounded-full bg-foam px-5 py-2.5 text-[12px] font-semibold tracking-[0.14em] text-abyss hover:bg-white sm:inline-flex"
-          >
-            LEAVE A REVIEW
-          </Link>
+          {bookUrl ? (
+            <a
+              href={bookUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-lift hidden items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-[12px] font-semibold tracking-[0.14em] text-abyss hover:bg-[#d8bc86] sm:inline-flex"
+            >
+              <Instagram className="h-4 w-4" /> BOOK VIA INSTAGRAM
+            </a>
+          ) : (
+            <Link
+              href="/reviews#leave-a-review"
+              className="btn-lift hidden rounded-full bg-foam px-5 py-2.5 text-[12px] font-semibold tracking-[0.14em] text-abyss hover:bg-white sm:inline-flex"
+            >
+              LEAVE A REVIEW
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
@@ -110,12 +121,21 @@ export function Header({ instagramUrl }: { instagramUrl: string | null }) {
       >
         <nav aria-label="Mobile" className="flex flex-col">
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className="display border-b border-white/5 py-5 text-3xl transition-[padding,color] duration-300 [font-stretch:110%] hover:pl-2 hover:text-sea">
+            <Link key={n.href} href={n.href} className="display border-b border-white/5 py-5 text-3xl transition-[padding,color] duration-300 [font-stretch:110%] hover:pl-2 hover:text-gold">
               {n.label}
             </Link>
           ))}
         </nav>
-        <Link href="/reviews#leave-a-review" onClick={() => setOpen(false)} className="mt-8 flex items-center justify-center rounded-full bg-foam py-4 text-sm font-semibold tracking-[0.14em] text-abyss">
+        {bookUrl && (
+          <a href={bookUrl} target="_blank" rel="noopener noreferrer" className="mt-8 flex items-center justify-center gap-2 rounded-full bg-gold py-4 text-sm font-semibold tracking-[0.14em] text-abyss">
+            <Instagram className="h-4 w-4" /> BOOK VIA INSTAGRAM
+          </a>
+        )}
+        <Link
+          href="/reviews#leave-a-review"
+          onClick={() => setOpen(false)}
+          className={cx("flex items-center justify-center rounded-full py-4 text-sm font-semibold tracking-[0.14em]", bookUrl ? "mt-3 border border-foam/30 text-foam" : "mt-8 bg-foam text-abyss")}
+        >
           LEAVE A REVIEW
         </Link>
         {instagramUrl && (

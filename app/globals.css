@@ -2,26 +2,27 @@
 
 /*
  * OCEAN X design tokens.
- * Deep-ocean ink, sea-foam paper, a single restrained sea-glass accent.
+ * Warm black, ivory and a restrained champagne-gold accent.
  */
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  --color-abyss: #04080b; /* deepest background */
-  --color-ink: #0a1217; /* dark sections */
-  --color-ink-2: #111c23;
-  --color-ink-3: #1b2a33;
-  --color-line: #24343e;
-  --color-mist: #8a9ba5; /* muted text on dark */
-  --color-foam: #eef1ee; /* light sections */
-  --color-sand: #e4e0d6;
-  --color-paper: #f7f7f4;
-  --color-slate: #5b6870; /* muted text on light */
-  --color-deep: #0b1a22; /* text on light */
-  --color-sea: #7cc6c9; /* accent — used sparingly */
-  --color-sea-deep: #2f7f86;
-  --color-coral: #e0765f;
+  /* Luxury palette: warm black, ivory and champagne gold. */
+  --color-abyss: #07080a; /* deepest background */
+  --color-ink: #0e0f12; /* dark sections */
+  --color-ink-2: #16171b;
+  --color-ink-3: #22232a;
+  --color-line: #2d2e35;
+  --color-mist: #a39f96; /* muted text on dark */
+  --color-foam: #f3eee4; /* ivory sections */
+  --color-sand: #e6dccb;
+  --color-paper: #faf7f1;
+  --color-slate: #6b655b; /* muted text on light */
+  --color-deep: #16140f; /* text on light */
+  --color-gold: #c9a96e; /* champagne accent — used sparingly */
+  --color-gold-deep: #7f602c; /* accent for text on light backgrounds */
+  --color-coral: #c46b52;
 
   --tracking-display: -0.02em;
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -37,11 +38,11 @@
     @apply bg-paper text-deep font-sans antialiased;
   }
   ::selection {
-    background: var(--color-sea);
+    background: var(--color-gold);
     color: var(--color-abyss);
   }
   :focus-visible {
-    outline: 2px solid var(--color-sea);
+    outline: 2px solid var(--color-gold);
     outline-offset: 3px;
   }
 }
@@ -185,7 +186,7 @@
 }
 .text-outline {
   color: transparent;
-  -webkit-text-stroke: 1px rgba(238, 241, 238, 0.45);
+  -webkit-text-stroke: 1px rgba(201, 169, 110, 0.55);
 }
 
 /* ── Page transition (app/(site)/template.tsx) ─────────────────────────── */

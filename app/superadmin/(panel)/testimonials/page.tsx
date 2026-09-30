@@ -55,7 +55,7 @@ type Review = { id: string; name: string; instagram: string | null; text: string
 
 function ReviewCard({ t, highlight = false }: { t: Review; highlight?: boolean }) {
   return (
-    <div className={cx("flex flex-col justify-between rounded-xl border bg-white p-5", highlight ? "border-sea-deep/40 ring-2 ring-sea/20" : "border-slate/15")}>
+    <div className={cx("flex flex-col justify-between rounded-xl border bg-white p-5", highlight ? "border-gold-deep/40 ring-2 ring-gold/20" : "border-slate/15")}>
       <div>
         <div className="flex items-start justify-between gap-3">
           <p className="font-medium">

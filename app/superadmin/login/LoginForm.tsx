@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { loginAction, type LoginState } from "../actions";
 
-const control = "mt-1.5 block w-full rounded-lg border border-white/15 bg-white/5 px-3.5 py-3 text-sm text-foam placeholder:text-foam/30 focus:border-sea focus:outline-none focus:ring-2 focus:ring-sea/30";
+const control = "mt-1.5 block w-full rounded-lg border border-white/15 bg-white/5 px-3.5 py-3 text-sm text-foam placeholder:text-foam/30 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30";
 
 export function LoginForm() {
   const [state, action, pending] = useActionState<LoginState, FormData>(loginAction, undefined);

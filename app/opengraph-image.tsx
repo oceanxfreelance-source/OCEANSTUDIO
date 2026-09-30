@@ -16,16 +16,16 @@ export default function OpenGraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 72,
-          color: "#eef1ee",
-          background: "radial-gradient(70% 90% at 25% 20%, #1f5e64 0%, #0a1217 55%, #04080b 100%)",
+          color: "#f3eee4",
+          background: "radial-gradient(70% 90% at 25% 20%, #2a3444 0%, #0e0f12 55%, #07080a 100%)",
         }}
       >
         <div style={{ fontSize: 26, letterSpacing: 10 }}>MACHINES • MAABAIDHOO • LAAMU</div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", fontSize: 124, fontWeight: 700, letterSpacing: 6 }}>
-            <span>OCEAN</span><span style={{ color: "#7cc6c9", marginLeft: 24 }}>X</span>
+            <span>OCEAN</span><span style={{ color: "#c9a96e", marginLeft: 24 }}>X</span>
           </div>
-          <div style={{ fontSize: 38, color: "#b9c6cc", marginTop: 12 }}>Surf films & photography at Machines, Maabaidhoo</div>
+          <div style={{ fontSize: 38, color: "#c9bfae", marginTop: 12 }}>Surf films & photography at Machines, Maabaidhoo</div>
         </div>
       </div>
     ),

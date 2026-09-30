@@ -19,7 +19,7 @@ export function ReviewForm({ thanks }: { thanks: string }) {
   if (state.status === "sent") {
     return (
       <div role="status" className="border border-deep/10 bg-white/60 p-8">
-        <p className="eyebrow text-sea-deep">Review sent</p>
+        <p className="eyebrow text-gold-deep">Review sent</p>
         <p className="display mt-4 text-3xl [font-stretch:112%]">{thanks}</p>
       </div>
     );
@@ -41,7 +41,7 @@ export function ReviewForm({ thanks }: { thanks: string }) {
 
       <fieldset>
         <legend className="eyebrow text-slate">
-          Your rating <span className="text-coral">*</span>
+          How would you rate our drone videography? <span className="text-coral">*</span>
         </legend>
         <input type="hidden" name="rating" value={rating || ""} />
         <div className="mt-3 flex items-center gap-1" onMouseLeave={() => setHover(0)}>
@@ -55,7 +55,7 @@ export function ReviewForm({ thanks }: { thanks: string }) {
               aria-pressed={rating === i}
               className="rounded p-0.5 transition-transform hover:scale-110"
             >
-              <StarShape className={cx("h-9 w-9 transition-colors", i <= shown ? "text-amber-400" : "text-deep/15")} />
+              <StarShape className={cx("h-9 w-9 transition-colors", i <= shown ? "text-gold" : "text-deep/15")} />
             </button>
           ))}
           <span className="ml-3 text-sm text-slate">{LABELS[shown]}</span>
@@ -65,9 +65,17 @@ export function ReviewForm({ thanks }: { thanks: string }) {
 
       <div>
         <label htmlFor="text" className="eyebrow block text-slate">
-          Your note <span className="text-coral">*</span>
+          Your note about the drone videography <span className="text-coral">*</span>
         </label>
-        <textarea id="text" name="text" rows={4} maxLength={1500} defaultValue={v.text} className={cx(input, "resize-y")} placeholder="How was your session at Machines?" />
+        <textarea
+          id="text"
+          name="text"
+          rows={4}
+          maxLength={1500}
+          defaultValue={v.text}
+          className={cx(input, "resize-y")}
+          placeholder="How did your drone clips from Machines turn out? The angles, the edit, the experience…"
+        />
         {fe.text && <p className="mt-2 text-sm text-coral">{fe.text}</p>}
       </div>
 

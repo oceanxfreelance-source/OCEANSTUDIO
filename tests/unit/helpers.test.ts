@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { instagramUrl, priceLabel, whatsappUrl } from "@/lib/format";
+import { instagramDmUrl, instagramUrl, priceLabel, whatsappUrl } from "@/lib/format";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import { parseVideoUrl } from "@/lib/video";
@@ -27,6 +27,9 @@ describe("formatting", () => {
   it("contact links", () => {
     expect(instagramUrl("@ocean.x")).toBe("https://instagram.com/ocean.x");
     expect(instagramUrl("")).toBeNull();
+    expect(instagramDmUrl("@ocean.x")).toBe("https://ig.me/m/ocean.x");
+    expect(instagramDmUrl("https://www.instagram.com/ocean.x/")).toBe("https://ig.me/m/ocean.x");
+    expect(instagramDmUrl("")).toBeNull();
     expect(whatsappUrl("+960 777-1234", "Hi")).toBe("https://wa.me/9607771234?text=Hi");
   });
 });

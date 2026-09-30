@@ -31,7 +31,7 @@ export default async function PortfolioAdmin({ searchParams }: { searchParams: P
       </div>
       {items.length === 0 ? (
         <Empty>
-          No work here yet. <Link href="/superadmin/portfolio/new" className="text-sea-deep underline">Add your first piece</Link>.
+          No work here yet. <Link href="/superadmin/portfolio/new" className="text-gold-deep underline">Add your first piece</Link>.
         </Empty>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

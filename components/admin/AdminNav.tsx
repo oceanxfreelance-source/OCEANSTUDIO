@@ -47,7 +47,7 @@ export function AdminNav({ pendingReviews, onLogout, adminName }: { pendingRevie
                   >
                     {it.label}
                     {it.href === "/superadmin/testimonials" && pendingReviews > 0 && (
-                      <span className="rounded-full bg-sea px-2 py-0.5 text-[11px] font-semibold text-abyss" title="Reviews waiting for approval">{pendingReviews}</span>
+                      <span className="rounded-full bg-gold px-2 py-0.5 text-[11px] font-semibold text-abyss" title="Reviews waiting for approval">{pendingReviews}</span>
                     )}
                   </Link>
                 </li>
@@ -84,7 +84,7 @@ export function AdminNav({ pendingReviews, onLogout, adminName }: { pendingRevie
         <Brand />
         <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="rounded-lg px-3 py-1.5 text-sm ring-1 ring-white/20">
           {open ? "Close" : "Menu"}
-          {!open && pendingReviews > 0 && <span className="ml-2 rounded-full bg-sea px-1.5 text-[11px] font-semibold text-abyss">{pendingReviews}</span>}
+          {!open && pendingReviews > 0 && <span className="ml-2 rounded-full bg-gold px-1.5 text-[11px] font-semibold text-abyss">{pendingReviews}</span>}
         </button>
       </div>
       {open && <div className="fixed inset-x-0 bottom-0 top-14 z-40 overflow-y-auto bg-abyss px-4 py-6 text-foam lg:hidden">{nav}</div>}
@@ -96,7 +96,7 @@ function Brand() {
   return (
     <Link href="/superadmin" className="flex items-baseline gap-2 px-3">
       <span className="display text-base tracking-[0.18em] [font-stretch:125%]">
-        OCEAN<span className="ml-[0.35em] text-sea">X</span>
+        OCEAN<span className="ml-[0.35em] text-gold">X</span>
       </span>
       <span className="text-[10px] uppercase tracking-[0.2em] text-foam/40">Admin</span>
     </Link>

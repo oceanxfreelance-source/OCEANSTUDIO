@@ -9,10 +9,10 @@ import { Img } from "./Img";
 /** Placeholder shown when an item has no cover image yet: deep water + faint swell lines. */
 export function CoverFallback({ label }: { label: string }) {
   return (
-    <div className="relative flex h-full w-full items-end overflow-hidden bg-[radial-gradient(90%_70%_at_20%_10%,#1d3f47_0%,#0e1c23_55%,#060b0e_100%)] p-5 text-foam/45">
+    <div className="relative flex h-full w-full items-end overflow-hidden bg-[radial-gradient(90%_70%_at_20%_10%,#26303f_0%,#13151a_55%,#07080a_100%)] p-5 text-foam/45">
       <svg aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 w-full opacity-30" viewBox="0 0 400 200" preserveAspectRatio="none">
         {Array.from({ length: 7 }, (_, i) => (
-          <path key={i} d={`M0 ${40 + i * 22} C 100 ${30 + i * 22}, 200 ${52 + i * 22}, 400 ${38 + i * 22}`} fill="none" stroke="#eef1ee" strokeWidth="0.7" opacity={0.25 + i * 0.1} />
+          <path key={i} d={`M0 ${40 + i * 22} C 100 ${30 + i * 22}, 200 ${52 + i * 22}, 400 ${38 + i * 22}`} fill="none" stroke="#e6d7b9" strokeWidth="0.7" opacity={0.25 + i * 0.1} />
         ))}
       </svg>
       <span className="eyebrow relative">{label}</span>
@@ -50,7 +50,7 @@ export function ServiceCard({ s, index }: { s: ServiceCardData; index?: number }
           <span
             className={cx(
               "eyebrow rounded-full px-3 py-1.5 backdrop-blur",
-              soon ? "bg-abyss/60 text-foam/80" : "bg-sea/90 text-abyss",
+              soon ? "bg-abyss/60 text-foam/80" : "bg-gold/90 text-abyss",
             )}
           >
             {SERVICE_STATUS_LABEL[s.status]}
@@ -59,7 +59,7 @@ export function ServiceCard({ s, index }: { s: ServiceCardData; index?: number }
       </div>
       <div className="mt-5 flex items-start justify-between gap-4">
         <div>
-          <h3 className="display text-2xl transition-colors duration-300 [font-stretch:110%] group-hover:text-sea-deep">{s.name}</h3>
+          <h3 className="display text-2xl transition-colors duration-300 [font-stretch:110%] group-hover:text-gold-deep">{s.name}</h3>
           {s.shortDescription && <p className="mt-2 text-sm leading-relaxed text-slate">{s.shortDescription}</p>}
           {!soon && <p className="mt-3 text-sm font-medium">{priceLabel(s.price, s.priceType, s.currency)}</p>}
         </div>

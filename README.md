@@ -4,7 +4,7 @@
 
 This repository holds two things:
 
-1. **The public website.** Visitors see Ocean X's work, services and where Ocean X works (Machines & Maabaidhoo), and read and leave reviews. It is a showcase, not a booking system. Visitors never register or log in.
+1. **The public website.** Visitors see Ocean X's work, services and where Ocean X works (Machines & Maabaidhoo), and read and leave reviews. It is a showcase, not a booking system: guests book by sending a DM on Instagram (the “Book via Instagram” buttons and the `/book` short link open a DM once the Instagram username is set in Website content). Visitors never register or log in.
 2. **The private Superadmin** at `/superadmin`. Only the Ocean X owner uses it, to manage the website and the business.
 
 ```
@@ -23,7 +23,7 @@ PRIVATE  Owner   → /superadmin login → Dashboard → Reviews (approve) · Se
 | `/services` | Services from the database: **Active** and **Coming soon** |
 | `/machines` | Machines & Maabaidhoo, managed from the admin (`/laamu` redirects here) |
 | `/about`, `/contact` | Editable text and contact details |
-| `/reviews` | All approved reviews with stars and the average rating, plus a **Leave a review** form (name, optional Instagram, 1–5 stars, note). No account; spam-protected and rate-limited. `/book` redirects to Contact |
+| `/reviews` | All approved reviews with stars and the average rating, plus a **Leave a review** form (name, optional Instagram, 1–5 stars, note). No account; spam-protected and rate-limited. Reviews ask about the drone videography. `/book` opens an Instagram DM (or Contact until the username is set) |
 
 | Superadmin section | What you can do |
 | --- | --- |
@@ -115,7 +115,7 @@ tests/                 unit tests + Playwright browser tests
 
 - **Website text:** edit it in Superadmin → Website content. To add a *new* editable text, add one entry to `CONTENT_FIELDS` in `lib/content.ts` and it appears in the admin automatically.
 - **Portfolio categories or location types:** edit the lists in `lib/constants.ts`.
-- **Colours and fonts:** edit `app/globals.css` (the `@theme` block).
+- **Colours and fonts:** edit `app/globals.css` (the `@theme` block): warm black, ivory and champagne gold (`--color-gold`).
 
 ## Ready for later
 

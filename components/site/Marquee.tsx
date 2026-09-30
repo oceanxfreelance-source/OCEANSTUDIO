@@ -8,7 +8,7 @@ export function Marquee({ items }: { items: string[] }) {
       {items.map((t, i) => (
         <span key={i} className="flex items-center">
           <span className={i % 2 ? "text-outline" : "text-foam"}>{t}</span>
-          <span className="mx-8 inline-block h-2 w-2 rounded-full bg-sea md:mx-12" aria-hidden />
+          <span className="mx-8 inline-block h-2 w-2 rounded-full bg-gold md:mx-12" aria-hidden />
         </span>
       ))}
     </div>

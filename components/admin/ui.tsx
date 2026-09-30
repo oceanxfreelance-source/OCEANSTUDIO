@@ -38,7 +38,7 @@ export function Card({ title, children, className, actions }: { title?: string; 
 
 export function Stat({ label, value, href, tone = "default" }: { label: string; value: React.ReactNode; href?: string; tone?: "default" | "accent" }) {
   const body = (
-    <div className={cx("h-full rounded-xl border p-5 transition-colors", tone === "accent" ? "border-sea-deep/30 bg-sea/10" : "border-slate/15 bg-white", href && "hover:border-slate/40")}>
+    <div className={cx("h-full rounded-xl border p-5 transition-colors", tone === "accent" ? "border-gold-deep/30 bg-gold/10" : "border-slate/15 bg-white", href && "hover:border-slate/40")}>
       <p className="text-xs font-medium uppercase tracking-wider text-slate">{label}</p>
       <p className="mt-2 text-3xl font-semibold tracking-tight">{value}</p>
     </div>
@@ -119,7 +119,7 @@ export function Table({ head, children }: { head: string[]; children: React.Reac
 }
 
 // ── Form fields (work with ActionForm) ─────────────────────────────────
-const control = "mt-1.5 block w-full rounded-lg border border-slate/30 bg-white px-3 py-2.5 text-sm text-deep shadow-sm placeholder:text-slate/50 focus:border-sea-deep focus:outline-none focus:ring-2 focus:ring-sea/30";
+const control = "mt-1.5 block w-full rounded-lg border border-slate/30 bg-white px-3 py-2.5 text-sm text-deep shadow-sm placeholder:text-slate/50 focus:border-gold-deep focus:outline-none focus:ring-2 focus:ring-gold/30";
 
 type Base = { label: string; name: string; hint?: string; className?: string; required?: boolean };
 

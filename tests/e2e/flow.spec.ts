@@ -195,6 +195,29 @@ test("admin: editing website text changes the home page", async ({ page }) => {
   await expect(page.getByText("Home — hero saved.")).toBeVisible();
 });
 
+test("admin: adding the Instagram username turns on 'Book via Instagram' (DM)", async ({ page, request }) => {
+  await login(page);
+  await page.goto("/superadmin/content");
+  const social = page.locator("form").filter({ has: page.getByRole("button", { name: "Save contact & social" }) });
+  await social.getByLabel("Instagram username").fill("@oceanx.e2e");
+  await social.getByRole("button", { name: "Save contact & social" }).click();
+  await expect(page.getByText("Contact & social saved.")).toBeVisible();
+
+  await page.goto("/");
+  await expect(page.locator("header").getByRole("link", { name: /BOOK VIA INSTAGRAM/ })).toHaveAttribute("href", "https://ig.me/m/oceanx.e2e");
+  await expect(page.getByRole("link", { name: /DM US TO BOOK/ })).toHaveAttribute("href", "https://ig.me/m/oceanx.e2e");
+  const short = await request.get("/book", { maxRedirects: 0 });
+  expect(short.headers()["location"]).toBe("https://ig.me/m/oceanx.e2e");
+
+  // restore
+  await page.goto("/superadmin/content");
+  await social.getByLabel("Instagram username").fill("");
+  await social.getByRole("button", { name: "Save contact & social" }).click();
+  await expect(page.getByText("Contact & social saved.")).toBeVisible();
+  await page.goto("/");
+  await expect(page.locator("header").getByRole("link", { name: /BOOK VIA INSTAGRAM/ })).toHaveCount(0);
+});
+
 test("admin: logout ends the session", async ({ page }) => {
   await login(page);
   await page.getByRole("button", { name: "Log out" }).first().click();

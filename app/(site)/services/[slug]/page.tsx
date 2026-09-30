@@ -5,8 +5,10 @@ import { Img } from "@/components/site/Img";
 import { OceanBackdrop } from "@/components/site/OceanBackdrop";
 import { Prose } from "@/components/site/Section";
 import { SERVICE_STATUS_LABEL } from "@/lib/constants";
-import { priceLabel } from "@/lib/format";
+import { instagramDmUrl, priceLabel } from "@/lib/format";
 import { getPublicService } from "@/lib/public";
+import { InstagramBookButton } from "@/components/site/InstagramBook";
+import { getContent } from "@/lib/content";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -25,6 +27,7 @@ export default async function ServicePage({ params }: Props) {
   const s = await getPublicService((await params).slug);
   if (!s) notFound();
   const soon = s.status === "COMING_SOON";
+  const dm = instagramDmUrl((await getContent())["social.instagram"]);
 
   return (
     <>
@@ -38,7 +41,7 @@ export default async function ServicePage({ params }: Props) {
         )}
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/40 to-abyss/30" />
         <div className="container-x relative pb-14 pt-32 md:pb-20">
-          <span className={soon ? "eyebrow rounded-full bg-foam/10 px-3 py-1.5 text-foam/80 backdrop-blur" : "eyebrow rounded-full bg-sea px-3 py-1.5 text-abyss"}>
+          <span className={soon ? "eyebrow rounded-full bg-foam/10 px-3 py-1.5 text-foam/80 backdrop-blur" : "eyebrow rounded-full bg-gold px-3 py-1.5 text-abyss"}>
             {SERVICE_STATUS_LABEL[s.status]}
           </span>
           <h1 className="display mt-6 max-w-5xl text-5xl [font-stretch:115%] sm:text-6xl lg:text-7xl">{s.name}</h1>
@@ -55,11 +58,19 @@ export default async function ServicePage({ params }: Props) {
             <p className="eyebrow text-slate">{soon ? "Status" : "Pricing"}</p>
             <p className="display mt-3 text-3xl [font-stretch:110%]">{soon ? "Coming soon" : priceLabel(s.price, s.priceType, s.currency)}</p>
             <p className="mt-4 text-sm leading-relaxed text-slate">
-              {soon ? "We're getting this service ready — follow us to hear when it's available." : "Final pricing depends on timing and the number of surfers. Get in touch for details."}
+              {soon
+                ? "We're getting this service ready — follow us to hear when it's available."
+                : dm
+                  ? "Send us a DM on Instagram with your dates and the number of surfers to book."
+                  : "Final pricing depends on timing and the number of surfers. Get in touch for details."}
             </p>
-            <ButtonLink href="/contact" variant="dark" className="mt-7 w-full">
-              CONTACT US
-            </ButtonLink>
+            {dm && !soon ? (
+              <InstagramBookButton dmUrl={dm} variant="dark" className="mt-7 w-full" />
+            ) : (
+              <ButtonLink href="/contact" variant="dark" className="mt-7 w-full">
+                CONTACT US
+              </ButtonLink>
+            )}
             <ButtonLink href="/work" variant="outline-dark" className="mt-3 w-full">
               SEE OUR WORK
             </ButtonLink>
