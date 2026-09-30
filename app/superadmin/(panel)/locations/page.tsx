@@ -4,14 +4,14 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { toggleLocation } from "./actions";
 
-export const metadata = { title: "Laamu locations" };
+export const metadata = { title: "Locations" };
 
 export default async function LocationsAdmin() {
   await requireAdmin();
   const locations = await db.location.findMany({ orderBy: [{ displayOrder: "asc" }, { name: "asc" }], include: { _count: { select: { portfolio: true } } } });
   return (
     <>
-      <PageHeader title="Laamu locations" subtitle="Places shown on the Laamu page and in the booking form." actions={<ButtonLink href="/superadmin/locations/new">+ Add location</ButtonLink>} />
+      <PageHeader title="Locations" subtitle="Places shown on the Machines & Maabaidhoo page and in the booking form." actions={<ButtonLink href="/superadmin/locations/new">+ Add location</ButtonLink>} />
       {locations.length === 0 ? (
         <Empty>No locations yet.</Empty>
       ) : (

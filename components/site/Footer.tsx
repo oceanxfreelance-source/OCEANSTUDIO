@@ -24,7 +24,7 @@ export function Footer({ c }: { c: Content }) {
         <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-foam/75 md:grid-cols-1">
           <Link href="/work" className="hover:text-white">Our Work</Link>
           <Link href="/services" className="hover:text-white">Services</Link>
-          <Link href="/laamu" className="hover:text-white">Laamu</Link>
+          <Link href="/machines" className="hover:text-white">Machines & Maabaidhoo</Link>
           <Link href="/about" className="hover:text-white">About</Link>
           <Link href="/contact" className="hover:text-white">Contact</Link>
           <Link href="/book" className="hover:text-white">Book a session</Link>
@@ -55,7 +55,7 @@ export function Footer({ c }: { c: Content }) {
       <div className="border-t border-white/5">
         <div className="container-x flex flex-col gap-2 py-6 text-xs text-foam/40 sm:flex-row sm:justify-between">
           <p>© {new Date().getFullYear()} OCEAN X. All rights reserved.</p>
-          <p>Laamu Atoll, Republic of Maldives</p>
+          <p>Maabaidhoo, Laamu Atoll, Maldives</p>
         </div>
       </div>
     </footer>

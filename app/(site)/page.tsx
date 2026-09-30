@@ -34,7 +34,7 @@ export default async function HomePage() {
       <section className="relative flex min-h-[100svh] items-end overflow-hidden bg-abyss text-foam">
         {heroImage ? (
           <div className="absolute inset-0">
-            <Img media={heroImage} alt={heroImage.alt || "Ocean X — Laamu, Maldives"} priority sizes="100vw" />
+            <Img media={heroImage} alt={heroImage.alt || "Ocean X — Machines, Maabaidhoo"} priority sizes="100vw" />
           </div>
         ) : (
           <OceanBackdrop />
@@ -128,25 +128,25 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── Laamu ─────────────────────────────────────────── */}
+      {/* ── Machines & Maabaidhoo ─────────────────────────────────────────── */}
       <section className="bg-ink py-24 text-foam md:py-32">
         <div className="container-x">
           <SectionHeading
             dark
-            eyebrow="Laamu • Maldives"
+            eyebrow="Machines • Maabaidhoo"
             title="Home waters."
             intro={c["laamu.intro"]}
             action={
-              <ButtonLink href="/laamu" variant="outline-light" arrow className="self-start md:self-auto">
-                EXPLORE LAAMU
+              <ButtonLink href="/machines" variant="outline-light" arrow className="self-start md:self-auto">
+                WHERE WE WORK
               </ButtonLink>
             }
           />
           {locations.length > 0 && (
-            <div className="-mx-5 mt-14 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
+            <div className="-mx-5 mt-14 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0">
               {locations.slice(0, 4).map((l) => (
-                <div key={l.id} className="w-[75vw] shrink-0 snap-start sm:w-auto">
-                  <LocationCard l={l} />
+                <div key={l.id} className="w-[80vw] shrink-0 snap-start sm:w-auto">
+                  <LocationCard l={l} wide />
                 </div>
               ))}
             </div>

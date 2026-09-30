@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!w) return {};
   return {
     title: w.title,
-    description: w.description.slice(0, 160) || `${w.category} by Ocean X${w.location ? ` — ${w.location.name}, Laamu` : ""}.`,
+    description: w.description.slice(0, 160) || `${w.category} by Ocean X${w.location ? ` — ${w.location.name}, Maabaidhoo` : " at Machines, Maabaidhoo"}.`,
     alternates: { canonical: `/work/${w.slug}` },
     openGraph: w.cover ? { images: [{ url: `/media/${w.cover.id}`, width: w.cover.width, height: w.cover.height }] } : undefined,
   };
@@ -40,7 +40,7 @@ export default async function WorkItemPage({ params }: Props) {
             <span className="flex items-center gap-1.5">
               <Pin className="h-4 w-4" />
               {w.location.published ? (
-                <Link href={`/laamu/${w.location.slug}`} className="hover:text-foam">
+                <Link href={`/machines/${w.location.slug}`} className="hover:text-foam">
                   {w.location.name}
                 </Link>
               ) : (

@@ -28,6 +28,13 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["sharp"],
+  async redirects() {
+    // The location section used to live at /laamu.
+    return [
+      { source: "/laamu", destination: "/machines", permanent: true },
+      { source: "/laamu/:slug", destination: "/machines/:slug", permanent: true },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

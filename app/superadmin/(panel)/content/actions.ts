@@ -18,7 +18,12 @@ export async function saveContent(group: string, _prev: FormState, fd: FormData)
     if (value.length > 8000) errors[f.key] = "Too long";
     if (type === "url" && value && !/^https?:\/\/\S+$/i.test(value)) errors[f.key] = "Enter a full link starting with https://";
     if (f.key === "social.instagram") value = value.replace(/^@/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/[/?#].*$/, "");
-    writes.push(db.setting.upsert({ where: { key: f.key }, create: { key: f.key, value }, update: { value } }));
+    // Values left at the default aren't stored, so improved defaults still reach the site.
+    writes.push(
+      value === f.default
+        ? db.setting.deleteMany({ where: { key: f.key } })
+        : db.setting.upsert({ where: { key: f.key }, create: { key: f.key, value }, update: { value } }),
+    );
   }
   if (Object.keys(errors).length) return { error: "Please fix the highlighted fields.", fieldErrors: errors };
   await db.$transaction(writes);

@@ -1,14 +1,14 @@
 # OCEAN X
 
-**Ocean & Visual Media from Laamu, Maldives.**
+**Ocean & Visual Media from Machines, Maabaidhoo — Laamu, Maldives.**
 
 This repository holds two things:
 
-1. **The public website.** Visitors see Ocean X's work, services and Laamu locations, then send a booking request. Visitors never register or log in.
+1. **The public website.** Visitors see Ocean X's work, services and where Ocean X works (Machines & Maabaidhoo), then send a booking request. Visitors never register or log in.
 2. **The private Superadmin** at `/superadmin`. Only the Ocean X owner uses it, to manage the website and the business.
 
 ```
-PUBLIC   Visitor → Website → Our Work / Services / Laamu → Book a session → Ocean X replies
+PUBLIC   Visitor → Website → Our Work / Services / Machines → Book a session → Ocean X replies
 PRIVATE  Owner   → /superadmin login → Dashboard → Bookings · Sessions · Customers · Content
 ```
 
@@ -18,10 +18,10 @@ PRIVATE  Owner   → /superadmin login → Dashboard → Bookings · Sessions ·
 
 | Public page | What it shows |
 | --- | --- |
-| `/` Home | Cinematic hero, intro, selected work, services, Laamu, testimonials, call to action |
+| `/` Home | Cinematic hero, intro, selected work, services, Machines & Maabaidhoo, testimonials, call to action |
 | `/work` | Portfolio with category filter (Surf, Ocean, Laamu, Travel, Commercial, Resort, Photography, Videography) |
 | `/services` | Services from the database: **Active** and **Coming soon** |
-| `/laamu` | Locations (Machines, islands, lagoons…) managed from the admin |
+| `/machines` | Machines & Maabaidhoo, managed from the admin (`/laamu` redirects here) |
 | `/about`, `/contact` | Editable text and contact details |
 | `/book` | Booking request form. No account; spam-protected and rate-limited |
 
@@ -33,7 +33,7 @@ PRIVATE  Owner   → /superadmin login → Dashboard → Bookings · Sessions ·
 | Customers | Private customer records (created automatically from bookings), with session count, total spent, and first and last booking |
 | Services | Add or edit services, switch **Coming soon → Active** in one click, set prices, images and display order |
 | Portfolio | Add work with photos and a YouTube, Vimeo or MP4 link, then feature, publish or unpublish it |
-| Laamu locations | Add, edit, feature or publish places |
+| Locations | Add, edit, feature or publish places (Machines, Maabaidhoo) |
 | Testimonials | Real customer quotes; featured ones appear on the home page |
 | Website content | Hero text and image, about text, contact details, Instagram, footer, SEO description |
 | Account | Change your password and sign out all devices |
@@ -70,7 +70,7 @@ You need Node.js 22 and a PostgreSQL database. The free Neon database works.
 npm install
 cp .env.example .env            # then put your DATABASE_URL in .env
 npx prisma migrate deploy       # create the tables
-npm run db:seed                 # starter services + Laamu places (runs once)
+npm run db:seed                 # starter services + Machines & Maabaidhoo (runs once)
 npm run admin:create -- you@example.com "Your Name"   # asks for a password
 npm run dev                     # open http://localhost:3000
 ```
@@ -100,7 +100,7 @@ The browser tests sign in with `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`. GitHub 
 ## Project layout
 
 ```
-app/(site)/            public pages (home, work, services, laamu, about, contact, book)
+app/(site)/            public pages (home, work, services, machines, about, contact, book)
 app/superadmin/        login + private admin panel
 app/api/admin/media    admin-only image upload
 app/media/[id]         serves optimised images (cached for a year)

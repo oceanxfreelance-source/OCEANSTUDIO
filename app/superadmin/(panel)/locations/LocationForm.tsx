@@ -40,7 +40,7 @@ export function LocationForm({ action, location }: { action: (p: FormState, fd: 
         <Card title="Publishing">
           <div className="space-y-4">
             <Checkbox label="Published" name="published" defaultChecked={l?.published ?? true} />
-            <Checkbox label="Featured" name="featured" defaultChecked={l?.featured ?? false} hint="Shown first on the Laamu page." />
+            <Checkbox label="Featured" name="featured" defaultChecked={l?.featured ?? false} hint="Shown first on the Machines & Maabaidhoo page." />
             <TextField label="Display order" name="displayOrder" type="number" defaultValue={l?.displayOrder ?? 0} />
           </div>
         </Card>

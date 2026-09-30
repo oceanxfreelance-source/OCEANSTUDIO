@@ -1,5 +1,5 @@
 /**
- * Starter content: the current services and a few Laamu places.
+ * Starter content: the current services and our two places — Machines and Maabaidhoo.
  * Runs only ONCE per database (remembered in the settings table), so it's safe
  * in every deploy: anything you later edit or delete is never re-created.
  * No fake portfolio items or testimonials are created; add real ones in /superadmin.
@@ -15,9 +15,9 @@ const services = [
     status: "ACTIVE" as const,
     featured: true,
     displayOrder: 1,
-    shortDescription: "Aerial surf and ocean films from above the reef.",
+    shortDescription: "Aerial surf films of your waves at Machines.",
     description:
-      "Cinematic aerial footage of your surf session, boat trip or island stay — filmed above the waves of Laamu.\n\nTell us when you're surfing and at which break, and we'll plan the flight around the conditions and the light. You receive your edited clips and original files by private download link.",
+      "Cinematic aerial footage of your surf session at Machines, Maabaidhoo — filmed from above the wave.\n\nTell us when you're surfing and we'll plan the flight around the conditions and the light. You receive your edited clips and original files by private download link.",
   },
   {
     slug: "sea-photography",
@@ -47,10 +47,7 @@ const services = [
 
 const locations = [
   { slug: "machines", name: "Machines", kind: "Surf spot", featured: true, displayOrder: 1, description: "One of Laamu's best-known surf breaks — and where Ocean X began, with a drone above the waves." },
-  { slug: "maabaidhoo", name: "Maabaidhoo", kind: "Island", displayOrder: 2, description: "" },
-  { slug: "fonadhoo", name: "Fonadhoo", kind: "Island", displayOrder: 3, description: "" },
-  { slug: "gan", name: "Gan", kind: "Island", displayOrder: 4, description: "" },
-  { slug: "hithadhoo", name: "Hithadhoo", kind: "Island", displayOrder: 5, description: "" },
+  { slug: "maabaidhoo", name: "Maabaidhoo", kind: "Island", featured: true, displayOrder: 2, description: "Our island in Laamu Atoll — home base for every Ocean X session at Machines." },
 ];
 
 async function main() {

@@ -56,7 +56,7 @@ export function PortfolioForm({ action, item, locations }: { action: (p: FormSta
         <Card title="Organise">
           <div className="space-y-4">
             <Select label="Category" name="category" required defaultValue={w?.category ?? "Surf"} options={PORTFOLIO_CATEGORIES.map((c) => ({ value: c, label: c }))} />
-            <Select label="Location" name="locationId" defaultValue={w?.locationId ?? ""} options={[{ value: "", label: "— None —" }, ...locations.map((l) => ({ value: l.id, label: l.name }))]} hint="Add places under Laamu locations." />
+            <Select label="Location" name="locationId" defaultValue={w?.locationId ?? ""} options={[{ value: "", label: "— None —" }, ...locations.map((l) => ({ value: l.id, label: l.name }))]} hint="Add places under Locations." />
             <TextField label="Date" name="date" type="date" defaultValue={dateInputValue(w?.date)} />
           </div>
         </Card>

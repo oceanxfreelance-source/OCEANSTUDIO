@@ -105,7 +105,7 @@ export function BookingForm({
         <Field label="Location" name="location" error={fe.location}>
           {locations.length > 0 && locationIsListed ? (
             <select id="location" name="location" defaultValue={v.location ?? defaults.location ?? ""} className={input}>
-              <option value="">Anywhere in Laamu / not sure</option>
+              <option value="">Not sure yet</option>
               {locations.map((l) => (
                 <option key={l.id} value={l.name}>
                   {l.name}

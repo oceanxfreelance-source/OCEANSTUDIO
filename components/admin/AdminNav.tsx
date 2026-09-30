@@ -20,7 +20,7 @@ const GROUPS = [
     items: [
       { href: "/superadmin/services", label: "Services" },
       { href: "/superadmin/portfolio", label: "Portfolio" },
-      { href: "/superadmin/locations", label: "Laamu locations" },
+      { href: "/superadmin/locations", label: "Locations" },
       { href: "/superadmin/testimonials", label: "Testimonials" },
       { href: "/superadmin/content", label: "Website content" },
     ],

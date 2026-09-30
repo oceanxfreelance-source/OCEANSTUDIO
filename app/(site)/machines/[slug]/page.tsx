@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${l.name}, ${l.atoll}`,
     description: l.description.slice(0, 160) || `${l.name} — ${l.kind.toLowerCase()} in ${l.atoll}, Maldives, filmed and photographed by Ocean X.`,
-    alternates: { canonical: `/laamu/${l.slug}` },
+    alternates: { canonical: `/machines/${l.slug}` },
     openGraph: l.cover ? { images: [{ url: `/media/${l.cover.id}`, width: l.cover.width, height: l.cover.height }] } : undefined,
   };
 }

@@ -9,7 +9,7 @@ import { getPortfolio } from "@/lib/public";
 
 export const metadata: Metadata = {
   title: "Our Work",
-  description: "Surf films, drone videography and ocean photography from Machines and the islands of Laamu, Maldives.",
+  description: "Surf films, drone videography and ocean photography from Machines, Maabaidhoo — Laamu, Maldives.",
   alternates: { canonical: "/work" },
 };
 

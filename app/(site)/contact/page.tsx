@@ -7,7 +7,7 @@ import { instagramUrl, whatsappUrl } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact Ocean X in Laamu, Maldives — Instagram, email and WhatsApp for sessions, collaborations and commercial projects.",
+  description: "Contact Ocean X at Machines, Maabaidhoo (Laamu, Maldives) — Instagram, email and WhatsApp for sessions, collaborations and commercial projects.",
   alternates: { canonical: "/contact" },
 };
 
@@ -29,7 +29,7 @@ export default async function ContactPage() {
           <div data-reveal>
             <p className="display text-4xl [font-stretch:115%]">OCEAN X</p>
             <p className="mt-3 flex items-center gap-2 text-slate">
-              <Pin className="h-4 w-4" /> Laamu, Maldives
+              <Pin className="h-4 w-4" /> Machines, Maabaidhoo — Laamu, Maldives
             </p>
             <ul className="mt-10 divide-y divide-deep/10 border-y border-deep/10">
               {rows.map((r) => (

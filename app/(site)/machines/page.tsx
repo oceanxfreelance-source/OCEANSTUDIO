@@ -5,38 +5,38 @@ import { getContent } from "@/lib/content";
 import { getLocations } from "@/lib/public";
 
 export const metadata: Metadata = {
-  title: "Laamu, Maldives",
-  description: "Surf breaks, islands and lagoons of Laamu Atoll — the places Ocean X films and photographs, from Machines to the local islands.",
-  alternates: { canonical: "/laamu" },
+  title: "Machines & Maabaidhoo",
+  description: "Machines surf break and Maabaidhoo island in Laamu Atoll, Maldives — where Ocean X films and photographs.",
+  alternates: { canonical: "/machines" },
 };
 
-export default async function LaamuPage() {
+export default async function MachinesPage() {
   const [c, locations] = await Promise.all([getContent(), getLocations()]);
   const featured = locations.filter((l) => l.featured);
   const others = locations.filter((l) => !l.featured);
 
   return (
     <>
-      <PageHero eyebrow="Laamu • Maldives" title="Our home atoll." intro={c["laamu.intro"]} />
+      <PageHero eyebrow="Machines • Maabaidhoo • Laamu" title="Where we work." intro={c["laamu.intro"]} />
       <section className="bg-ink pb-24 text-foam md:pb-32">
         <div className="container-x pt-4">
           {locations.length === 0 ? (
-            <EmptyState dark title="Locations coming soon" body="We're mapping out the places we love around Laamu." />
+            <EmptyState dark title="Locations coming soon" body="Photos of Machines and Maabaidhoo are on their way." />
           ) : (
             <>
               {featured.length > 0 && (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-6 sm:grid-cols-2">
                   {featured.map((l) => (
-                    <LocationCard key={l.id} l={l} />
+                    <LocationCard key={l.id} l={l} wide />
                   ))}
                 </div>
               )}
               {others.length > 0 && (
                 <div className={featured.length ? "mt-16" : ""}>
                   {featured.length > 0 && <p className="eyebrow mb-8 text-mist">More places</p>}
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-6 sm:grid-cols-2">
                     {others.map((l) => (
-                      <LocationCard key={l.id} l={l} />
+                      <LocationCard key={l.id} l={l} wide />
                     ))}
                   </div>
                 </div>

@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const s = await getPublicService((await params).slug);
   if (!s) return {};
   return {
-    title: `${s.name} in Laamu, Maldives`,
+    title: `${s.name} at Machines, Maabaidhoo`,
     description: s.shortDescription || s.description.slice(0, 160),
     alternates: { canonical: `/services/${s.slug}` },
     openGraph: s.cover ? { images: [{ url: `/media/${s.cover.id}`, width: s.cover.width, height: s.cover.height }] } : undefined,

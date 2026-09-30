@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 // Phone layout: no sideways scrolling, menu works, booking form usable.
-for (const path of ["/", "/services", "/work", "/laamu", "/about", "/contact", "/book"]) {
+for (const path of ["/", "/services", "/work", "/machines", "/about", "/contact", "/book"]) {
   test(`no horizontal overflow on ${path}`, async ({ page }) => {
     await page.goto(path);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);

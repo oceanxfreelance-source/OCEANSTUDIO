@@ -101,17 +101,17 @@ export function WorkCard({ w, large = false, dark = false }: { w: WorkCardData; 
 
 type LocationCardData = { slug: string; name: string; kind: string; atoll: string; cover: MediaRef | null; description: string };
 
-export function LocationCard({ l }: { l: LocationCardData }) {
+export function LocationCard({ l, wide = false }: { l: LocationCardData; wide?: boolean }) {
   return (
-    <Link href={`/laamu/${l.slug}`} data-reveal className="group block">
-      <div className="relative aspect-[3/4] overflow-hidden bg-ink">
-        {l.cover ? <Img media={l.cover} alt={l.name} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="transition duration-[1.2s] ease-out group-hover:scale-[1.04]" /> : <CoverFallback label={l.kind} />}
+    <Link href={`/machines/${l.slug}`} data-reveal className="group block">
+      <div className={cx("relative overflow-hidden bg-ink", wide ? "aspect-[4/5] sm:aspect-[4/3]" : "aspect-[3/4]")}>
+        {l.cover ? <Img media={l.cover} alt={l.name} sizes="(min-width: 640px) 50vw, 100vw" className="transition duration-[1.2s] ease-out group-hover:scale-[1.04]" /> : <CoverFallback label={l.kind} />}
         <div className="absolute inset-0 bg-gradient-to-t from-abyss/80 via-abyss/10 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-5 text-foam">
           <p className="eyebrow flex items-center gap-1.5 text-foam/70">
             <Pin className="h-3.5 w-3.5" /> {l.kind}
           </p>
-          <h3 className="display mt-2 text-2xl [font-stretch:110%]">{l.name}</h3>
+          <h3 className={cx("display mt-2 [font-stretch:110%]", wide ? "text-3xl md:text-5xl" : "text-2xl")}>{l.name}</h3>
         </div>
       </div>
     </Link>

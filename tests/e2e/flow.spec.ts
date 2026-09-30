@@ -26,7 +26,7 @@ async function login(page: Page) {
 test("public site: no accounts, no admin link", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("CAPTURED BY THE OCEAN.");
-  await expect(page.getByText("LAAMU • MALDIVES").first()).toBeVisible();
+  await expect(page.getByText("MACHINES • MAABAIDHOO • LAAMU").first()).toBeVisible();
   await expect(page.getByRole("link", { name: "BOOK A SESSION" }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: /EXPLORE OUR WORK/ })).toBeVisible();
   const html = await page.content();

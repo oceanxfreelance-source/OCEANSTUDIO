@@ -9,7 +9,7 @@ export default async function NewLocation() {
   await requireAdmin();
   return (
     <>
-      <PageHeader title="Add location" back={{ href: "/superadmin/locations", label: "Laamu locations" }} />
+      <PageHeader title="Add location" back={{ href: "/superadmin/locations", label: "Locations" }} />
       <LocationForm action={saveLocation.bind(null, null)} />
     </>
   );

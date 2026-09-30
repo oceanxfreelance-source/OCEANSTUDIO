@@ -8,7 +8,7 @@ import { BookingForm } from "./BookingForm";
 
 export const metadata: Metadata = {
   title: "Book a session",
-  description: "Request a drone, surf or ocean session with Ocean X in Laamu, Maldives. No account needed.",
+  description: "Request a drone, surf or ocean session with Ocean X at Machines, Maabaidhoo (Laamu, Maldives). No account needed.",
   alternates: { canonical: "/book" },
 };
 

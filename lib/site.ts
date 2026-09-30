@@ -9,7 +9,7 @@ export function siteUrl(): string {
 
 export const BRAND = {
   name: "OCEAN X",
-  tagline: "Ocean & Visual Media from Laamu, Maldives",
+  tagline: "Ocean & Visual Media from Machines, Maabaidhoo — Laamu, Maldives",
   region: "Laamu Atoll",
   country: "Maldives",
 } as const;

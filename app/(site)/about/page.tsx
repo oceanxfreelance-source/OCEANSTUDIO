@@ -9,7 +9,7 @@ import { getPublicServices, getTestimonials } from "@/lib/public";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Ocean X is a visual-media company born around the ocean and surf culture of Laamu, Maldives.",
+  description: "Ocean X is a visual-media company born around the ocean and surf culture of Machines, Maabaidhoo, in Laamu, Maldives.",
   alternates: { canonical: "/about" },
 };
 
@@ -35,7 +35,7 @@ export default async function AboutPage() {
           <div data-reveal>
             {image ? (
               <div className="aspect-[4/5] overflow-hidden bg-ink">
-                <Img media={image} alt={image.alt || "Ocean X in Laamu"} sizes="(min-width: 1024px) 50vw, 100vw" />
+                <Img media={image} alt={image.alt || "Ocean X at Machines"} sizes="(min-width: 1024px) 50vw, 100vw" />
               </div>
             ) : (
               <div className="border-l border-deep/15 pl-8">

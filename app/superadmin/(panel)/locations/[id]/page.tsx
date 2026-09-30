@@ -19,11 +19,11 @@ export default async function EditLocation({ params, searchParams }: { params: P
     <>
       <PageHeader
         title={location.name}
-        back={{ href: "/superadmin/locations", label: "Laamu locations" }}
+        back={{ href: "/superadmin/locations", label: "Locations" }}
         actions={
           <>
             {location.published && (
-              <Link href={`/laamu/${location.slug}`} target="_blank" className="rounded-lg border border-slate/30 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-foam">
+              <Link href={`/machines/${location.slug}`} target="_blank" className="rounded-lg border border-slate/30 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-foam">
                 View on website ↗
               </Link>
             )}

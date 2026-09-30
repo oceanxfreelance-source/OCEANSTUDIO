@@ -7,7 +7,7 @@ import { getPublicServices } from "@/lib/public";
 
 export const metadata: Metadata = {
   title: "Services",
-  description: "Drone videography, surf films and ocean photography in Laamu, Maldives — see what Ocean X offers now and what's coming soon.",
+  description: "Drone videography, surf films and ocean photography at Machines, Maabaidhoo (Laamu, Maldives) — see what Ocean X offers now and what's coming soon.",
   alternates: { canonical: "/services" },
 };
 
