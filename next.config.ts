@@ -27,7 +27,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  serverExternalPackages: ["sharp"],
+  serverExternalPackages: ["sharp", "ffmpeg-static"],
+  // Ship the ffmpeg binary with the video-optimising function.
+  outputFileTracingIncludes: {
+    "/api/admin/video-optimize": ["./node_modules/ffmpeg-static/ffmpeg"],
+  },
   async redirects() {
     // The location section used to live at /laamu.
     return [

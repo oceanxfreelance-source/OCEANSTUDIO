@@ -15,7 +15,7 @@ import { db } from "@/lib/db";
 import { instagramDmUrl, instagramUrl } from "@/lib/format";
 import { InstagramBookButton } from "@/components/site/InstagramBook";
 import { getFeaturedWork, getLocations, getPublicServices, getReviewStats, getTestimonials } from "@/lib/public";
-import { parseVideoUrl } from "@/lib/video";
+import { parseVideoUrl, posterFor } from "@/lib/video";
 
 export default async function HomePage() {
   const [c, services, work, locations, testimonials, reviewStats] = await Promise.all([
@@ -40,8 +40,16 @@ export default async function HomePage() {
       <section className="grain relative flex min-h-[100svh] items-end overflow-hidden bg-abyss text-foam">
         <div className="hero-parallax absolute inset-0">
           <div className="hero-media absolute inset-0">
-            {heroImage ? <Img media={heroImage} alt={heroImage.alt || "Ocean X — Machines, Maabaidhoo"} priority sizes="100vw" /> : <OceanBackdrop />}
-            {heroVideo?.kind === "file" && <HeroVideo src={heroVideo.url} poster={heroImage ? `/media/${heroImage.id}` : undefined} />}
+            {heroImage ? (
+              <Img media={heroImage} alt={heroImage.alt || "Ocean X — Machines, Maabaidhoo"} priority sizes="100vw" />
+            ) : heroVideo?.kind === "file" && posterFor(heroVideo.url) ? (
+              // No hero photo: use the hero video's cover frame (also what phones see).
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={posterFor(heroVideo.url)!} alt="Ocean X — Machines, Maabaidhoo" fetchPriority="high" className="h-full w-full object-cover" />
+            ) : (
+              <OceanBackdrop />
+            )}
+            {heroVideo?.kind === "file" && <HeroVideo src={heroVideo.url} poster={heroImage ? `/media/${heroImage.id}` : (posterFor(heroVideo.url) ?? undefined)} />}
           </div>
         </div>
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/30 to-abyss/40" />

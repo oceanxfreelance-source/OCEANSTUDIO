@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Badge, Card, Empty, PageHeader, Stat } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth";
+import { OptimiseAll } from "@/components/admin/OptimiseAll";
 import { getContent } from "@/lib/content";
+import { needsOptimising } from "@/lib/video";
 import { db } from "@/lib/db";
 import { formatDate, money } from "@/lib/format";
 import { StarsInline } from "@/components/admin/StarsInline";
@@ -10,7 +12,13 @@ export const metadata = { title: "Dashboard" };
 
 export default async function Dashboard() {
   const admin = await requireAdmin();
-  const instagram = (await getContent())["social.instagram"];
+  const content = await getContent();
+  const instagram = content["social.instagram"];
+  const videoRefs = await Promise.all([
+    db.portfolioItem.findMany({ where: { videoUrl: { not: null } }, select: { videoUrl: true } }),
+    db.location.findMany({ where: { videoUrl: { not: null } }, select: { videoUrl: true } }),
+  ]);
+  const toOptimise = [...new Set([...videoRefs.flat().map((r) => r.videoUrl), content["hero.videoUrl"]].filter(needsOptimising) as string[])];
   const today = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z");
   const monthStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
 
@@ -33,6 +41,18 @@ export default async function Dashboard() {
   return (
     <>
       <PageHeader title={`Hello, ${admin.name.split(" ")[0]}`} subtitle="Here's what's happening at Ocean X." />
+
+      {toOptimise.length > 0 && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
+          <p className="font-semibold">
+            {toOptimise.length} video{toOptimise.length === 1 ? "" : "s"} can&apos;t play on some phones yet
+          </p>
+          <p className="mt-1 text-sm text-slate">
+            Drone and phone cameras record in a heavy format. One tap converts {toOptimise.length === 1 ? "it" : "them"} into a light version every phone can play (about a minute each).
+          </p>
+          <OptimiseAll urls={toOptimise} />
+        </div>
+      )}
 
       {!instagram && (
         <Link href="/superadmin/content#Contact%20%26%20social" className="mb-6 block rounded-xl border border-gold/50 bg-gold/10 p-5 hover:bg-gold/15">

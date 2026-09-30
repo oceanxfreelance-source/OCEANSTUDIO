@@ -1,19 +1,23 @@
 "use client";
 
 import { upload } from "@vercel/blob/client";
+import { needsOptimising, posterFor } from "@/lib/video";
 import { useRef, useState } from "react";
 import { FieldError } from "./ActionForm";
 
 /**
  * Video field for admin forms. "Upload video" opens the phone's gallery (or the
  * computer's files); the video goes straight from the browser to video storage
- * with a progress bar. Pasting a link is available as a secondary option.
+ * with a progress bar, then the server converts it into a version every phone
+ * can play (H.264 1080p, streaming-ready, with a cover frame). Pasting a link
+ * is available as a secondary option.
  */
 const MAX_MB = 500;
 
 export function VideoField({ name, label, defaultValue, hint }: { name: string; label: string; defaultValue?: string | null; hint?: string }) {
   const [value, setValue] = useState(defaultValue ?? "");
   const [progress, setProgress] = useState<number | null>(null);
+  const [optimising, setOptimising] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showLink, setShowLink] = useState(!!defaultValue && !/\.(mp4|mov|m4v|webm)(\?|$)/i.test(defaultValue));
   const fileRef = useRef<HTMLInputElement>(null);
@@ -45,6 +49,8 @@ export function VideoField({ name, label, defaultValue, hint }: { name: string; 
         onUploadProgress: (p) => setProgress(Math.round(p.percentage)),
       });
       setValue(blob.url);
+      setProgress(null);
+      await optimise(blob.url);
     } catch (e) {
       if ((e as Error).name !== "AbortError") setError(`Upload failed: ${(e as Error).message}`);
     } finally {
@@ -54,12 +60,28 @@ export function VideoField({ name, label, defaultValue, hint }: { name: string; 
     }
   }
 
+  /** Convert on the server into the phone-friendly version (~30–90 s). */
+  async function optimise(url: string) {
+    setOptimising(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/video-optimize", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url }) });
+      const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !json.url) throw new Error(json.error ?? `Error ${res.status}`);
+      setValue(json.url);
+    } catch (e) {
+      setError(`${(e as Error).message} The original is kept, but it may not play on every phone.`);
+    } finally {
+      setOptimising(false);
+    }
+  }
+
   return (
     <div>
       <p className="block text-sm font-medium text-deep">{label}</p>
       <input type="hidden" name={name} value={value} />
       <div className="mt-1.5 flex flex-wrap items-center gap-3">
-        {progress === null ? (
+        {optimising ? null : progress === null ? (
           <button type="button" onClick={() => fileRef.current?.click()} className="rounded-lg bg-abyss px-5 py-3 text-sm font-semibold text-white hover:bg-ink-3">
             {value ? "Replace video" : "Upload video"}
           </button>
@@ -96,18 +118,37 @@ export function VideoField({ name, label, defaultValue, hint }: { name: string; 
         </div>
       )}
 
-      {isFile && progress === null && (
-        <div className="mt-3 max-w-md overflow-hidden rounded-lg bg-black">
-          <video src={value} controls preload="metadata" playsInline className="aspect-video w-full" />
+      {optimising && (
+        <div className="mt-3 max-w-md rounded-lg border border-gold/40 bg-gold/10 p-4">
+          <p className="text-sm font-semibold">Optimising for every phone…</p>
+          <p className="mt-0.5 text-xs text-slate">Usually under a minute. Keep this page open.</p>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white">
+            <div className="h-full w-1/3 animate-[indeterminate_1.4s_ease-in-out_infinite] rounded-full bg-gold-deep" />
+          </div>
         </div>
       )}
-      {value && progress === null && (
+
+      {isFile && progress === null && !optimising && (
+        <div className="mt-3 max-w-xs overflow-hidden rounded-lg bg-black">
+          <video src={value} poster={posterFor(value) ?? undefined} controls preload="metadata" playsInline className="max-h-80 w-full" />
+        </div>
+      )}
+      {needsOptimising(value) && progress === null && !optimising && (
+        <div className="mt-3 flex max-w-md flex-wrap items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+          <span className="flex-1">This video isn&apos;t optimised yet, so some phones can&apos;t play it.</span>
+          <button type="button" onClick={() => optimise(value)} className="rounded-md bg-abyss px-3 py-1.5 font-semibold text-white">
+            Optimise for phones
+          </button>
+        </div>
+      )}
+      {posterFor(value) && !optimising && <p className="mt-2 text-xs text-emerald-700">✓ Optimised — plays on all phones.</p>}
+      {value && progress === null && !optimising && (
         <button type="button" onClick={() => setValue("")} className="mt-2 text-xs text-slate underline hover:text-deep">
           Remove video
         </button>
       )}
       <p className="mt-1.5 text-xs text-slate">
-        {hint ?? "Choose a video from your gallery (up to 500 MB). Shorter 1080p clips load fastest for visitors on phones."} After it uploads, click Save.
+        {hint ?? "Choose a video straight from your gallery or the DJI app (up to 500 MB, 2½ minutes). It's automatically converted so every phone can play it."} When it says Optimised, click Save.
       </p>
       {error && <p className="mt-1.5 text-xs text-red-700">{error}</p>}
       <FieldError name={name} />

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { VideoSource } from "@/lib/video";
+import { cx } from "@/components/ui/cx";
+import { posterFor, type VideoSource } from "@/lib/video";
 import { Play } from "./Icons";
 
 /**
- * Click-to-play video. Nothing heavy loads until the visitor presses play,
- * which keeps pages fast on mobile data.
+ * Simple, elegant tap-to-play video. Before play only a small cover image
+ * loads (nothing heavy on mobile data); after tapping, the video plays inline
+ * in its own shape — vertical drone clips stay vertical.
  */
 export function VideoPlayer({ source, poster, title }: { source: VideoSource; poster?: string; title: string }) {
   const [playing, setPlaying] = useState(false);
@@ -25,47 +27,45 @@ export function VideoPlayer({ source, poster, title }: { source: VideoSource; po
     );
   }
 
-  const thumb = poster ?? (source.kind === "youtube" ? source.thumbnail : undefined);
-
-  // Uploaded video files: native player. Only a few KB load until play is pressed;
-  // without a poster the browser shows the video's first frame.
-  if (source.kind === "file") {
-    return (
-      <video
-        src={thumb ? source.url : `${source.url}#t=0.1`}
-        poster={thumb}
-        controls
-        playsInline
-        preload="metadata"
-        className="aspect-video w-full bg-black"
-        aria-label={title}
-      />
-    );
-  }
+  const isFile = source.kind === "file";
+  const cover = (isFile ? posterFor(source.url) : null) ?? poster ?? (source.kind === "youtube" ? source.thumbnail : undefined);
 
   if (!playing) {
     return (
-      <button type="button" onClick={() => setPlaying(true)} className="group relative flex aspect-video w-full items-center justify-center overflow-hidden bg-ink text-foam" aria-label={`Play video: ${title}`}>
-        {thumb && (
+      <button
+        type="button"
+        onClick={() => setPlaying(true)}
+        aria-label={`Play video: ${title}`}
+        className={cx("vf-corners group relative mx-auto flex w-full items-center justify-center overflow-hidden bg-ink text-foam", isFile ? "aspect-[4/5] max-h-[80vh] sm:aspect-video" : "aspect-video")}
+      >
+        {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover opacity-80 transition duration-700 group-hover:scale-[1.02] group-hover:opacity-100" loading="lazy" />
-        )}
-        <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-foam/90 text-abyss shadow-2xl transition-transform group-hover:scale-105 md:h-20 md:w-20">
-          <Play className="ml-1 h-6 w-6 md:h-7 md:w-7" />
+          <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" loading="lazy" />
+        ) : isFile ? (
+          // Older upload without a cover frame: show the first frame.
+          <video src={`${source.url}#t=0.1`} muted playsInline preload="metadata" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+        ) : null}
+        <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-abyss/60 via-transparent to-abyss/20" />
+        <span className="relative flex flex-col items-center gap-4">
+          <span className="flex h-20 w-20 items-center justify-center rounded-full border border-gold/60 bg-abyss/40 text-gold shadow-2xl backdrop-blur-md transition duration-500 group-hover:scale-105 group-hover:bg-gold group-hover:text-abyss md:h-24 md:w-24">
+            <Play className="ml-1 h-7 w-7" />
+          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/90">Play film</span>
         </span>
       </button>
     );
   }
 
+  if (isFile) {
+    return (
+      <div className="flex w-full justify-center bg-black">
+        <video src={source.url} poster={cover} controls autoPlay playsInline preload="auto" className="max-h-[85vh] w-auto max-w-full" aria-label={title} />
+      </div>
+    );
+  }
   return (
     <div className="relative aspect-video w-full bg-black">
-      <iframe
-        src={source.embedUrl}
-        title={title}
-        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-        allowFullScreen
-        className="absolute inset-0 h-full w-full"
-      />
+      <iframe src={source.embedUrl} title={title} allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowFullScreen className="absolute inset-0 h-full w-full" />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SERVICE_STATUS_LABEL } from "@/lib/constants";
 import { formatDate, priceLabel } from "@/lib/format";
+import { posterFor } from "@/lib/video";
 import type { MediaRef } from "@/lib/public";
 import { cx } from "@/components/ui/cx";
 import { ArrowRight, Pin } from "./Icons";
@@ -87,6 +88,9 @@ export function WorkCard({ w, large = false, dark = false }: { w: WorkCardData; 
           <div className="h-full w-full">
             {w.cover ? (
               <Img media={w.cover} alt={w.title} sizes={large ? "(min-width: 768px) 66vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"} className="transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
+            ) : posterFor(w.videoUrl) ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={posterFor(w.videoUrl)!} alt={w.title} loading="lazy" className="h-full w-full object-cover transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
             ) : w.videoUrl && /\.(mp4|mov|m4v|webm)(\?|$)/i.test(w.videoUrl) ? (
               // No cover photo: show the uploaded video's first frame.
               <video src={`${w.videoUrl}#t=0.1`} muted playsInline preload="metadata" aria-hidden className="h-full w-full object-cover" />
@@ -113,7 +117,7 @@ export function WorkCard({ w, large = false, dark = false }: { w: WorkCardData; 
   );
 }
 
-type LocationCardData = { slug: string; name: string; kind: string; atoll: string; cover: MediaRef | null; description: string };
+type LocationCardData = { slug: string; name: string; kind: string; atoll: string; cover: MediaRef | null; description: string; videoUrl?: string | null };
 
 export function LocationCard({ l, wide = false }: { l: LocationCardData; wide?: boolean }) {
   return (
@@ -121,7 +125,14 @@ export function LocationCard({ l, wide = false }: { l: LocationCardData; wide?: 
       <div className={cx("vf-corners relative overflow-hidden bg-ink", wide ? "aspect-[4/5] sm:aspect-[4/3]" : "aspect-[3/4]")}>
         <div data-reveal-image className="absolute inset-0">
           <div className="h-full w-full">
-            {l.cover ? <Img media={l.cover} alt={l.name} sizes="(min-width: 640px) 50vw, 100vw" className="transition duration-[1.2s] ease-out group-hover:scale-[1.06]" /> : <CoverFallback label={l.kind} />}
+            {l.cover ? (
+              <Img media={l.cover} alt={l.name} sizes="(min-width: 640px) 50vw, 100vw" className="transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
+            ) : posterFor(l.videoUrl) ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={posterFor(l.videoUrl)!} alt={l.name} loading="lazy" className="h-full w-full object-cover transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
+            ) : (
+              <CoverFallback label={l.kind} />
+            )}
           </div>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-abyss/80 via-abyss/10 to-transparent" />

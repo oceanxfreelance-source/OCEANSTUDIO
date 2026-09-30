@@ -47,3 +47,17 @@ export function parseVideoUrl(raw: string | null | undefined): VideoSource | nul
   if (/\.(mp4|webm|mov|m4v)$/i.test(url.pathname)) return { kind: "file", url: url.toString() };
   return { kind: "link", url: url.toString() };
 }
+
+/**
+ * Videos optimised by the site live at …/videos/web/<id>.mp4 with a matching
+ * cover frame at …/videos/web/<id>.jpg. Returns that cover, or null.
+ */
+export function posterFor(url: string | null | undefined): string | null {
+  if (!url || !/\.blob\.vercel-storage\.com\/videos\/web\/[a-z0-9]+\.mp4$/i.test(url)) return null;
+  return url.replace(/\.mp4$/i, ".jpg");
+}
+
+/** True for videos uploaded to our storage that haven't been optimised for phones yet. */
+export function needsOptimising(url: string | null | undefined): boolean {
+  return !!url && /\.blob\.vercel-storage\.com\/videos\//i.test(url) && !/\/videos\/web\//i.test(url);
+}
