@@ -1,10 +1,12 @@
-// OCEANX STUDIO — PostgreSQL schema
+// OCEAN X — database schema
 //
-// Core invariants enforced by application code (see lib/storage/keys.ts and server/*):
-//  * media_files rows describe immutable MASTER uploads. They are never overwritten.
-//  * every processing operation creates a NEW media_versions row + object.
-//  * client deliveries copy published versions into /deliveries/{id}/... which is
-//    the ONLY prefix that the expiration cleanup is allowed to delete.
+// Two separate worlds live here:
+//   * PUBLIC content the website shows (services, portfolio, Laamu locations,
+//     testimonials, editable site text) — managed from /superadmin.
+//   * PRIVATE business data only the administrator sees (booking requests,
+//     customers, shoot sessions, deliveries).
+//
+// Visitors never get accounts. The only login is the Superadmin (AdminUser).
 
 generator client {
   provider = "prisma-client-js"
@@ -15,554 +17,345 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum AdminRole {
-  OWNER
-  ADMIN
-}
+// ─────────────────────────────── Admin & security ───────────────────────────────
 
-enum SessionKind {
-  ADMIN
-  CLIENT
-}
-
-enum ProjectStatus {
-  DRAFT
-  PROCESSING
-  READY
-  ACTIVE
-  ARCHIVED
-}
-
-enum MediaType {
-  PHOTO
-  RAW
-  VIDEO
-}
-
-enum MediaStatus {
-  UPLOADING
-  UPLOADED
-  INGESTING
-  READY
-  FAILED
-}
-
-enum IntegrityStatus {
-  UNVERIFIED
-  OK
-  MISMATCH
-}
-
-enum VersionType {
-  ORIGINAL
-  RAW_DEVELOPED
-  AI_ENHANCED
-  ENHANCED
-  UPSCALED
-  COLOR_GRADED
-  VIDEO_ENHANCED
-}
-
-enum JobType {
-  INGEST
-  RAW_DEVELOP
-  PHOTO_ENHANCE
-  COLOR_GRADE
-  VIDEO_ENHANCE
-  VERIFY_MASTER
-  DELIVERY_PREPARE
-  ZIP_PACKAGE
-}
-
-enum JobStatus {
-  QUEUED
-  PROCESSING
-  COMPLETED
-  FAILED
-  CANCELLED
-}
-
-enum DeliveryStatus {
-  PREPARING
-  ACTIVE
-  EXPIRED
-  DELETING
-  DELETED
-  REVOKED
-  FAILED
-}
-
-enum StorageCategory {
-  MASTER
-  DERIVATIVE
-  PREVIEW
-  DELIVERY_FILE
-  DELIVERY_PREVIEW
-  DELIVERY_PACKAGE
-  DELIVERY_MANIFEST
-  PROCESSING_TEMP
-}
-
-enum DownloadType {
-  FILE
-  PACKAGE
-  ADMIN_MASTER
-  ADMIN_VERSION
-}
-
-enum ActorType {
-  ADMIN
-  CLIENT
-  SYSTEM
-}
-
-enum PackageStatus {
-  QUEUED
-  BUILDING
-  READY
-  FAILED
-  DELETED
-}
-
+/// Ocean X administrators. There is no public registration: admins are created
+/// with `npm run admin:create`. `role` is ready for future staff accounts.
 model AdminUser {
-  id           String    @id @default(cuid())
-  email        String    @unique
+  id           String         @id @default(cuid())
+  email        String         @unique
   name         String
-  passwordHash String    @map("password_hash")
-  role         AdminRole @default(ADMIN)
-  createdAt    DateTime  @default(now()) @map("created_at")
-  lastLoginAt  DateTime? @map("last_login_at")
-  disabledAt   DateTime? @map("disabled_at")
-
-  sessions   Session[]
-  deliveries Delivery[]
-  jobs       ProcessingJob[]
+  passwordHash String         @map("password_hash")
+  role         AdminRole      @default(OWNER)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  lastLoginAt  DateTime?      @map("last_login_at")
+  sessions     AdminSession[]
 
   @@map("admin_users")
 }
 
-model Session {
-  id          String      @id @default(cuid())
-  tokenHash   String      @unique @map("token_hash")
-  kind        SessionKind
-  adminUserId String?     @map("admin_user_id")
-  deliveryId  String?     @map("delivery_id")
-  createdAt   DateTime    @default(now()) @map("created_at")
-  expiresAt   DateTime    @map("expires_at")
-  revokedAt   DateTime?   @map("revoked_at")
-  lastSeenAt  DateTime?   @map("last_seen_at")
-  ipHash      String?     @map("ip_hash")
-  userAgent   String?     @map("user_agent")
-
-  adminUser AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
-  delivery  Delivery?  @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
-
-  @@index([deliveryId])
-  @@index([adminUserId])
-  @@map("sessions")
+enum AdminRole {
+  OWNER
+  STAFF
 }
 
-model Client {
-  id        String   @id @default(cuid())
-  name      String
-  email     String?
-  phone     String?
-  notes     String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+/// Server-side login sessions. The browser only holds a random token; we store
+/// its SHA-256 hash so a database leak does not expose live sessions.
+model AdminSession {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique @map("token_hash")
+  adminId   String    @map("admin_id")
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  userAgent String?   @map("user_agent")
 
-  projects   Project[]
-  access     ProjectAccess[]
-  deliveries Delivery[]
-
-  @@map("clients")
+  @@index([adminId])
+  @@map("admin_sessions")
 }
 
-model Project {
-  id          String        @id @default(cuid())
-  name        String
-  description String?
-  shootDate   DateTime?     @map("shoot_date")
-  status      ProjectStatus @default(DRAFT)
-  clientId    String?       @map("client_id")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  archivedAt  DateTime?     @map("archived_at")
-
-  client     Client?         @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  access     ProjectAccess[]
-  media      MediaFile[]
-  versions   MediaVersion[]
-  jobs       ProcessingJob[]
-  deliveries Delivery[]
-
-  @@index([status])
-  @@map("projects")
-}
-
-model ProjectAccess {
-  id        String   @id @default(cuid())
-  projectId String   @map("project_id")
-  clientId  String   @map("client_id")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  client  Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
-
-  @@unique([projectId, clientId])
-  @@map("project_access")
-}
-
-/// Immutable master upload. Never overwritten, never replaced by AI output.
-model MediaFile {
-  id               String          @id @default(cuid())
-  projectId        String          @map("project_id")
-  filename         String
-  extension        String
-  mediaType        MediaType       @map("media_type")
-  mimeType         String          @map("mime_type")
-  size             BigInt
-  width            Int?
-  height           Int?
-  duration         Float?
-  fps              Float?
-  codec            String?
-  bitrate          BigInt?
-  audioCodec       String?         @map("audio_codec")
-  container        String?
-  colorInfo        Json?           @map("color_info")
-  checksum         String?
-  clientChecksum   String?         @map("client_checksum")
-  etag             String?
-  storageKey       String          @unique @map("storage_key")
-  stagingKey       String?         @map("staging_key")
-  previewKey       String?         @map("preview_key")
-  thumbKey         String?         @map("thumb_key")
-  detailKey        String?         @map("detail_key")
-  uploadId         String?         @map("upload_id")
-  status           MediaStatus     @default(UPLOADING)
-  isMaster         Boolean         @default(true) @map("is_master")
-  integrityStatus  IntegrityStatus @default(UNVERIFIED) @map("integrity_status")
-  integrityCheckedAt DateTime?     @map("integrity_checked_at")
-  errorMessage     String?         @map("error_message")
-  capturedAt       DateTime?       @map("captured_at")
-  createdAt        DateTime        @default(now()) @map("created_at")
-  uploadedAt       DateTime?       @map("uploaded_at")
-
-  project   Project         @relation(fields: [projectId], references: [id], onDelete: Restrict)
-  metadata  MediaMetadata?
-  versions  MediaVersion[]
-  jobs      ProcessingJob[]
-  favorites Favorite[]
-
-  @@index([projectId])
-  @@index([status])
-  @@map("media_files")
-}
-
-model MediaMetadata {
-  id           String   @id @default(cuid())
-  mediaId      String   @unique @map("media_id")
-  cameraMake   String?  @map("camera_make")
-  cameraModel  String?  @map("camera_model")
-  lens         String?
-  iso          Int?
-  shutter      String?
-  aperture     Float?
-  focalLength  Float?   @map("focal_length")
-  faceRegions  Json?    @map("face_regions")
-  exif         Json?
-  raw          Json?
-  probe        Json?
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  media MediaFile @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-
-  @@map("media_metadata")
-}
-
-/// Every processed asset is an independently stored version. The ORIGINAL version
-/// references the master object (isMasterRef = true) and is never re-encoded.
-model MediaVersion {
-  id              String      @id @default(cuid())
-  mediaId         String      @map("media_id")
-  projectId       String      @map("project_id")
-  versionNumber   Int         @map("version_number")
-  versionType     VersionType @map("version_type")
-  label           String
-  engine          String?
-  isAi            Boolean     @default(false) @map("is_ai")
-  scale           Int?
-  parentVersionId String?     @map("parent_version_id")
-  processingJobId String?     @unique @map("processing_job_id")
-  storageKey      String      @map("storage_key")
-  previewKey      String?     @map("preview_key")
-  thumbKey        String?     @map("thumb_key")
-  detailKey       String?     @map("detail_key")
-  filename        String
-  mimeType        String      @map("mime_type")
-  size            BigInt
-  width           Int?
-  height          Int?
-  duration        Float?
-  bitrate         BigInt?
-  fps             Float?
-  checksum        String?
-  settings        Json?
-  fidelity        Json?
-  isMasterRef     Boolean     @default(false) @map("is_master_ref")
-  published       Boolean     @default(false)
-  publishedAt     DateTime?   @map("published_at")
-  createdAt       DateTime    @default(now()) @map("created_at")
-
-  media         MediaFile      @relation(fields: [mediaId], references: [id], onDelete: Restrict)
-  project       Project        @relation(fields: [projectId], references: [id], onDelete: Restrict)
-  parent        MediaVersion?  @relation("VersionLineage", fields: [parentVersionId], references: [id], onDelete: SetNull)
-  children      MediaVersion[] @relation("VersionLineage")
-  deliveryFiles DeliveryFile[]
-
-  @@unique([mediaId, versionNumber])
-  @@index([projectId, published])
-  @@map("media_versions")
-}
-
-model ProcessingJob {
-  id               String    @id @default(cuid())
-  mediaId          String?   @map("media_id")
-  projectId        String?   @map("project_id")
-  deliveryId       String?   @map("delivery_id")
-  sourceVersionId  String?   @map("source_version_id")
-  outputVersionId  String?   @map("output_version_id")
-  batchId          String?   @map("batch_id")
-  jobType          JobType   @map("job_type")
-  settings         Json?
-  status           JobStatus @default(QUEUED)
-  progress         Int       @default(0)
-  stage            String?
-  inputStorageKey  String?   @map("input_storage_key")
-  outputStorageKey String?   @map("output_storage_key")
-  errorMessage     String?   @map("error_message")
-  technicalLog     String?   @map("technical_log")
-  attempts         Int       @default(0)
-  createdById      String?   @map("created_by_id")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  startedAt        DateTime? @map("started_at")
-  completedAt      DateTime? @map("completed_at")
-
-  media     MediaFile? @relation(fields: [mediaId], references: [id], onDelete: SetNull)
-  project   Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  delivery  Delivery?  @relation(fields: [deliveryId], references: [id], onDelete: SetNull)
-  createdBy AdminUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
-
-  @@index([status])
-  @@index([mediaId])
-  @@index([batchId])
-  @@map("processing_jobs")
-}
-
-model ProcessingPreset {
-  id        String   @id @default(cuid())
-  name      String
-  kind      String
-  settings  Json
-  builtIn   Boolean  @default(false) @map("built_in")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@unique([kind, name])
-  @@map("processing_presets")
-}
-
-model Delivery {
-  id                 String         @id @default(cuid())
-  number             Int            @default(autoincrement())
-  projectId          String         @map("project_id")
-  clientId           String         @map("client_id")
-  title              String
-  secureTokenHash    String         @unique @map("secure_token_hash")
-  tokenCiphertext    String         @map("token_ciphertext")
-  passwordHash       String         @map("password_hash")
-  passwordCiphertext String         @map("password_ciphertext")
-  status             DeliveryStatus @default(PREPARING)
-  allowFavorites     Boolean        @default(true) @map("allow_favorites")
-  watermarkPreviews  Boolean        @default(false) @map("watermark_previews")
-  manifest           Json?
-  createdAt          DateTime       @default(now()) @map("created_at")
-  expiresAt          DateTime       @map("expires_at")
-  expiredAt          DateTime?      @map("expired_at")
-  revokedAt          DateTime?      @map("revoked_at")
-  deletedAt          DateTime?      @map("deleted_at")
-  cleanupAttempts    Int            @default(0) @map("cleanup_attempts")
-  cleanupLockedUntil DateTime?      @map("cleanup_locked_until")
-  lastCleanupError   String?        @map("last_cleanup_error")
-  createdById        String?        @map("created_by")
-  renewedFromId      String?        @map("renewed_from_id")
-
-  project   Project           @relation(fields: [projectId], references: [id], onDelete: Restrict)
-  client    Client            @relation(fields: [clientId], references: [id], onDelete: Restrict)
-  createdBy AdminUser?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
-  files     DeliveryFile[]
-  packages  DeliveryPackage[]
-  sessions  Session[]
-  favorites Favorite[]
-  downloads Download[]
-  jobs      ProcessingJob[]
-
-  @@index([status, expiresAt])
-  @@map("deliveries")
-}
-
-model DeliveryFile {
-  id         String    @id @default(cuid())
-  deliveryId String    @map("delivery_id")
-  mediaId    String    @map("media_id")
-  versionId  String    @map("version_id")
-  filename   String
-  label      String
-  mediaType  MediaType @map("media_type")
-  mimeType   String    @map("mime_type")
-  size       BigInt
-  checksum   String?
-  width      Int?
-  height     Int?
-  duration   Float?
-  storageKey String    @map("storage_key")
-  previewKey String?   @map("preview_key")
-  thumbKey   String?   @map("thumb_key")
-  sortOrder  Int       @default(0) @map("sort_order")
-  copiedAt   DateTime? @map("copied_at")
-  createdAt  DateTime  @default(now()) @map("created_at")
-
-  delivery  Delivery     @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
-  version   MediaVersion @relation(fields: [versionId], references: [id], onDelete: Restrict)
-  favorites Favorite[]
-  downloads Download[]
-
-  @@unique([deliveryId, versionId])
-  @@index([deliveryId])
-  @@map("delivery_files")
-}
-
-model DeliveryPackage {
-  id         String        @id @default(cuid())
-  deliveryId String        @map("delivery_id")
-  partNumber Int           @map("part_number")
-  totalParts Int           @map("total_parts")
-  filename   String
-  storageKey String        @map("storage_key")
-  size       BigInt        @default(0)
-  fileCount  Int           @default(0) @map("file_count")
-  status     PackageStatus @default(QUEUED)
-  createdAt  DateTime      @default(now()) @map("created_at")
-
-  delivery  Delivery   @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
-  downloads Download[]
-
-  @@unique([deliveryId, partNumber])
-  @@map("delivery_packages")
-}
-
-/// Registry of every object written by the application. Temporary objects are
-/// tied to a delivery and are the only ones the cleanup worker deletes.
-model StorageObject {
-  id         String          @id @default(cuid())
-  key        String          @unique
-  category   StorageCategory
-  size       BigInt          @default(0)
-  temporary  Boolean         @default(false)
-  projectId  String?         @map("project_id")
-  mediaId    String?         @map("media_id")
-  versionId  String?         @map("version_id")
-  deliveryId String?         @map("delivery_id")
-  createdAt  DateTime        @default(now()) @map("created_at")
-  deletedAt  DateTime?       @map("deleted_at")
-
-  @@index([category, deletedAt])
-  @@index([deliveryId])
-  @@map("storage_objects")
-}
-
-model Download {
-  id             String       @id @default(cuid())
-  deliveryId     String?      @map("delivery_id")
-  deliveryFileId String?      @map("delivery_file_id")
-  packageId      String?      @map("package_id")
-  mediaId        String?      @map("media_id")
-  versionId      String?      @map("version_id")
-  downloadType   DownloadType @map("download_type")
-  label          String?
-  ipHash         String?      @map("ip_hash")
-  userAgent      String?      @map("user_agent")
-  createdAt      DateTime     @default(now()) @map("created_at")
-
-  delivery     Delivery?        @relation(fields: [deliveryId], references: [id], onDelete: SetNull)
-  deliveryFile DeliveryFile?    @relation(fields: [deliveryFileId], references: [id], onDelete: SetNull)
-  package      DeliveryPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
-
-  @@index([deliveryId])
-  @@index([mediaId])
-  @@index([createdAt])
-  @@map("downloads")
-}
-
-model Favorite {
-  id             String   @id @default(cuid())
-  deliveryId     String   @map("delivery_id")
-  deliveryFileId String   @map("delivery_file_id")
-  mediaId        String   @map("media_id")
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  delivery     Delivery     @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
-  deliveryFile DeliveryFile @relation(fields: [deliveryFileId], references: [id], onDelete: Cascade)
-  media        MediaFile    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-
-  @@unique([deliveryId, deliveryFileId])
-  @@map("favorites")
-}
-
-model Watermark {
-  id        String   @id @default(cuid())
-  text      String
-  opacity   Float    @default(0.35)
-  position  String   @default("center")
-  scale     Float    @default(0.05)
-  isDefault Boolean  @default(false) @map("is_default")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("watermarks")
-}
-
-model AuditLog {
-  id         String    @id @default(cuid())
-  action     String
-  actorType  ActorType @map("actor_type")
-  actorId    String?   @map("actor_id")
-  projectId  String?   @map("project_id")
-  deliveryId String?   @map("delivery_id")
-  mediaId    String?   @map("media_id")
-  details    Json?
-  ipHash     String?   @map("ip_hash")
-  createdAt  DateTime  @default(now()) @map("created_at")
-
-  @@index([action])
-  @@index([createdAt])
-  @@map("audit_logs")
-}
-
-model AppSetting {
-  key       String   @id
-  value     Json
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("app_settings")
-}
-
-/// Fixed-window rate-limit counters, used when no Redis is configured
-/// (serverless instances do not share memory).
+/// Fixed-window counters for login and booking-form rate limiting.
 model RateLimit {
   key     String   @id
   count   Int
   resetAt DateTime @map("reset_at")
 
-  @@index([resetAt])
   @@map("rate_limits")
+}
+
+// ─────────────────────────────── Media ───────────────────────────────
+
+/// Uploaded images. Version 1 stores optimised WebP bytes in Postgres (free, no
+/// extra service). `storage`/`storageKey` let a future version move files to
+/// S3/R2 without changing the rest of the app.
+model MediaAsset {
+  id         String   @id @default(cuid())
+  storage    String   @default("db")
+  storageKey String?  @map("storage_key")
+  mimeType   String   @map("mime_type")
+  width      Int
+  height     Int
+  size       Int
+  data       Bytes? // full size (max 2400px)
+  thumb      Bytes? // small version (max 900px) for grids and phones
+  alt        String   @default("")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  serviceCovers     Service[]        @relation("ServiceCover")
+  serviceImages     ServiceImage[]
+  portfolioCovers   PortfolioItem[]  @relation("PortfolioCover")
+  portfolioImages   PortfolioImage[]
+  locationCovers    Location[]       @relation("LocationCover")
+  locationImages    LocationImage[]
+  testimonialAvatar Testimonial[]
+
+  @@map("media_assets")
+}
+
+// ─────────────────────────────── Public content ───────────────────────────────
+
+/// Editable website text (hero, about, contact, social links, footer…).
+/// Keys and defaults are defined in lib/content.ts.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+enum ServiceStatus {
+  ACTIVE
+  COMING_SOON
+  HIDDEN
+}
+
+enum PriceType {
+  ON_REQUEST
+  FIXED
+  FROM
+  PER_PERSON
+  PER_HOUR
+  PER_SESSION
+}
+
+model Service {
+  id               String         @id @default(cuid())
+  slug             String         @unique
+  name             String
+  shortDescription String         @default("") @map("short_description")
+  description      String         @default("")
+  status           ServiceStatus  @default(COMING_SOON)
+  price            Decimal?       @db.Decimal(10, 2)
+  priceType        PriceType      @default(ON_REQUEST) @map("price_type")
+  currency         String         @default("USD")
+  coverId          String?        @map("cover_id")
+  cover            MediaAsset?    @relation("ServiceCover", fields: [coverId], references: [id], onDelete: SetNull)
+  images           ServiceImage[]
+  featured         Boolean        @default(false)
+  displayOrder     Int            @default(0) @map("display_order")
+  published        Boolean        @default(true)
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  bookings         Booking[]
+  shootSessions    ShootSession[]
+
+  @@index([published, status, displayOrder])
+  @@map("services")
+}
+
+model ServiceImage {
+  serviceId String     @map("service_id")
+  mediaId   String     @map("media_id")
+  position  Int        @default(0)
+  service   Service    @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  media     MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([serviceId, mediaId])
+  @@map("service_images")
+}
+
+/// Places Ocean X works — surf spots, islands, lagoons… `atoll` keeps the model
+/// ready for Maldives-wide expansion beyond Laamu.
+model Location {
+  id           String          @id @default(cuid())
+  slug         String          @unique
+  name         String
+  kind         String          @default("Island")
+  atoll        String          @default("Laamu")
+  description  String          @default("")
+  coverId      String?         @map("cover_id")
+  cover        MediaAsset?     @relation("LocationCover", fields: [coverId], references: [id], onDelete: SetNull)
+  images       LocationImage[]
+  videoUrl     String?         @map("video_url")
+  featured     Boolean         @default(false)
+  published    Boolean         @default(true)
+  displayOrder Int             @default(0) @map("display_order")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+  portfolio    PortfolioItem[]
+  bookings     Booking[]
+
+  @@index([published, displayOrder])
+  @@map("locations")
+}
+
+model LocationImage {
+  locationId String     @map("location_id")
+  mediaId    String     @map("media_id")
+  position   Int        @default(0)
+  location   Location   @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  media      MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([locationId, mediaId])
+  @@map("location_images")
+}
+
+model PortfolioItem {
+  id           String           @id @default(cuid())
+  slug         String           @unique
+  title        String
+  description  String           @default("")
+  category     String // see PORTFOLIO_CATEGORIES in lib/constants.ts
+  locationId   String?          @map("location_id")
+  location     Location?        @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  date         DateTime?
+  coverId      String?          @map("cover_id")
+  cover        MediaAsset?      @relation("PortfolioCover", fields: [coverId], references: [id], onDelete: SetNull)
+  images       PortfolioImage[]
+  videoUrl     String?          @map("video_url")
+  featured     Boolean          @default(false)
+  published    Boolean          @default(true)
+  displayOrder Int              @default(0) @map("display_order")
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  @@index([published, category])
+  @@map("portfolio_items")
+}
+
+model PortfolioImage {
+  itemId   String        @map("item_id")
+  mediaId  String        @map("media_id")
+  position Int           @default(0)
+  item     PortfolioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  media    MediaAsset    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, mediaId])
+  @@map("portfolio_images")
+}
+
+model Testimonial {
+  id        String      @id @default(cuid())
+  name      String
+  instagram String?
+  text      String
+  avatarId  String?     @map("avatar_id")
+  avatar    MediaAsset? @relation(fields: [avatarId], references: [id], onDelete: SetNull)
+  date      DateTime?
+  featured  Boolean     @default(false)
+  published Boolean     @default(true)
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@map("testimonials")
+}
+
+// ─────────────────────────────── Private business data ───────────────────────────────
+
+/// Internal customer records. Customers never log in — this is the admin's CRM.
+model Customer {
+  id        String         @id @default(cuid())
+  name      String
+  instagram String?
+  email     String?
+  whatsapp  String?
+  country   String?
+  notes     String         @default("")
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  bookings  Booking[]
+  sessions  ShootSession[]
+
+  @@index([email])
+  @@index([instagram])
+  @@index([whatsapp])
+  @@map("customers")
+}
+
+enum BookingStatus {
+  NEW
+  CONTACTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  DEPOSIT
+  PAID
+  REFUNDED
+}
+
+/// A request sent from the public booking form.
+model Booking {
+  id            String         @id @default(cuid())
+  reference     String         @unique // e.g. OX-B-00012 — friendly ID for the admin
+  customerId    String         @map("customer_id")
+  customer      Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  serviceId     String?        @map("service_id")
+  service       Service?       @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  serviceName   String         @default("") @map("service_name") // snapshot at request time
+  locationId    String?        @map("location_id")
+  location      Location?      @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  locationText  String         @default("") @map("location_text")
+  fullName      String         @map("full_name")
+  instagram     String?
+  email         String?
+  whatsapp      String?
+  preferredDate DateTime?      @map("preferred_date") @db.Date
+  preferredTime String?        @map("preferred_time")
+  people        Int?
+  message       String         @default("")
+  status        BookingStatus  @default(NEW)
+  price         Decimal?       @db.Decimal(10, 2)
+  paymentStatus PaymentStatus  @default(UNPAID) @map("payment_status")
+  notes         String         @default("")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  sessions      ShootSession[]
+
+  @@index([status, createdAt])
+  @@map("bookings")
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum DeliveryStatus {
+  NOT_READY
+  PROCESSING
+  READY
+  SENT
+}
+
+/// A confirmed shoot. Named ShootSession to avoid confusion with login sessions.
+model ShootSession {
+  id             String         @id @default(cuid())
+  code           String         @unique // e.g. OX-S-00007 — the "Session ID"
+  bookingId      String?        @map("booking_id")
+  booking        Booking?       @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  customerId     String         @map("customer_id")
+  customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  serviceId      String?        @map("service_id")
+  service        Service?       @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  serviceName    String         @default("") @map("service_name")
+  locationText   String         @default("") @map("location_text")
+  date           DateTime       @db.Date
+  time           String?
+  people         Int?
+  clips          Int?
+  price          Decimal?       @db.Decimal(10, 2)
+  paymentStatus  PaymentStatus  @default(UNPAID) @map("payment_status")
+  status         SessionStatus  @default(SCHEDULED)
+  deliveryStatus DeliveryStatus @default(NOT_READY) @map("delivery_status")
+  deliveryLink   String?        @map("delivery_link")
+  deliverySentAt DateTime?      @map("delivery_sent_at")
+  notes          String         @default("")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  @@index([status, date])
+  @@map("shoot_sessions")
+}
+
+/// Sequential counters for friendly references (OX-B-00001, OX-S-00001).
+model Counter {
+  name  String @id
+  value Int    @default(0)
+
+  @@map("counters")
 }

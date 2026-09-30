@@ -1,89 +1,93 @@
 @import "tailwindcss";
 
+/*
+ * OCEAN X design tokens.
+ * Deep-ocean ink, sea-foam paper, a single restrained sea-glass accent.
+ */
 @theme {
-  --color-ink-950: #07090b;
-  --color-ink-900: #0b0e11;
-  --color-ink-850: #0f1216;
-  --color-ink-800: #13171c;
-  --color-ink-750: #181d23;
-  --color-ink-700: #1f252c;
-  --color-ink-600: #2a3139;
-  --color-ink-500: #3a434d;
-  --color-mist-400: #7d8793;
-  --color-mist-300: #9ea7b2;
-  --color-mist-200: #c6ccd3;
-  --color-mist-100: #e7eaee;
-  --color-ocean-300: #8fe0ea;
-  --color-ocean-400: #5ccbd9;
-  --color-ocean-500: #2fb3c4;
-  --color-ocean-600: #1d8e9d;
-  --color-sand-400: #e3c07f;
-  --color-coral-400: #ef7d6d;
-  --color-kelp-400: #7fcf97;
-  --font-sans: "Inter", ui-sans-serif, -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  --animate-fade-in: fade-in 180ms ease-out;
-  --animate-rise: rise 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --color-abyss: #04080b; /* deepest background */
+  --color-ink: #0a1217; /* dark sections */
+  --color-ink-2: #111c23;
+  --color-ink-3: #1b2a33;
+  --color-line: #24343e;
+  --color-mist: #8a9ba5; /* muted text on dark */
+  --color-foam: #eef1ee; /* light sections */
+  --color-sand: #e4e0d6;
+  --color-paper: #f7f7f4;
+  --color-slate: #5b6870; /* muted text on light */
+  --color-deep: #0b1a22; /* text on light */
+  --color-sea: #7cc6c9; /* accent — used sparingly */
+  --color-sea-deep: #2f7f86;
+  --color-coral: #e0765f;
+
+  --tracking-display: -0.02em;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
   }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+  body {
+    @apply bg-paper text-deep font-sans antialiased;
+  }
+  ::selection {
+    background: var(--color-sea);
+    color: var(--color-abyss);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-sea);
+    outline-offset: 3px;
   }
 }
 
-:root {
-  color-scheme: dark;
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-[1400px] px-5 sm:px-8 lg:px-12;
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.28em];
+  }
+  .display {
+    font-family: var(--font-display);
+    letter-spacing: var(--tracking-display);
+    @apply font-semibold leading-[0.95];
+  }
 }
 
-html,
-body {
-  background: var(--color-ink-900);
-  color: var(--color-mist-100);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+/* Scroll-reveal (see components/site/Reveal.tsx). Content is visible without JS. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    transform 0.9s var(--ease-out-soft);
+}
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
 }
 
-::selection {
-  background: color-mix(in oklab, var(--color-ocean-500) 45%, transparent);
+/* Slow drifting light in the default hero (no photo uploaded yet). */
+@keyframes drift {
+  0% { transform: translate3d(-4%, 0, 0) scale(1.05); }
+  50% { transform: translate3d(4%, -2%, 0) scale(1.1); }
+  100% { transform: translate3d(-4%, 0, 0) scale(1.05); }
 }
-
-:focus-visible {
-  outline: 2px solid var(--color-ocean-400);
-  outline-offset: 2px;
-  border-radius: 6px;
+@keyframes swell {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-3%); }
 }
-
-input[type="range"] {
-  accent-color: var(--color-ocean-400);
-}
-
-.eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--color-mist-400);
-  font-weight: 600;
-}
-
-.tabular {
-  font-variant-numeric: tabular-nums;
-}
-
-.checker {
-  background-image: linear-gradient(45deg, #15191e 25%, transparent 25%), linear-gradient(-45deg, #15191e 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #15191e 75%), linear-gradient(-45deg, transparent 75%, #15191e 75%);
-  background-size: 16px 16px;
-  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
-}
+.animate-drift { animation: drift 28s ease-in-out infinite; }
+.animate-swell { animation: swell 14s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  html { scroll-behavior: auto; }
+  .animate-drift, .animate-swell { animation: none; }
+  .js [data-reveal] { opacity: 1; transform: none; transition: none; }
 }

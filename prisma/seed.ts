@@ -1,44 +1,72 @@
 /**
- * Development seed: generic demo clients & projects and the built-in presets.
- * No real customer data, no media (upload real files through the UI).
+ * Starter content: the current services and a few Laamu places.
+ * Runs only ONCE per database (remembered in the settings table), so it's safe
+ * in every deploy: anything you later edit or delete is never re-created.
+ * No fake portfolio items or testimonials are created; add real ones in /superadmin.
  */
-import { db } from "@/lib/db";
-import { PRESETS } from "@/services/color/presets";
+import { PrismaClient } from "@prisma/client";
+
+const db = new PrismaClient();
+
+const services = [
+  {
+    slug: "drone-videography",
+    name: "Drone Videography",
+    status: "ACTIVE" as const,
+    featured: true,
+    displayOrder: 1,
+    shortDescription: "Aerial surf and ocean films from above the reef.",
+    description:
+      "Cinematic aerial footage of your surf session, boat trip or island stay — filmed above the waves of Laamu.\n\nTell us when you're surfing and at which break, and we'll plan the flight around the conditions and the light. You receive your edited clips and original files by private download link.",
+  },
+  {
+    slug: "sea-photography",
+    name: "Sea Photography",
+    status: "COMING_SOON" as const,
+    displayOrder: 2,
+    shortDescription: "Photographs of the ocean, boats and island life.",
+    description: "Still photography of the sea, the islands and the people who live and travel here.",
+  },
+  {
+    slug: "surf-photography",
+    name: "Surf Photography",
+    status: "COMING_SOON" as const,
+    displayOrder: 3,
+    shortDescription: "Sharp action photos of your waves.",
+    description: "Surf photography from the channel and the line-up — every wave of your session, captured.",
+  },
+  {
+    slug: "water-photography",
+    name: "Water Photography",
+    status: "COMING_SOON" as const,
+    displayOrder: 4,
+    shortDescription: "In-water photography, eye level with the wave.",
+    description: "Photography from in the water — close to the action, eye level with the wave.",
+  },
+];
+
+const locations = [
+  { slug: "machines", name: "Machines", kind: "Surf spot", featured: true, displayOrder: 1, description: "One of Laamu's best-known surf breaks — and where Ocean X began, with a drone above the waves." },
+  { slug: "maabaidhoo", name: "Maabaidhoo", kind: "Island", displayOrder: 2, description: "" },
+  { slug: "fonadhoo", name: "Fonadhoo", kind: "Island", displayOrder: 3, description: "" },
+  { slug: "gan", name: "Gan", kind: "Island", displayOrder: 4, description: "" },
+  { slug: "hithadhoo", name: "Hithadhoo", kind: "Island", displayOrder: 5, description: "" },
+];
 
 async function main() {
-  const clients = [
-    { name: "Demo Client — Surf", email: "surf.client@example.com" },
-    { name: "Demo Client — Wedding", email: "wedding.client@example.com" },
-    { name: "Demo Client — Events", email: "events.client@example.com" },
-  ];
-  const created = [];
-  for (const c of clients) {
-    const existing = await db.client.findFirst({ where: { email: c.email } });
-    created.push(existing ?? (await db.client.create({ data: c })));
+  const done = await db.setting.findUnique({ where: { key: "system.seeded" } });
+  if (done && !process.argv.includes("--force")) {
+    console.log("✔ Starter content already added earlier — skipping.");
+    return;
   }
-  const projects = [
-    { name: "Surf Session", client: 0 },
-    { name: "Wedding Collection", client: 1 },
-    { name: "Drone Footage", client: 0 },
-    { name: "Outdoor Portrait", client: 1 },
-    { name: "Event Photography", client: 2 },
-  ];
-  for (const p of projects) {
-    if (await db.project.findFirst({ where: { name: p.name } })) continue;
-    const clientId = created[p.client]!.id;
-    await db.project.create({ data: { name: p.name, clientId, shootDate: new Date(), access: { create: { clientId } } } });
+  for (const s of services) {
+    await db.service.upsert({ where: { slug: s.slug }, create: { ...s, priceType: "ON_REQUEST", published: true }, update: {} });
   }
-  for (const preset of Object.values(PRESETS)) {
-    await db.processingPreset.upsert({
-      where: { kind_name: { kind: "COLOR", name: preset.name } },
-      create: { kind: "COLOR", name: preset.name, settings: JSON.parse(JSON.stringify(preset)), builtIn: true },
-      update: { settings: JSON.parse(JSON.stringify(preset)) },
-    });
+  for (const l of locations) {
+    await db.location.upsert({ where: { slug: l.slug }, create: { ...l, atoll: "Laamu", published: true }, update: {} });
   }
-  if (!(await db.watermark.findFirst({ where: { isDefault: true } }))) {
-    await db.watermark.create({ data: { text: "OCEANX STUDIO", opacity: 0.35, position: "center", scale: 0.05, isDefault: true } });
-  }
-  console.log("Seed complete. Create an admin with: npm run admin:create");
+  await db.setting.upsert({ where: { key: "system.seeded" }, create: { key: "system.seeded", value: new Date().toISOString() }, update: {} });
+  console.log(`✔ Seeded ${services.length} services and ${locations.length} locations (existing ones left unchanged).`);
 }
 
 main()

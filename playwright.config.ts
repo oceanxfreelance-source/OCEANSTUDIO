@@ -1,28 +1,25 @@
 import { defineConfig, devices } from "@playwright/test";
-import { E2E_PORT } from "./tests/e2e/env";
 
 /**
- * End-to-end tests run the production build (`next start`, started in
- * global-setup after the per-run database exists) plus the real background
- * worker against Postgres, Redis and S3-compatible storage. Run `npm run build` first.
+ * End-to-end tests against a running app (npm run build && npm start).
+ *   E2E_BASE_URL=http://localhost:3000 E2E_ADMIN_EMAIL=… E2E_ADMIN_PASSWORD=… npx playwright test
  */
+const executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined;
+
 export default defineConfig({
   testDir: "tests/e2e",
-  timeout: 5 * 60_000,
-  expect: { timeout: 60_000 },
+  globalSetup: "./tests/e2e/global-setup.ts",
+  timeout: 90_000,
   fullyParallel: false,
   workers: 1,
-  retries: 0,
   reporter: [["list"]],
-  globalSetup: "./tests/e2e/global-setup.ts",
-  globalTeardown: "./tests/e2e/global-teardown.ts",
   use: {
-    baseURL: `http://localhost:${E2E_PORT}`,
+    baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000",
     trace: "retain-on-failure",
-    launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH } : undefined,
+    launchOptions: { executablePath },
   },
   projects: [
-    { name: "admin-desktop", testMatch: /admin\.spec\.ts/, use: { ...devices["Desktop Chrome"], viewport: { width: 1920, height: 1080 } } },
-    { name: "client-mobile", testMatch: /gallery\.spec\.ts/, dependencies: ["admin-desktop"], use: { ...devices["iPhone 13"], browserName: "chromium" } },
+    { name: "desktop", use: { ...devices["Desktop Chrome"], launchOptions: { executablePath } }, testIgnore: /mobile\.spec\.ts/ },
+    { name: "mobile", use: { ...devices["Pixel 7"], launchOptions: { executablePath } }, testMatch: /mobile\.spec\.ts/ },
   ],
 });

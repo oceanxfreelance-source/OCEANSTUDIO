@@ -1,9 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 
+// One Prisma client per server process (Next.js dev hot-reload safe).
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-export const db: PrismaClient =
-  globalForPrisma.prisma ??
-  new PrismaClient({ log: process.env.PRISMA_LOG === "true" ? ["query", "warn", "error"] : ["warn", "error"] });
+export const db = globalForPrisma.prisma ?? new PrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;

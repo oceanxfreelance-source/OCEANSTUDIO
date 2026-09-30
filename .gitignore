@@ -1,7 +1,6 @@
 node_modules
 .next
 out
-dist
 coverage
 *.tsbuildinfo
 next-env.d.ts
@@ -9,10 +8,7 @@ next-env.d.ts
 .env.local
 .env.*.local
 !.env.example
+.DS_Store
+dump.rdb
 /test-results
 /playwright-report
-/tmp
-.DS_Store
-tests/e2e/.e2e-state.json
-tests/e2e/.e2e-delivery.json
-dump.rdb
