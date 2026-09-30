@@ -1,6 +1,8 @@
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { RevealObserver } from "@/components/site/Reveal";
+import { ReviewBadge } from "@/components/site/ReviewBadge";
+import { getReviewStats } from "@/lib/public";
 import { getContent } from "@/lib/content";
 import { instagramDmUrl, instagramUrl } from "@/lib/format";
 import { BRAND, siteUrl } from "@/lib/site";
@@ -10,7 +12,7 @@ import { BRAND, siteUrl } from "@/lib/site";
 export const revalidate = 300;
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const c = await getContent();
+  const [c, reviewStats] = await Promise.all([getContent(), getReviewStats()]);
   const ig = instagramUrl(c["social.instagram"]);
 
   // Structured data so search engines understand who and where Ocean X is.
@@ -36,6 +38,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <main id="main">{children}</main>
       <Footer c={c} />
       <RevealObserver />
+      <ReviewBadge average={reviewStats.average} count={reviewStats.count} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
     </>
   );

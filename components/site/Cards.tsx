@@ -35,7 +35,7 @@ export function ServiceCard({ s, index }: { s: ServiceCardData; index?: number }
   const soon = s.status === "COMING_SOON";
   return (
     <Link href={`/services/${s.slug}`} data-reveal className="group flex flex-col">
-      <div className="relative aspect-[4/3] overflow-hidden bg-ink sm:aspect-[4/5]">
+      <div className="vf-corners relative aspect-[4/3] overflow-hidden bg-ink sm:aspect-[4/5]">
         <div data-reveal-image className="absolute inset-0">
           <div className="h-full w-full">
             {s.cover ? (
@@ -82,7 +82,7 @@ type WorkCardData = {
 export function WorkCard({ w, large = false, dark = false }: { w: WorkCardData; large?: boolean; dark?: boolean }) {
   return (
     <Link href={`/work/${w.slug}`} data-reveal className="group block">
-      <div className={cx("relative overflow-hidden bg-ink", large ? "aspect-[4/3] md:aspect-[16/10]" : "aspect-[4/5]")}>
+      <div className={cx("vf-corners relative overflow-hidden bg-ink", large ? "aspect-[4/3] md:aspect-[16/10]" : "aspect-[4/5]")}>
         <div data-reveal-image className="absolute inset-0">
           <div className="h-full w-full">
             {w.cover ? (
@@ -118,7 +118,7 @@ type LocationCardData = { slug: string; name: string; kind: string; atoll: strin
 export function LocationCard({ l, wide = false }: { l: LocationCardData; wide?: boolean }) {
   return (
     <Link href={`/machines/${l.slug}`} data-reveal className="group block">
-      <div className={cx("relative overflow-hidden bg-ink", wide ? "aspect-[4/5] sm:aspect-[4/3]" : "aspect-[3/4]")}>
+      <div className={cx("vf-corners relative overflow-hidden bg-ink", wide ? "aspect-[4/5] sm:aspect-[4/3]" : "aspect-[3/4]")}>
         <div data-reveal-image className="absolute inset-0">
           <div className="h-full w-full">
             {l.cover ? <Img media={l.cover} alt={l.name} sizes="(min-width: 640px) 50vw, 100vw" className="transition duration-[1.2s] ease-out group-hover:scale-[1.06]" /> : <CoverFallback label={l.kind} />}

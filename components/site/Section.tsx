@@ -1,5 +1,6 @@
 import { cx } from "@/components/ui/cx";
 import { AnimatedWords } from "./HeroTitle";
+import { Viewfinder } from "./Viewfinder";
 
 /** Standard section heading: small eyebrow + large title + optional intro. */
 export function SectionHeading({
@@ -32,9 +33,10 @@ export function SectionHeading({
 /** Top-of-page banner for inner pages (dark, compact). */
 export function PageHero({ eyebrow, title, intro }: { eyebrow: string; title: string; intro?: string }) {
   return (
-    <section className="relative overflow-hidden bg-abyss pb-14 pt-32 text-foam md:pb-20 md:pt-44">
+    <section className="grain relative overflow-hidden bg-abyss pb-16 pt-36 text-foam md:pb-24 md:pt-48">
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(50%_60%_at_20%_0%,rgba(201,169,110,0.16),transparent_70%)]" />
-      <div className="container-x relative">
+      <Viewfinder compact />
+      <div className="container-x relative z-[2]">
         <p className="hero-in eyebrow eyebrow-line text-gold" style={{ "--delay": "0.05s" } as React.CSSProperties}>
           {eyebrow}
         </p>

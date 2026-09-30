@@ -4,6 +4,7 @@ import { LocationCard, ServiceCard, WorkCard } from "@/components/site/Cards";
 import { HeroVideo } from "@/components/site/HeroVideo";
 import { AnimatedWords } from "@/components/site/HeroTitle";
 import { Marquee } from "@/components/site/Marquee";
+import { Viewfinder } from "@/components/site/Viewfinder";
 import { ArrowRight, Instagram } from "@/components/site/Icons";
 import { Img } from "@/components/site/Img";
 import { OceanBackdrop } from "@/components/site/OceanBackdrop";
@@ -36,7 +37,7 @@ export default async function HomePage() {
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────── */}
-      <section className="relative flex min-h-[100svh] items-end overflow-hidden bg-abyss text-foam">
+      <section className="grain relative flex min-h-[100svh] items-end overflow-hidden bg-abyss text-foam">
         <div className="hero-parallax absolute inset-0">
           <div className="hero-media absolute inset-0">
             {heroImage ? <Img media={heroImage} alt={heroImage.alt || "Ocean X — Machines, Maabaidhoo"} priority sizes="100vw" /> : <OceanBackdrop />}
@@ -44,8 +45,11 @@ export default async function HomePage() {
           </div>
         </div>
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/30 to-abyss/40" />
+        <Viewfinder />
+        <span aria-hidden className="letterbox letterbox-top" />
+        <span aria-hidden className="letterbox letterbox-bottom" />
 
-        <div className="hero-content-scroll container-x relative pb-20 pt-32 md:pb-28">
+        <div className="hero-content-scroll container-x relative z-[2] pb-24 pt-32 md:pb-32">
           <p className="hero-in eyebrow eyebrow-line text-foam/80" style={{ "--delay": "0.15s" } as React.CSSProperties}>
             {c["hero.location"]}
           </p>
