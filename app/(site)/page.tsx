@@ -49,7 +49,7 @@ export default async function HomePage() {
         <span aria-hidden className="letterbox letterbox-top" />
         <span aria-hidden className="letterbox letterbox-bottom" />
 
-        <div className="hero-content-scroll container-x relative z-[2] pb-24 pt-32 md:pb-32">
+        <div className="hero-content-scroll container-x relative z-[2] pb-24 pt-36 md:pb-32 md:pt-56">
           <p className="hero-in eyebrow eyebrow-line text-foam/80" style={{ "--delay": "0.15s" } as React.CSSProperties}>
             {c["hero.location"]}
           </p>
