@@ -118,7 +118,7 @@ export default async function HomePage() {
       {services.length > 0 && (
         <section className="bg-foam py-24 md:py-32">
           <div className="container-x">
-            <SectionHeading eyebrow="Services" title="What we create" intro={c["services.intro"]} />
+            <SectionHeading eyebrow="Services" title="Surf sessions" intro={c["services.intro"]} />
             <div className="mt-14 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
               {services.slice(0, 6).map((s, i) => (
                 <ServiceCard key={s.id} s={s} index={i} />

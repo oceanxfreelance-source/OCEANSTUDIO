@@ -7,7 +7,7 @@ import { getPublicServices } from "@/lib/public";
 
 export const metadata: Metadata = {
   title: "Services",
-  description: "Drone videography, surf films and ocean photography at Machines, Maabaidhoo (Laamu, Maldives) — see what Ocean X offers now and what's coming soon.",
+  description: "Drone surf films and surf photography at Machines, Maabaidhoo (Laamu, Maldives) — see what Ocean X offers now and what's coming soon.",
   alternates: { canonical: "/services" },
 };
 
@@ -18,7 +18,7 @@ export default async function ServicesPage() {
 
   return (
     <>
-      <PageHero eyebrow="Services" title="What we create." intro={c["services.intro"]} />
+      <PageHero eyebrow="Services" title="Surf sessions." intro={c["services.intro"]} />
       <section className="bg-paper py-20 md:py-28">
         <div className="container-x">
           {services.length === 0 && <EmptyState title="Services coming soon" body="We're preparing our service list. Get in touch in the meantime." />}
@@ -43,7 +43,7 @@ export default async function ServicesPage() {
             </div>
           )}
           <div className="mt-24 flex flex-col items-start justify-between gap-6 border-t border-deep/10 pt-10 md:flex-row md:items-center">
-            <p className="max-w-xl text-lg text-slate">Have a project that isn&apos;t listed — a resort, a brand, an event? Tell us about it.</p>
+            <p className="max-w-xl text-lg text-slate">Want something that isn&apos;t listed — a surf trip edit, a group session, a brand shoot? Tell us about it.</p>
             <ButtonLink href="/book" variant="dark" arrow>
               SEND A REQUEST
             </ButtonLink>

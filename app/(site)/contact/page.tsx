@@ -7,7 +7,7 @@ import { instagramUrl, whatsappUrl } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact Ocean X at Machines, Maabaidhoo (Laamu, Maldives) — Instagram, email and WhatsApp for sessions, collaborations and commercial projects.",
+  description: "Contact Ocean X at Machines, Maabaidhoo (Laamu, Maldives) — Instagram, email and WhatsApp for surf sessions and collaborations.",
   alternates: { canonical: "/contact" },
 };
 

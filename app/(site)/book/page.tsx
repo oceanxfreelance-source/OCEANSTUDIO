@@ -8,7 +8,7 @@ import { BookingForm } from "./BookingForm";
 
 export const metadata: Metadata = {
   title: "Book a session",
-  description: "Request a drone, surf or ocean session with Ocean X at Machines, Maabaidhoo (Laamu, Maldives). No account needed.",
+  description: "Book a surf filming session with Ocean X at Machines, Maabaidhoo (Laamu, Maldives). No account needed.",
   alternates: { canonical: "/book" },
 };
 
@@ -35,9 +35,9 @@ export default async function BookPage({ searchParams }: Props) {
             <div>
               <p className="eyebrow text-slate">How it works</p>
               <ol className="mt-5 space-y-4 text-sm leading-relaxed text-slate">
-                <li><span className="font-semibold text-deep">1. Send a request</span> — tell us when, where and what you&apos;d like.</li>
-                <li><span className="font-semibold text-deep">2. We reply personally</span> — to confirm conditions, timing and price.</li>
-                <li><span className="font-semibold text-deep">3. Session day</span> — we shoot; you receive your files by private link.</li>
+                <li><span className="font-semibold text-deep">1. Send a request</span> — tell us when you&apos;re surfing and how many surfers.</li>
+                <li><span className="font-semibold text-deep">2. We reply personally</span> — to confirm the swell, tide, timing and price.</li>
+                <li><span className="font-semibold text-deep">3. Session day</span> — you surf, we film; your clips arrive by private link.</li>
               </ol>
             </div>
             {(ig || wa) && (

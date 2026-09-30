@@ -46,7 +46,7 @@ test("visitor sends a booking request without an account", async ({ page }) => {
   const d = new Date(Date.now() + 7 * 86400_000).toISOString().slice(0, 10);
   await page.getByLabel("Preferred date").fill(d);
   await page.getByLabel("Preferred time").selectOption("Sunrise");
-  await page.getByLabel("People / surfers").fill("2");
+  await page.getByLabel("Number of surfers").fill("2");
   await page.getByLabel("Service").selectOption({ label: "Drone Videography" });
   await page.getByLabel("Location").selectOption("Machines");
   await page.getByLabel("Message").fill("Two of us surfing Machines, would love drone clips.");

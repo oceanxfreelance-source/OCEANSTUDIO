@@ -24,8 +24,8 @@ const services = [
     name: "Sea Photography",
     status: "COMING_SOON" as const,
     displayOrder: 2,
-    shortDescription: "Photographs of the ocean, boats and island life.",
-    description: "Still photography of the sea, the islands and the people who live and travel here.",
+    shortDescription: "Photos of the line-up, the sets and the sea around Machines.",
+    description: "Photography of the waves and the ocean at Machines — line-ups, sets and the moments between them.",
   },
   {
     slug: "surf-photography",
@@ -33,15 +33,15 @@ const services = [
     status: "COMING_SOON" as const,
     displayOrder: 3,
     shortDescription: "Sharp action photos of your waves.",
-    description: "Surf photography from the channel and the line-up — every wave of your session, captured.",
+    description: "Surf photography from the channel at Machines — every wave of your session, captured.",
   },
   {
     slug: "water-photography",
     name: "Water Photography",
     status: "COMING_SOON" as const,
     displayOrder: 4,
-    shortDescription: "In-water photography, eye level with the wave.",
-    description: "Photography from in the water — close to the action, eye level with the wave.",
+    shortDescription: "In-water surf photography, eye level with the wave.",
+    description: "Surf photography from in the water at Machines — close to the action, eye level with the wave.",
   },
 ];
 

@@ -9,7 +9,7 @@ import { getPortfolio } from "@/lib/public";
 
 export const metadata: Metadata = {
   title: "Our Work",
-  description: "Surf films, drone videography and ocean photography from Machines, Maabaidhoo — Laamu, Maldives.",
+  description: "Surf films, drone surf videography and surf photos from Machines, Maabaidhoo — Laamu, Maldives.",
   alternates: { canonical: "/work" },
 };
 
@@ -22,7 +22,7 @@ export default async function WorkPage({ searchParams }: Props) {
 
   return (
     <>
-      <PageHero eyebrow="Our work" title="Stories from the water." intro={c["work.intro"]} />
+      <PageHero eyebrow="Our work" title="Waves from Machines." intro={c["work.intro"]} />
       <section className="bg-abyss pb-24 text-foam md:pb-32">
         <div className="container-x">
           <nav aria-label="Filter by category" className="-mx-5 flex gap-2 overflow-x-auto border-b border-white/10 px-5 pb-5 sm:mx-0 sm:flex-wrap sm:px-0">

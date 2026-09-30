@@ -18,7 +18,7 @@ export interface ContentField {
 export const CONTENT_FIELDS = [
   // Home — hero
   { group: "Home — hero", key: "hero.title", label: "Hero title", default: "CAPTURED BY THE OCEAN." },
-  { group: "Home — hero", key: "hero.subtitle", label: "Hero subtitle", default: "Ocean & visual media from Machines, Maabaidhoo — Laamu, Maldives." },
+  { group: "Home — hero", key: "hero.subtitle", label: "Hero subtitle", default: "Surf films and surf photography at Machines, Maabaidhoo — Laamu, Maldives." },
   { group: "Home — hero", key: "hero.location", label: "Location line", default: "MACHINES • MAABAIDHOO • LAAMU" },
   { group: "Home — hero", key: "hero.primaryCta", label: "Main button", default: "BOOK A SESSION" },
   { group: "Home — hero", key: "hero.secondaryCta", label: "Second button", default: "EXPLORE OUR WORK" },
@@ -32,22 +32,22 @@ export const CONTENT_FIELDS = [
     help: "Optional. A short, muted, compressed .mp4 (under ~8 MB). Only plays on larger screens — phones get the hero image.",
   },
   // Home — sections
-  { group: "Home — sections", key: "home.introTitle", label: "Intro title", default: "Ocean, people and places — told visually." },
+  { group: "Home — sections", key: "home.introTitle", label: "Intro title", default: "You surf. We capture every wave." },
   {
     group: "Home — sections",
     key: "home.introBody",
     label: "Intro text",
     type: "textarea",
     default:
-      "Ocean X is a visual-media company at Maabaidhoo, Laamu. We film and photograph the surf at Machines and the ocean around it — for surfers, travellers and brands.",
+      "Ocean X films and photographs surfers at Machines, Maabaidhoo. Book a session, paddle out, and we'll capture your waves from the drone above the line-up — then send you the clips to keep.",
   },
-  { group: "Home — sections", key: "cta.title", label: "Call-to-action title", default: "Your session, from the water and the air." },
+  { group: "Home — sections", key: "cta.title", label: "Call-to-action title", default: "Surfing Machines? Let's film your session." },
   {
     group: "Home — sections",
     key: "cta.body",
     label: "Call-to-action text",
     type: "textarea",
-    default: "Tell us when you're surfing Machines and what you have in mind. We'll reply personally.",
+    default: "Tell us when you're in the water and how many surfers. We'll check the conditions and reply personally.",
   },
   // About
   { group: "About", key: "about.title", label: "About title", default: "Born above the waves of Machines." },
@@ -58,24 +58,24 @@ export const CONTENT_FIELDS = [
     type: "textarea",
     help: "Separate paragraphs with a blank line.",
     default:
-      "Ocean X started with a drone above the waves of Machines, Maabaidhoo. What began with surf has grown into a vision to capture the ocean, the people and the moments that make this place unique.\n\nToday we create aerial films, surf content and visual stories for the surfers who ride Machines — and we're growing into sea, water and underwater photography, films and more.",
+      "Ocean X started with a drone above the waves of Machines, Maabaidhoo. We're surfers filming surfers — every session is about your waves, your style and the moments you want to remember.\n\nToday we film aerial surf sessions at Machines, and surf photography from the channel and in the water is coming soon.",
   },
   { group: "About", key: "about.imageId", label: "About image", default: "", type: "image" },
   // Pages
-  { group: "Page intros", key: "services.intro", label: "Services intro", type: "textarea", default: "What we create at Machines — from the air and on the water." },
-  { group: "Page intros", key: "work.intro", label: "Our work intro", type: "textarea", default: "Selected films and photographs from Machines, Maabaidhoo." },
+  { group: "Page intros", key: "services.intro", label: "Services intro", type: "textarea", default: "Surf sessions at Machines — filmed from the air, with photography from the channel and the water coming soon." },
+  { group: "Page intros", key: "work.intro", label: "Our work intro", type: "textarea", default: "Surf films and photos from Machines, Maabaidhoo." },
   {
     group: "Page intros",
     key: "laamu.intro",
     label: "Machines & Maabaidhoo intro",
     type: "textarea",
-    default: "Machines and Maabaidhoo are where we work — the wave, the island and the ocean around them, in Laamu Atoll.",
+    default: "Machines is the wave. Maabaidhoo is home. Every Ocean X surf session happens here, in Laamu Atoll.",
   },
   // Booking
-  { group: "Booking", key: "booking.intro", label: "Booking page intro", type: "textarea", default: "Tell us about your session. No account needed — we'll get back to you personally." },
+  { group: "Booking", key: "booking.intro", label: "Booking page intro", type: "textarea", default: "Tell us about your surf session. No account needed — we'll get back to you personally." },
   { group: "Booking", key: "booking.success", label: "Confirmation message", type: "textarea", default: "Thanks for reaching out to Ocean X. We'll get back to you shortly." },
   // Contact & social
-  { group: "Contact & social", key: "contact.text", label: "Contact text", type: "textarea", default: "For sessions, collaborations and commercial projects, message us any time." },
+  { group: "Contact & social", key: "contact.text", label: "Contact text", type: "textarea", default: "For surf sessions and collaborations, message us any time." },
   { group: "Contact & social", key: "contact.email", label: "Email", default: "", help: "Leave empty to hide." },
   { group: "Contact & social", key: "contact.whatsapp", label: "WhatsApp number", default: "", help: "With country code, e.g. +960 7XX XXXX. Leave empty to hide." },
   { group: "Contact & social", key: "social.instagram", label: "Instagram username", default: "", help: "Without @, e.g. oceanx.maldives. Leave empty to hide." },
@@ -83,13 +83,13 @@ export const CONTENT_FIELDS = [
   { group: "Contact & social", key: "social.tiktok", label: "TikTok link", default: "", type: "url" },
   { group: "Contact & social", key: "social.facebook", label: "Facebook link", default: "", type: "url" },
   // Footer & SEO
-  { group: "Footer & SEO", key: "footer.text", label: "Footer text", default: "Ocean & visual media from Machines, Maabaidhoo — Laamu, Maldives." },
+  { group: "Footer & SEO", key: "footer.text", label: "Footer text", default: "Surf films & photography at Machines, Maabaidhoo — Laamu, Maldives." },
   {
     group: "Footer & SEO",
     key: "seo.description",
     label: "Search engine description",
     type: "textarea",
-    default: "Ocean X — drone videography, surf films and ocean photography at Machines, Maabaidhoo, in Laamu Atoll, Maldives.",
+    default: "Ocean X — surf films, drone surf videography and surf photography at Machines, Maabaidhoo, in Laamu Atoll, Maldives.",
   },
 ] as const satisfies readonly ContentField[];
 

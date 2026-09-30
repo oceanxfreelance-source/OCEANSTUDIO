@@ -9,7 +9,7 @@ import { getPublicServices, getTestimonials } from "@/lib/public";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Ocean X is a visual-media company born around the ocean and surf culture of Machines, Maabaidhoo, in Laamu, Maldives.",
+  description: "Ocean X films and photographs surfers at Machines, Maabaidhoo, in Laamu, Maldives.",
   alternates: { canonical: "/about" },
 };
 

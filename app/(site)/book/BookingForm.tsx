@@ -85,7 +85,7 @@ export function BookingForm({
             ))}
           </select>
         </Field>
-        <Field label="People / surfers" name="people" error={fe.people}>
+        <Field label="Number of surfers" name="people" error={fe.people}>
           <input id="people" name="people" type="number" inputMode="numeric" min={1} max={100} defaultValue={v.people} className={input} placeholder="1" />
         </Field>
       </div>
@@ -119,7 +119,7 @@ export function BookingForm({
       </div>
 
       <Field label="Message" name="message" error={fe.message}>
-        <textarea id="message" name="message" rows={4} defaultValue={v.message} className={cx(input, "resize-y")} placeholder="Tell us about your trip, skill level, what you'd like filmed…" />
+        <textarea id="message" name="message" rows={4} defaultValue={v.message} className={cx(input, "resize-y")} placeholder="Your surf level, board, how long you're in Maabaidhoo, what you'd like filmed…" />
       </Field>
 
       <p className="text-xs text-slate">We only use your details to reply to this request.</p>
