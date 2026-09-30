@@ -20,12 +20,23 @@ const NAV = [
 export function Header({ instagramUrl }: { instagramUrl: string | null }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
   // Pages with a dark full-bleed hero start with a transparent header.
   const overlay = pathname === "/";
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    // Solid background once scrolled; slide away while scrolling down and
+    // come back as soon as the visitor scrolls up.
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 24);
+      if (Math.abs(y - last) > 6) {
+        setHidden(y > last && y > 160);
+        last = y;
+      }
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -44,7 +55,8 @@ export function Header({ instagramUrl }: { instagramUrl: string | null }) {
   return (
     <header
       className={cx(
-        "fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-500",
+        "fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        hidden && !open && "header-hidden",
         solid ? "border-b border-white/5 bg-abyss/85 backdrop-blur-xl" : "border-b border-transparent bg-transparent",
       )}
     >
@@ -55,8 +67,9 @@ export function Header({ instagramUrl }: { instagramUrl: string | null }) {
             <Link
               key={n.href}
               href={n.href}
+              aria-current={pathname.startsWith(n.href) ? "page" : undefined}
               className={cx(
-                "text-[13px] tracking-wide transition-colors hover:text-white",
+                "link-underline text-[13px] tracking-wide hover:text-white",
                 pathname.startsWith(n.href) ? "text-white" : "text-foam/70",
               )}
             >
@@ -72,7 +85,7 @@ export function Header({ instagramUrl }: { instagramUrl: string | null }) {
           )}
           <Link
             href="/reviews#leave-a-review"
-            className="hidden rounded-full bg-foam px-5 py-2.5 text-[12px] font-semibold tracking-[0.14em] text-abyss transition-colors hover:bg-white sm:inline-flex"
+            className="btn-lift hidden rounded-full bg-foam px-5 py-2.5 text-[12px] font-semibold tracking-[0.14em] text-abyss hover:bg-white sm:inline-flex"
           >
             LEAVE A REVIEW
           </Link>
@@ -97,7 +110,7 @@ export function Header({ instagramUrl }: { instagramUrl: string | null }) {
       >
         <nav aria-label="Mobile" className="flex flex-col">
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className="display border-b border-white/5 py-5 text-3xl [font-stretch:110%]">
+            <Link key={n.href} href={n.href} className="display border-b border-white/5 py-5 text-3xl transition-[padding,color] duration-300 [font-stretch:110%] hover:pl-2 hover:text-sea">
               {n.label}
             </Link>
           ))}

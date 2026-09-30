@@ -36,11 +36,15 @@ export function ServiceCard({ s, index }: { s: ServiceCardData; index?: number }
   return (
     <Link href={`/services/${s.slug}`} data-reveal className="group flex flex-col">
       <div className="relative aspect-[4/3] overflow-hidden bg-ink sm:aspect-[4/5]">
-        {s.cover ? (
-          <Img media={s.cover} alt={s.name} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className={cx("transition duration-[1.2s] ease-out group-hover:scale-[1.04]", soon && "grayscale-[35%]")} />
-        ) : (
-          <CoverFallback label={s.name} />
-        )}
+        <div data-reveal-image className="absolute inset-0">
+          <div className="h-full w-full">
+            {s.cover ? (
+              <Img media={s.cover} alt={s.name} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className={cx("transition duration-[1.2s] ease-out group-hover:scale-[1.06]", soon && "grayscale-[35%]")} />
+            ) : (
+              <CoverFallback label={s.name} />
+            )}
+          </div>
+        </div>
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
           {index !== undefined && <span className="eyebrow text-foam/70">{String(index + 1).padStart(2, "0")}</span>}
           <span
@@ -55,7 +59,7 @@ export function ServiceCard({ s, index }: { s: ServiceCardData; index?: number }
       </div>
       <div className="mt-5 flex items-start justify-between gap-4">
         <div>
-          <h3 className="display text-2xl [font-stretch:110%]">{s.name}</h3>
+          <h3 className="display text-2xl transition-colors duration-300 [font-stretch:110%] group-hover:text-sea-deep">{s.name}</h3>
           {s.shortDescription && <p className="mt-2 text-sm leading-relaxed text-slate">{s.shortDescription}</p>}
           {!soon && <p className="mt-3 text-sm font-medium">{priceLabel(s.price, s.priceType, s.currency)}</p>}
         </div>
@@ -79,14 +83,21 @@ export function WorkCard({ w, large = false, dark = false }: { w: WorkCardData; 
   return (
     <Link href={`/work/${w.slug}`} data-reveal className="group block">
       <div className={cx("relative overflow-hidden bg-ink", large ? "aspect-[4/3] md:aspect-[16/10]" : "aspect-[4/5]")}>
-        {w.cover ? (
-          <Img media={w.cover} alt={w.title} sizes={large ? "(min-width: 768px) 66vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"} className="transition duration-[1.2s] ease-out group-hover:scale-[1.04]" />
-        ) : w.videoUrl && /\.(mp4|mov|m4v|webm)(\?|$)/i.test(w.videoUrl) ? (
-          // No cover photo: show the uploaded video's first frame.
-          <video src={`${w.videoUrl}#t=0.1`} muted playsInline preload="metadata" aria-hidden className="h-full w-full object-cover" />
-        ) : (
-          <CoverFallback label={w.category} />
-        )}
+        <div data-reveal-image className="absolute inset-0">
+          <div className="h-full w-full">
+            {w.cover ? (
+              <Img media={w.cover} alt={w.title} sizes={large ? "(min-width: 768px) 66vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"} className="transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
+            ) : w.videoUrl && /\.(mp4|mov|m4v|webm)(\?|$)/i.test(w.videoUrl) ? (
+              // No cover photo: show the uploaded video's first frame.
+              <video src={`${w.videoUrl}#t=0.1`} muted playsInline preload="metadata" aria-hidden className="h-full w-full object-cover" />
+            ) : (
+              <CoverFallback label={w.category} />
+            )}
+          </div>
+        </div>
+        <span className="view-pill absolute left-1/2 top-1/2 z-10 -ml-9 -mt-9 flex h-[72px] w-[72px] items-center justify-center rounded-full bg-foam text-[11px] font-semibold tracking-[0.2em] text-abyss">
+          {w.videoUrl ? "PLAY" : "VIEW"}
+        </span>
         <div className="absolute inset-0 bg-gradient-to-t from-abyss/70 via-transparent to-transparent opacity-80" />
         {w.videoUrl && <span className="eyebrow absolute right-4 top-4 rounded-full bg-abyss/60 px-3 py-1.5 text-foam backdrop-blur">Film</span>}
         <div className="absolute inset-x-0 bottom-0 p-5 text-foam">
@@ -108,7 +119,11 @@ export function LocationCard({ l, wide = false }: { l: LocationCardData; wide?: 
   return (
     <Link href={`/machines/${l.slug}`} data-reveal className="group block">
       <div className={cx("relative overflow-hidden bg-ink", wide ? "aspect-[4/5] sm:aspect-[4/3]" : "aspect-[3/4]")}>
-        {l.cover ? <Img media={l.cover} alt={l.name} sizes="(min-width: 640px) 50vw, 100vw" className="transition duration-[1.2s] ease-out group-hover:scale-[1.04]" /> : <CoverFallback label={l.kind} />}
+        <div data-reveal-image className="absolute inset-0">
+          <div className="h-full w-full">
+            {l.cover ? <Img media={l.cover} alt={l.name} sizes="(min-width: 640px) 50vw, 100vw" className="transition duration-[1.2s] ease-out group-hover:scale-[1.06]" /> : <CoverFallback label={l.kind} />}
+          </div>
+        </div>
         <div className="absolute inset-0 bg-gradient-to-t from-abyss/80 via-abyss/10 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-5 text-foam">
           <p className="eyebrow flex items-center gap-1.5 text-foam/70">

@@ -22,12 +22,12 @@ export function Footer({ c }: { c: Content }) {
           <p className="eyebrow mt-6 text-foam/50">{c["hero.location"]}</p>
         </div>
         <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-foam/75 md:grid-cols-1">
-          <Link href="/work" className="hover:text-white">Our Work</Link>
-          <Link href="/services" className="hover:text-white">Services</Link>
-          <Link href="/machines" className="hover:text-white">Machines & Maabaidhoo</Link>
-          <Link href="/about" className="hover:text-white">About</Link>
-          <Link href="/contact" className="hover:text-white">Contact</Link>
-          <Link href="/reviews" className="hover:text-white">Reviews</Link>
+          <Link href="/work" className="link-underline w-fit hover:text-white">Our Work</Link>
+          <Link href="/services" className="link-underline w-fit hover:text-white">Services</Link>
+          <Link href="/machines" className="link-underline w-fit hover:text-white">Machines & Maabaidhoo</Link>
+          <Link href="/about" className="link-underline w-fit hover:text-white">About</Link>
+          <Link href="/contact" className="link-underline w-fit hover:text-white">Contact</Link>
+          <Link href="/reviews" className="link-underline w-fit hover:text-white">Reviews</Link>
         </nav>
         <div className="space-y-3 text-sm text-foam/75">
           {ig && (

@@ -16,13 +16,13 @@ export function ButtonLink({ href, children, variant = "light", arrow = false, c
     <Link
       href={href}
       className={cx(
-        "group inline-flex items-center justify-center gap-3 rounded-full px-7 py-4 text-[12px] font-semibold tracking-[0.16em] transition-colors",
+        "btn-lift group inline-flex items-center justify-center gap-3 rounded-full px-7 py-4 text-[12px] font-semibold tracking-[0.16em]",
         styles[variant],
         className,
       )}
     >
       {children}
-      {arrow && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
+      {arrow && <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />}
     </Link>
   );
 }

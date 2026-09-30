@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ButtonLink } from "@/components/site/Buttons";
 import { LocationCard, ServiceCard, WorkCard } from "@/components/site/Cards";
 import { HeroVideo } from "@/components/site/HeroVideo";
+import { AnimatedWords } from "@/components/site/HeroTitle";
+import { Marquee } from "@/components/site/Marquee";
 import { ArrowRight, Instagram } from "@/components/site/Icons";
 import { Img } from "@/components/site/Img";
 import { OceanBackdrop } from "@/components/site/OceanBackdrop";
@@ -33,22 +35,26 @@ export default async function HomePage() {
     <>
       {/* ── Hero ─────────────────────────────────────────── */}
       <section className="relative flex min-h-[100svh] items-end overflow-hidden bg-abyss text-foam">
-        {heroImage ? (
-          <div className="absolute inset-0">
-            <Img media={heroImage} alt={heroImage.alt || "Ocean X — Machines, Maabaidhoo"} priority sizes="100vw" />
+        <div className="hero-parallax absolute inset-0">
+          <div className="hero-media absolute inset-0">
+            {heroImage ? <Img media={heroImage} alt={heroImage.alt || "Ocean X — Machines, Maabaidhoo"} priority sizes="100vw" /> : <OceanBackdrop />}
+            {heroVideo?.kind === "file" && <HeroVideo src={heroVideo.url} poster={heroImage ? `/media/${heroImage.id}` : undefined} />}
           </div>
-        ) : (
-          <OceanBackdrop />
-        )}
-        {heroVideo?.kind === "file" && <HeroVideo src={heroVideo.url} poster={heroImage ? `/media/${heroImage.id}` : undefined} />}
+        </div>
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/30 to-abyss/40" />
 
-        <div className="container-x relative pb-16 pt-32 md:pb-24">
-          <p className="eyebrow text-foam/80">{c["hero.location"]}</p>
-          <h1 className="display mt-6 max-w-[14ch] text-[clamp(3rem,11vw,9.5rem)] [font-stretch:118%]">{c["hero.title"]}</h1>
+        <div className="hero-content-scroll container-x relative pb-20 pt-32 md:pb-28">
+          <p className="hero-in eyebrow eyebrow-line text-foam/80" style={{ "--delay": "0.15s" } as React.CSSProperties}>
+            {c["hero.location"]}
+          </p>
+          <h1 className="display mt-6 max-w-[14ch] text-[clamp(3rem,11vw,9.5rem)] [font-stretch:118%]">
+            <AnimatedWords text={c["hero.title"]} />
+          </h1>
           <div className="mt-8 flex flex-col gap-8 md:mt-10 md:flex-row md:items-end md:justify-between">
-            <p className="max-w-md text-lg leading-relaxed text-foam/80 md:text-xl">{c["hero.subtitle"]}</p>
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <p className="hero-in max-w-md text-lg leading-relaxed text-foam/80 md:text-xl" style={{ "--delay": "0.85s" } as React.CSSProperties}>
+              {c["hero.subtitle"]}
+            </p>
+            <div className="hero-in flex flex-col gap-3 sm:flex-row" style={{ "--delay": "1.05s" } as React.CSSProperties}>
               <ButtonLink href="/work" variant="light">
                 {c["hero.primaryCta"]}
               </ButtonLink>
@@ -58,13 +64,19 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+        <div className="hero-in absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-foam/50 md:flex" style={{ "--delay": "1.6s" } as React.CSSProperties} aria-hidden>
+          <span className="text-[10px] uppercase tracking-[0.35em]">Scroll</span>
+          <span className="scroll-cue h-10" />
+        </div>
       </section>
+
+      <Marquee items={["Machines", "Surf films", "Maabaidhoo", "Drone videography", "Laamu", "Surf photography"]} />
 
       {/* ── Intro ─────────────────────────────────────────── */}
       <section className="bg-paper py-24 md:py-36">
         <div className="container-x grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-24">
           <div data-reveal>
-            <p className="eyebrow text-sea-deep">Ocean X</p>
+            <p className="eyebrow eyebrow-line text-sea-deep">Ocean X</p>
             <h2 className="display mt-5 text-4xl [font-stretch:112%] sm:text-5xl lg:text-6xl">{c["home.introTitle"]}</h2>
           </div>
           <div data-reveal className="lg:pt-10">
@@ -73,7 +85,7 @@ export default async function HomePage() {
               <ul className="mt-10 divide-y divide-deep/10 border-y border-deep/10">
                 {services.map((s) => (
                   <li key={s.id}>
-                    <Link href={`/services/${s.slug}`} className="group flex items-center justify-between py-4">
+                    <Link href={`/services/${s.slug}`} className="group flex items-center justify-between py-4 transition-[padding] duration-300 hover:px-2">
                       <span className="font-medium">{s.name}</span>
                       <span className="flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-slate">
                         {s.status === "ACTIVE" ? <span className="text-sea-deep">Available</span> : "Coming soon"}
