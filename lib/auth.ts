@@ -41,7 +41,9 @@ export async function login(email: string, password: string): Promise<LoginResul
   const valid = await verifyPassword(password, admin?.passwordHash ?? (await getDummyHash()));
   if (!admin || !valid) return { ok: false, error: "Incorrect email or password." };
 
+  // A successful login resets both counters (only failed guesses should add up).
   await clearRateLimit(`login:email:${normalized}`);
+  await clearRateLimit(`login:ip:${ip}`);
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 3600 * 1000);
   const ua = (await headers()).get("user-agent")?.slice(0, 300) ?? null;

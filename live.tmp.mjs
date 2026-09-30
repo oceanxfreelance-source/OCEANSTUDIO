@@ -1,0 +1,18 @@
+import { chromium } from "@playwright/test";
+import { readFileSync } from "node:fs";
+const pw = readFileSync("/tmp/claude-0/site_admin_pw", "utf8");
+const base = "https://oceanx-studio.vercel.app";
+const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: process.argv[2] ? [process.argv[2]] : [] });
+const p = await b.newPage();
+p.on("requestfailed", (r) => console.log("FAILED", r.method(), r.url().slice(0, 90), r.failure()?.errorText));
+p.on("response", (r) => { if (/api\/blob|video-upload|vercel-storage/.test(r.url())) console.log("resp", r.status(), r.request().method(), r.url().slice(0, 90)); });
+await p.goto(base + "/superadmin/login");
+await p.fill("#email", "admin@oceanx.studio"); await p.fill("#password", pw); await p.click("button[type=submit]");
+await p.getByRole("heading", { name: /Hello/ }).waitFor();
+await p.goto(base + "/superadmin/portfolio/new");
+const [chooser] = await Promise.all([p.waitForEvent("filechooser"), p.getByRole("button", { name: "Upload video" }).click()]);
+await chooser.setFiles("/tmp/claude-0/ox-test-clip.mp4");
+await p.waitForTimeout(25000);
+console.log("field value:", (await p.locator('input[name="videoUrl"]').inputValue()).slice(0, 60) || "(empty)");
+console.log("errors:", await p.locator("p.text-red-700").allInnerTexts());
+await b.close();
