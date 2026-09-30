@@ -10,7 +10,7 @@ import { Img } from "./Img";
 /** Placeholder shown when an item has no cover image yet: deep water + faint swell lines. */
 export function CoverFallback({ label }: { label: string }) {
   return (
-    <div className="relative flex h-full w-full items-end overflow-hidden bg-[radial-gradient(90%_70%_at_20%_10%,#26303f_0%,#13151a_55%,#07080a_100%)] p-5 text-foam/45">
+    <div className="relative flex h-full w-full items-end overflow-hidden bg-[radial-gradient(120%_80%_at_30%_0%,#1b4a55_0%,#0e2a33_45%,#08141a_100%)] p-5 text-foam/45">
       <svg aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 w-full opacity-30" viewBox="0 0 400 200" preserveAspectRatio="none">
         {Array.from({ length: 7 }, (_, i) => (
           <path key={i} d={`M0 ${40 + i * 22} C 100 ${30 + i * 22}, 200 ${52 + i * 22}, 400 ${38 + i * 22}`} fill="none" stroke="#e6d7b9" strokeWidth="0.7" opacity={0.25 + i * 0.1} />
@@ -32,7 +32,7 @@ type ServiceCardData = {
   cover: MediaRef | null;
 };
 
-export function ServiceCard({ s, index }: { s: ServiceCardData; index?: number }) {
+export function ServiceCard({ s, index, fallbackImage }: { s: ServiceCardData; index?: number; fallbackImage?: string | null }) {
   const soon = s.status === "COMING_SOON";
   return (
     <Link href={`/services/${s.slug}`} data-reveal className="group flex flex-col">
@@ -41,6 +41,10 @@ export function ServiceCard({ s, index }: { s: ServiceCardData; index?: number }
           <div className="h-full w-full">
             {s.cover ? (
               <Img media={s.cover} alt={s.name} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className={cx("transition duration-[1.2s] ease-out group-hover:scale-[1.06]", soon && "grayscale-[35%]")} />
+            ) : fallbackImage && !soon ? (
+              // No photo yet: a frame from Ocean X's own drone footage.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={fallbackImage} alt={s.name} loading="lazy" className="h-full w-full object-cover object-[50%_28%] transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
             ) : (
               <CoverFallback label={s.name} />
             )}
@@ -90,7 +94,7 @@ export function WorkCard({ w, large = false, dark = false }: { w: WorkCardData; 
               <Img media={w.cover} alt={w.title} sizes={large ? "(min-width: 768px) 66vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"} className="transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
             ) : posterFor(w.videoUrl) ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={posterFor(w.videoUrl)!} alt={w.title} loading="lazy" className="h-full w-full object-cover transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
+              <img src={posterFor(w.videoUrl)!} alt={w.title} loading="lazy" className="h-full w-full object-cover object-[50%_28%] transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
             ) : w.videoUrl && /\.(mp4|mov|m4v|webm)(\?|$)/i.test(w.videoUrl) ? (
               // No cover photo: show the uploaded video's first frame.
               <video src={`${w.videoUrl}#t=0.1`} muted playsInline preload="metadata" aria-hidden className="h-full w-full object-cover" />
@@ -129,7 +133,7 @@ export function LocationCard({ l, wide = false }: { l: LocationCardData; wide?: 
               <Img media={l.cover} alt={l.name} sizes="(min-width: 640px) 50vw, 100vw" className="transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
             ) : posterFor(l.videoUrl) ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={posterFor(l.videoUrl)!} alt={l.name} loading="lazy" className="h-full w-full object-cover transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
+              <img src={posterFor(l.videoUrl)!} alt={l.name} loading="lazy" className="h-full w-full object-cover object-[50%_28%] transition duration-[1.2s] ease-out group-hover:scale-[1.06]" />
             ) : (
               <CoverFallback label={l.kind} />
             )}

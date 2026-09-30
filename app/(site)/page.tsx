@@ -14,22 +14,25 @@ import { getContent } from "@/lib/content";
 import { db } from "@/lib/db";
 import { instagramDmUrl, instagramUrl } from "@/lib/format";
 import { InstagramBookButton } from "@/components/site/InstagramBook";
-import { getFeaturedWork, getLocations, getPublicServices, getReviewStats, getTestimonials } from "@/lib/public";
+import { getFeaturedWork, getLocations, getPublicServices, getReviewStats, getShowcase, getTestimonials } from "@/lib/public";
 import { parseVideoUrl, posterFor } from "@/lib/video";
 
 export default async function HomePage() {
-  const [c, services, work, locations, testimonials, reviewStats] = await Promise.all([
+  const [c, services, work, locations, testimonials, reviewStats, showcase] = await Promise.all([
     getContent(),
     getPublicServices(),
     getFeaturedWork(5),
     getLocations(),
     getTestimonials(true),
     getReviewStats(),
+    getShowcase(),
   ]);
   const heroImage = c["hero.imageId"]
     ? await db.mediaAsset.findUnique({ where: { id: c["hero.imageId"] }, select: { id: true, width: true, height: true, alt: true } })
     : null;
   const heroVideo = parseVideoUrl(c["hero.videoUrl"]);
+  // No hero photo or video chosen yet: open with Ocean X's own drone footage.
+  const reel = !heroImage && heroVideo?.kind !== "file" ? showcase[0] : undefined;
   const ig = instagramUrl(c["social.instagram"]);
   const dm = instagramDmUrl(c["social.instagram"]);
   const [lead, ...rest] = work;
@@ -46,9 +49,13 @@ export default async function HomePage() {
               // No hero photo: use the hero video's cover frame (also what phones see).
               // eslint-disable-next-line @next/next/no-img-element
               <img src={posterFor(heroVideo.url)!} alt="Ocean X — Machines, Maabaidhoo" fetchPriority="high" className="h-full w-full object-cover" />
+            ) : reel ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={reel.poster!} alt="Surfing Machines, filmed from the drone" fetchPriority="high" className="h-full w-full object-cover" />
             ) : (
               <OceanBackdrop />
             )}
+            {reel && <HeroVideo src={reel.video} poster={reel.poster ?? undefined} mobile />}
             {heroVideo?.kind === "file" && <HeroVideo src={heroVideo.url} poster={heroImage ? `/media/${heroImage.id}` : (posterFor(heroVideo.url) ?? undefined)} />}
           </div>
         </div>
@@ -141,6 +148,39 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* ── How it works ──────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-paper py-24 md:py-32">
+        <div className="container-x">
+          <SectionHeading eyebrow="How it works" title="Surf. We film. You keep the clips." />
+          <ol className="mt-14 grid gap-px overflow-hidden border border-deep/10 bg-deep/10 md:grid-cols-3">
+            {[
+              { n: "01", t: "Send a DM", d: "Message us on Instagram with the day and time you want to surf." },
+              { n: "02", t: "We fly over Machines", d: "The drone follows you wave after wave, from above and from the channel, for your whole session." },
+              { n: "03", t: "Get your clips", d: "Your clips arrive by private link, ready for your phone and your Instagram." },
+            ].map((step) => (
+              <li key={step.n} data-reveal className="bg-paper p-8 md:p-10">
+                <span className="display text-5xl text-gold-deep/80">{step.n}</span>
+                <h3 className="mt-6 text-xl font-medium">{step.t}</h3>
+                <p className="mt-3 text-slate">{step.d}</p>
+              </li>
+            ))}
+          </ol>
+          <dl data-reveal className="mt-14 grid grid-cols-2 gap-8 border-t border-deep/10 pt-10 text-sm md:grid-cols-4">
+            {[
+              ["Camera", "DJI Air 3S"],
+              ["Filmed at", "Machines, Laamu"],
+              ["Format", "Vertical & wide"],
+              ["Delivery", "Private link"],
+            ].map(([k, v]) => (
+              <div key={k}>
+                <dt className="eyebrow text-slate">{k}</dt>
+                <dd className="mt-2 text-lg">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
       {/* ── Services ──────────────────────────────────────── */}
       {services.length > 0 && (
         <section className="bg-foam py-24 md:py-32">
@@ -148,7 +188,7 @@ export default async function HomePage() {
             <SectionHeading eyebrow="Services" title="Surf sessions" intro={c["services.intro"]} />
             <div className="mt-14 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
               {services.slice(0, 6).map((s, i) => (
-                <ServiceCard key={s.id} s={s} index={i} />
+                <ServiceCard key={s.id} s={s} index={i} fallbackImage={showcase[0]?.poster} />
               ))}
             </div>
           </div>

@@ -3,7 +3,7 @@ import { EmptyState, PageHero } from "@/components/site/Section";
 import { Stars } from "@/components/site/Stars";
 import { ReviewGrid } from "@/components/site/Testimonials";
 import { getContent } from "@/lib/content";
-import { getReviewStats, getTestimonials } from "@/lib/public";
+import { getReviewStats, getShowcase, getTestimonials } from "@/lib/public";
 import { ReviewForm } from "./ReviewForm";
 
 export const metadata: Metadata = {
@@ -13,11 +13,12 @@ export const metadata: Metadata = {
 };
 
 export default async function ReviewsPage() {
+  const showcase = await getShowcase();
   const [c, reviews, stats] = await Promise.all([getContent(), getTestimonials(), getReviewStats()]);
 
   return (
     <>
-      <PageHero eyebrow="Reviews" title="What surfers say." intro={c["reviews.intro"]} />
+      <PageHero eyebrow="Reviews" title="What surfers say." intro={c["reviews.intro"]} image={showcase[0]?.poster} />
       <section className="bg-paper py-16 md:py-24">
         <div className="container-x">
           {stats.average && (

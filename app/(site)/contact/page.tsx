@@ -3,6 +3,7 @@ import { ButtonLink } from "@/components/site/Buttons";
 import { Instagram, Mail, Pin, WhatsApp } from "@/components/site/Icons";
 import { PageHero } from "@/components/site/Section";
 import { getContent } from "@/lib/content";
+import { getShowcase } from "@/lib/public";
 import { instagramDmUrl, instagramUrl, whatsappUrl } from "@/lib/format";
 import { InstagramBookButton } from "@/components/site/InstagramBook";
 
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
+  const showcase = await getShowcase();
   const c = await getContent();
   const ig = instagramUrl(c["social.instagram"]);
   const dm = instagramDmUrl(c["social.instagram"]);
@@ -25,7 +27,7 @@ export default async function ContactPage() {
 
   return (
     <>
-      <PageHero eyebrow="Contact" title="Let's talk." intro={c["contact.text"]} />
+      <PageHero eyebrow="Contact" title="Let's talk." intro={c["contact.text"]} image={showcase[0]?.poster} />
       <section className="bg-paper py-20 md:py-28">
         <div className="container-x grid gap-14 lg:grid-cols-[1fr_1fr] lg:gap-24">
           <div data-reveal>

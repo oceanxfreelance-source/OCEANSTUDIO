@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { db } from "./db";
+import { posterFor } from "./video";
 
 /**
  * Read-only queries for the PUBLIC website. Everything here filters to
@@ -89,3 +90,29 @@ export const getTestimonials = cache((onlyFeatured = false) =>
 );
 
 export type MediaRef = { id: string; width: number; height: number; alt: string };
+
+/**
+ * Real footage used to dress the site when a photo hasn't been uploaded yet:
+ * the cover frames (and clips) of optimised videos from published work and
+ * locations — featured and newest first.
+ */
+export const getShowcase = cache(async () => {
+  const [work, places] = await Promise.all([
+    db.portfolioItem.findMany({
+      where: { published: true, videoUrl: { contains: "/videos/web/" } },
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      select: { title: true, slug: true, videoUrl: true },
+    }),
+    db.location.findMany({
+      where: { published: true, videoUrl: { contains: "/videos/web/" } },
+      orderBy: [{ featured: "desc" }, { displayOrder: "asc" }],
+      select: { name: true, slug: true, videoUrl: true },
+    }),
+  ]);
+  return [
+    ...work.map((w) => ({ title: w.title, href: `/work/${w.slug}`, video: w.videoUrl! })),
+    ...places.map((l) => ({ title: l.name, href: `/machines/${l.slug}`, video: l.videoUrl! })),
+  ]
+    .map((s) => ({ ...s, poster: posterFor(s.video) }))
+    .filter((s): s is typeof s & { poster: string } => !!s.poster);
+});

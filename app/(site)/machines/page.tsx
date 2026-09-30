@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LocationCard } from "@/components/site/Cards";
 import { EmptyState, PageHero } from "@/components/site/Section";
 import { getContent } from "@/lib/content";
-import { getLocations } from "@/lib/public";
+import { getLocations, getShowcase } from "@/lib/public";
 
 export const metadata: Metadata = {
   title: "Machines & Maabaidhoo",
@@ -11,13 +11,14 @@ export const metadata: Metadata = {
 };
 
 export default async function MachinesPage() {
+  const showcase = await getShowcase();
   const [c, locations] = await Promise.all([getContent(), getLocations()]);
   const featured = locations.filter((l) => l.featured);
   const others = locations.filter((l) => !l.featured);
 
   return (
     <>
-      <PageHero eyebrow="Machines • Maabaidhoo • Laamu" title="Where we work." intro={c["laamu.intro"]} />
+      <PageHero eyebrow="Machines • Maabaidhoo • Laamu" title="Where we work." intro={c["laamu.intro"]} image={(showcase[1] ?? showcase[0])?.poster} />
       <section className="bg-ink pb-24 text-foam md:pb-32">
         <div className="container-x pt-4">
           {locations.length === 0 ? (

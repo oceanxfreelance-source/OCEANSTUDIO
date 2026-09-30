@@ -5,7 +5,7 @@ import { InstagramBookButton } from "@/components/site/InstagramBook";
 import { instagramDmUrl } from "@/lib/format";
 import { EmptyState, PageHero } from "@/components/site/Section";
 import { getContent } from "@/lib/content";
-import { getPublicServices } from "@/lib/public";
+import { getPublicServices, getShowcase } from "@/lib/public";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -14,13 +14,14 @@ export const metadata: Metadata = {
 };
 
 export default async function ServicesPage() {
+  const showcase = await getShowcase();
   const [c, services] = await Promise.all([getContent(), getPublicServices()]);
   const active = services.filter((s) => s.status === "ACTIVE");
   const soon = services.filter((s) => s.status === "COMING_SOON");
 
   return (
     <>
-      <PageHero eyebrow="Services" title="Surf sessions." intro={c["services.intro"]} />
+      <PageHero eyebrow="Services" title="Surf sessions." intro={c["services.intro"]} image={(showcase[1] ?? showcase[0])?.poster} />
       <section className="bg-paper py-20 md:py-28">
         <div className="container-x">
           {services.length === 0 && <EmptyState title="Services coming soon" body="We're preparing our service list. Get in touch in the meantime." />}
@@ -29,7 +30,7 @@ export default async function ServicesPage() {
               <p className="eyebrow text-gold-deep">Available now</p>
               <div className="mt-8 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
                 {active.map((s, i) => (
-                  <ServiceCard key={s.id} s={s} index={i} />
+                  <ServiceCard key={s.id} s={s} index={i} fallbackImage={showcase[0]?.poster} />
                 ))}
               </div>
             </>

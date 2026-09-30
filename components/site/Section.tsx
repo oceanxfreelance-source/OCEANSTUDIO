@@ -31,9 +31,16 @@ export function SectionHeading({
 }
 
 /** Top-of-page banner for inner pages (dark, compact). */
-export function PageHero({ eyebrow, title, intro }: { eyebrow: string; title: string; intro?: string }) {
+export function PageHero({ eyebrow, title, intro, image }: { eyebrow: string; title: string; intro?: string; image?: string | null }) {
   return (
     <section className="grain relative overflow-hidden bg-abyss pb-16 pt-36 text-foam md:pb-24 md:pt-48">
+      {image && (
+        <div aria-hidden className="hero-media absolute inset-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image} alt="" fetchPriority="high" className="h-full w-full object-cover object-[50%_25%] opacity-45" />
+          <div className="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/70 to-abyss/40" />
+        </div>
+      )}
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(50%_60%_at_20%_0%,rgba(201,169,110,0.16),transparent_70%)]" />
       <Viewfinder compact />
       <div className="container-x relative z-[2]">

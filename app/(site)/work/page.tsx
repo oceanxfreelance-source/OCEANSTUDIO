@@ -5,7 +5,7 @@ import { EmptyState, PageHero } from "@/components/site/Section";
 import { cx } from "@/components/ui/cx";
 import { PORTFOLIO_CATEGORIES } from "@/lib/constants";
 import { getContent } from "@/lib/content";
-import { getPortfolio } from "@/lib/public";
+import { getPortfolio, getShowcase } from "@/lib/public";
 
 export const metadata: Metadata = {
   title: "Our Work",
@@ -16,13 +16,14 @@ export const metadata: Metadata = {
 type Props = { searchParams: Promise<{ category?: string }> };
 
 export default async function WorkPage({ searchParams }: Props) {
+  const showcase = await getShowcase();
   const { category } = await searchParams;
   const active = PORTFOLIO_CATEGORIES.find((c) => c.toLowerCase() === category?.toLowerCase());
   const [c, items] = await Promise.all([getContent(), getPortfolio(active)]);
 
   return (
     <>
-      <PageHero eyebrow="Our work" title="Waves from Machines." intro={c["work.intro"]} />
+      <PageHero eyebrow="Our work" title="Waves from Machines." intro={c["work.intro"]} image={showcase[0]?.poster} />
       <section className="bg-abyss pb-24 text-foam md:pb-32">
         <div className="container-x">
           <nav aria-label="Filter by category" className="-mx-5 flex gap-2 overflow-x-auto border-b border-white/10 px-5 pb-5 sm:mx-0 sm:flex-wrap sm:px-0">
