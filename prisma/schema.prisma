@@ -1,0 +1,375 @@
+// OCEAN X — database schema
+//
+// Two separate worlds live here:
+//   * PUBLIC content the website shows (services, portfolio, Laamu locations,
+//     testimonials, editable site text) — managed from /superadmin.
+//   * PRIVATE business data only the administrator sees (booking requests,
+//     customers, shoot sessions, deliveries).
+//
+// Visitors never get accounts. The only login is the Superadmin (AdminUser).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────── Admin & security ───────────────────────────────
+
+/// Ocean X administrators. There is no public registration: admins are created
+/// with `npm run admin:create`. `role` is ready for future staff accounts.
+model AdminUser {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  name         String
+  passwordHash String         @map("password_hash")
+  role         AdminRole      @default(OWNER)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  lastLoginAt  DateTime?      @map("last_login_at")
+  sessions     AdminSession[]
+
+  @@map("admin_users")
+}
+
+enum AdminRole {
+  OWNER
+  STAFF
+}
+
+/// Server-side login sessions. The browser only holds a random token; we store
+/// its SHA-256 hash so a database leak does not expose live sessions.
+model AdminSession {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique @map("token_hash")
+  adminId   String    @map("admin_id")
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  userAgent String?   @map("user_agent")
+
+  @@index([adminId])
+  @@map("admin_sessions")
+}
+
+/// Fixed-window counters for login and booking-form rate limiting.
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime @map("reset_at")
+
+  @@map("rate_limits")
+}
+
+// ─────────────────────────────── Media ───────────────────────────────
+
+/// Uploaded images. Version 1 stores optimised WebP bytes in Postgres (free, no
+/// extra service). `storage`/`storageKey` let a future version move files to
+/// S3/R2 without changing the rest of the app.
+model MediaAsset {
+  id         String   @id @default(cuid())
+  storage    String   @default("db")
+  storageKey String?  @map("storage_key")
+  mimeType   String   @map("mime_type")
+  width      Int
+  height     Int
+  size       Int
+  data       Bytes? // full size (max 2400px)
+  thumb      Bytes? // small version (max 900px) for grids and phones
+  alt        String   @default("")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  serviceCovers     Service[]        @relation("ServiceCover")
+  serviceImages     ServiceImage[]
+  portfolioCovers   PortfolioItem[]  @relation("PortfolioCover")
+  portfolioImages   PortfolioImage[]
+  locationCovers    Location[]       @relation("LocationCover")
+  locationImages    LocationImage[]
+  testimonialAvatar Testimonial[]
+
+  @@map("media_assets")
+}
+
+// ─────────────────────────────── Public content ───────────────────────────────
+
+/// Editable website text (hero, about, contact, social links, footer…).
+/// Keys and defaults are defined in lib/content.ts.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+enum ServiceStatus {
+  ACTIVE
+  COMING_SOON
+  HIDDEN
+}
+
+enum PriceType {
+  ON_REQUEST
+  FIXED
+  FROM
+  PER_PERSON
+  PER_HOUR
+  PER_SESSION
+}
+
+model Service {
+  id               String         @id @default(cuid())
+  slug             String         @unique
+  name             String
+  shortDescription String         @default("") @map("short_description")
+  description      String         @default("")
+  status           ServiceStatus  @default(COMING_SOON)
+  price            Decimal?       @db.Decimal(10, 2)
+  priceType        PriceType      @default(ON_REQUEST) @map("price_type")
+  currency         String         @default("USD")
+  coverId          String?        @map("cover_id")
+  cover            MediaAsset?    @relation("ServiceCover", fields: [coverId], references: [id], onDelete: SetNull)
+  images           ServiceImage[]
+  featured         Boolean        @default(false)
+  displayOrder     Int            @default(0) @map("display_order")
+  published        Boolean        @default(true)
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  bookings         Booking[]
+  shootSessions    ShootSession[]
+  films            PortfolioItem[] // videos shown on the service page
+
+  @@index([published, status, displayOrder])
+  @@map("services")
+}
+
+model ServiceImage {
+  serviceId String     @map("service_id")
+  mediaId   String     @map("media_id")
+  position  Int        @default(0)
+  service   Service    @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  media     MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([serviceId, mediaId])
+  @@map("service_images")
+}
+
+/// Places Ocean X works — surf spots, islands, lagoons… `atoll` keeps the model
+/// ready for Maldives-wide expansion beyond Laamu.
+model Location {
+  id           String          @id @default(cuid())
+  slug         String          @unique
+  name         String
+  kind         String          @default("Island")
+  atoll        String          @default("Laamu")
+  description  String          @default("")
+  coverId      String?         @map("cover_id")
+  cover        MediaAsset?     @relation("LocationCover", fields: [coverId], references: [id], onDelete: SetNull)
+  images       LocationImage[]
+  videoUrl     String?         @map("video_url")
+  featured     Boolean         @default(false)
+  published    Boolean         @default(true)
+  displayOrder Int             @default(0) @map("display_order")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+  portfolio    PortfolioItem[]
+  bookings     Booking[]
+
+  @@index([published, displayOrder])
+  @@map("locations")
+}
+
+model LocationImage {
+  locationId String     @map("location_id")
+  mediaId    String     @map("media_id")
+  position   Int        @default(0)
+  location   Location   @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  media      MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([locationId, mediaId])
+  @@map("location_images")
+}
+
+model PortfolioItem {
+  id           String           @id @default(cuid())
+  slug         String           @unique
+  title        String
+  description  String           @default("")
+  category     String // see PORTFOLIO_CATEGORIES in lib/constants.ts
+  locationId   String?          @map("location_id")
+  location     Location?        @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  serviceId    String?          @map("service_id") // shown on this service's page
+  service      Service?         @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  date         DateTime?
+  coverId      String?          @map("cover_id")
+  cover        MediaAsset?      @relation("PortfolioCover", fields: [coverId], references: [id], onDelete: SetNull)
+  images       PortfolioImage[]
+  videoUrl     String?          @map("video_url") // main video = videoUrls[0]
+  videoUrls    String[]         @default([]) @map("video_urls") // all videos, in order
+  featured     Boolean          @default(false)
+  published    Boolean          @default(true)
+  displayOrder Int              @default(0) @map("display_order")
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  @@index([published, category])
+  @@index([serviceId, published])
+  @@map("portfolio_items")
+}
+
+model PortfolioImage {
+  itemId   String        @map("item_id")
+  mediaId  String        @map("media_id")
+  position Int           @default(0)
+  item     PortfolioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  media    MediaAsset    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, mediaId])
+  @@map("portfolio_images")
+}
+
+/// Guest reviews (stars + a note). Reviews sent from the website arrive with
+/// pending = true and published = false; the admin approves them before they
+/// appear. The admin can also add reviews directly.
+model Testimonial {
+  id        String      @id @default(cuid())
+  name      String
+  instagram String?
+  text      String
+  rating    Int? // 1–5 stars
+  source    String      @default("admin") // "guest" = sent from the website
+  pending   Boolean     @default(false) // waiting for the admin's approval
+  avatarId  String?     @map("avatar_id")
+  avatar    MediaAsset? @relation(fields: [avatarId], references: [id], onDelete: SetNull)
+  date      DateTime?
+  featured  Boolean     @default(false)
+  published Boolean     @default(true)
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@index([published, pending])
+  @@map("testimonials")
+}
+
+// ─────────────────────────────── Private business data ───────────────────────────────
+
+/// Internal customer records. Customers never log in — this is the admin's CRM.
+model Customer {
+  id        String         @id @default(cuid())
+  name      String
+  instagram String?
+  email     String?
+  whatsapp  String?
+  country   String?
+  notes     String         @default("")
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  bookings  Booking[]
+  sessions  ShootSession[]
+
+  @@index([email])
+  @@index([instagram])
+  @@index([whatsapp])
+  @@map("customers")
+}
+
+enum BookingStatus {
+  NEW
+  CONTACTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  DEPOSIT
+  PAID
+  REFUNDED
+}
+
+/// A booking request. The public booking form was removed (the website is a
+/// showcase, not a booking system); the table is kept so no data is lost and
+/// bookings can return later.
+model Booking {
+  id            String         @id @default(cuid())
+  reference     String         @unique // e.g. OX-B-00012 — friendly ID for the admin
+  customerId    String         @map("customer_id")
+  customer      Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  serviceId     String?        @map("service_id")
+  service       Service?       @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  serviceName   String         @default("") @map("service_name") // snapshot at request time
+  locationId    String?        @map("location_id")
+  location      Location?      @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  locationText  String         @default("") @map("location_text")
+  fullName      String         @map("full_name")
+  instagram     String?
+  email         String?
+  whatsapp      String?
+  preferredDate DateTime?      @map("preferred_date") @db.Date
+  preferredTime String?        @map("preferred_time")
+  people        Int?
+  message       String         @default("")
+  status        BookingStatus  @default(NEW)
+  price         Decimal?       @db.Decimal(10, 2)
+  paymentStatus PaymentStatus  @default(UNPAID) @map("payment_status")
+  notes         String         @default("")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  sessions      ShootSession[]
+
+  @@index([status, createdAt])
+  @@map("bookings")
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum DeliveryStatus {
+  NOT_READY
+  PROCESSING
+  READY
+  SENT
+}
+
+/// A confirmed shoot. Named ShootSession to avoid confusion with login sessions.
+model ShootSession {
+  id             String         @id @default(cuid())
+  code           String         @unique // e.g. OX-S-00007 — the "Session ID"
+  bookingId      String?        @map("booking_id")
+  booking        Booking?       @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  customerId     String         @map("customer_id")
+  customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  serviceId      String?        @map("service_id")
+  service        Service?       @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  serviceName    String         @default("") @map("service_name")
+  locationText   String         @default("") @map("location_text")
+  date           DateTime       @db.Date
+  time           String?
+  people         Int?
+  clips          Int?
+  price          Decimal?       @db.Decimal(10, 2)
+  paymentStatus  PaymentStatus  @default(UNPAID) @map("payment_status")
+  status         SessionStatus  @default(SCHEDULED)
+  deliveryStatus DeliveryStatus @default(NOT_READY) @map("delivery_status")
+  deliveryLink   String?        @map("delivery_link")
+  deliverySentAt DateTime?      @map("delivery_sent_at")
+  notes          String         @default("")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  @@index([status, date])
+  @@map("shoot_sessions")
+}
+
+/// Sequential counters for friendly references (OX-B-00001, OX-S-00001).
+model Counter {
+  name  String @id
+  value Int    @default(0)
+
+  @@map("counters")
+}
