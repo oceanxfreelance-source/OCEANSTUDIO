@@ -225,3 +225,44 @@ test("admin: logout ends the session", async ({ page }) => {
   await page.goto("/superadmin/sessions");
   await expect(page).toHaveURL(/\/superadmin\/login$/);
 });
+
+test("admin: 'Add many videos' publishes one Surf video per clip", async ({ page }) => {
+  // Video storage and the optimiser are external services: stand them in so the
+  // test covers the admin flow (pick several clips → each becomes its own item).
+  const web = (n: number) => `https://abc.public.blob.vercel-storage.com/videos/web/${run}${"0".repeat(20 - run.length - 1)}${n}.mp4`;
+  let uploaded = 0;
+  let optimised = 0;
+  await page.route("**/api/admin/video-upload", (r) =>
+    r.fulfill({ json: { type: "blob.generate-client-token", clientToken: "vercel_blob_client_teststore_dGVzdA" } }),
+  );
+  await page.route("https://vercel.com/api/blob/**", (r) => {
+    uploaded++;
+    const url = `https://abc.public.blob.vercel-storage.com/videos/clip-${uploaded}.mp4`;
+    return r.fulfill({ json: { url, downloadUrl: url, pathname: `videos/clip-${uploaded}.mp4`, contentType: "video/mp4", contentDisposition: "inline" } });
+  });
+  await page.route("**/api/admin/video-optimize", (r) => r.fulfill({ json: { url: web(++optimised) } }));
+
+  await login(page);
+  await page.goto("/superadmin/portfolio");
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Choose videos" }).click();
+  const fc = await chooser;
+  expect(fc.isMultiple()).toBe(true);
+  const clip = (name: string) => ({ name, mimeType: "video/mp4", buffer: Buffer.from("not really a video") });
+  await fc.setFiles([clip("DJI_0001.MP4"), clip("DJI_0002.MP4"), { name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("x") }]);
+
+  await expect(page.getByText("✓ Done")).toHaveCount(2, { timeout: 30_000 });
+  await expect(page.getByText("Please choose a video.")).toBeVisible();
+  expect(optimised).toBe(2);
+
+  // Both clips are on the public Our Work page, then clean up.
+  await page.goto("/work");
+  for (const n of [1, 2]) await expect(page.locator(`img[src="${web(n).replace(".mp4", ".jpg")}"]`)).not.toHaveCount(0);
+  await page.goto("/superadmin/portfolio");
+  for (const n of [1, 2]) {
+    await page.locator(`a:has(img[src="${web(n).replace(".mp4", ".jpg")}"])`).click();
+    page.once("dialog", (d) => d.accept());
+    await page.getByRole("button", { name: "Delete" }).click();
+    await expect(page).toHaveURL(/\/superadmin\/portfolio$/);
+  }
+});

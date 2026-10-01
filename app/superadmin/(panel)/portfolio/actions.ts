@@ -6,7 +6,8 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { checkbox, fieldErrors, formToObject, idList, type FormState } from "@/lib/forms";
 import { uniqueSlug } from "@/lib/slug";
-import { deleteVideoIfUnused } from "@/lib/video-storage";
+import { formatDate } from "@/lib/format";
+import { deleteVideoIfUnused, isOurVideo } from "@/lib/video-storage";
 import { portfolioSchema } from "@/lib/validation";
 
 export async function savePortfolioItem(id: string | null, _prev: FormState, fd: FormData): Promise<FormState> {
@@ -63,4 +64,22 @@ export async function togglePortfolio(id: string, field: "published" | "featured
   const item = await db.portfolioItem.findUniqueOrThrow({ where: { id }, select: { published: true, featured: true } });
   await db.portfolioItem.update({ where: { id }, data: { [field]: !item[field] } });
   revalidatePath("/", "layout");
+}
+
+/**
+ * "Add many videos": one published Surf portfolio item per uploaded clip, at
+ * Machines when that location exists. Title and details can be edited later.
+ */
+export async function createVideoItem(videoUrl: string, takenAt: number | null): Promise<{ id: string; title: string }> {
+  await requireAdmin();
+  if (!isOurVideo(videoUrl)) throw new Error("Only uploaded videos can be added here.");
+  const date = takenAt && Number.isFinite(takenAt) && takenAt > 0 && takenAt <= Date.now() + 86_400_000 ? new Date(takenAt) : null;
+  const title = `Surf session${date ? ` · ${formatDate(date, { day: "numeric", month: "short", year: "numeric", timeZone: "Indian/Maldives" })}` : ""}`;
+  const machines = await db.location.findFirst({ where: { slug: "machines" }, select: { id: true } });
+  const slug = await uniqueSlug(title, async (s) => !!(await db.portfolioItem.findUnique({ where: { slug: s } })));
+  const item = await db.portfolioItem.create({
+    data: { slug, title, category: "Surf", videoUrl, date, locationId: machines?.id ?? null, published: true },
+  });
+  revalidatePath("/", "layout");
+  return { id: item.id, title };
 }

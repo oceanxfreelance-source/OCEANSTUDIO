@@ -1,9 +1,9 @@
 "use client";
 
-import { upload } from "@vercel/blob/client";
 import { needsOptimising, posterFor } from "@/lib/video";
 import { useRef, useState } from "react";
 import { FieldError } from "./ActionForm";
+import { checkVideoFile, optimiseVideo, uploadVideo } from "./video-client";
 
 /**
  * Video field for admin forms. "Upload video" opens the phone's gallery (or the
@@ -12,8 +12,6 @@ import { FieldError } from "./ActionForm";
  * can play (H.264 1080p, streaming-ready, with a cover frame). Pasting a link
  * is available as a secondary option.
  */
-const MAX_MB = 500;
-
 export function VideoField({ name, label, defaultValue, hint }: { name: string; label: string; defaultValue?: string | null; hint?: string }) {
   const [value, setValue] = useState(defaultValue ?? "");
   const [progress, setProgress] = useState<number | null>(null);
@@ -26,31 +24,19 @@ export function VideoField({ name, label, defaultValue, hint }: { name: string; 
 
   async function onFile(file: File) {
     setError(null);
-    if (!/^video\//.test(file.type) && !/\.(mp4|mov|m4v|webm)$/i.test(file.name)) {
-      setError("Please choose a video.");
-      return;
-    }
-    if (file.size > MAX_MB * 1024 * 1024) {
-      setError(`This video is ${Math.round(file.size / 1024 / 1024)} MB. The limit is ${MAX_MB} MB — export a shorter or 1080p version.`);
+    const problem = checkVideoFile(file);
+    if (problem) {
+      setError(problem);
       return;
     }
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     setProgress(0);
     try {
-      const ext = (file.name.match(/\.(mp4|mov|m4v|webm)$/i)?.[1] ?? (file.type === "video/quicktime" ? "mov" : "mp4")).toLowerCase();
-      const safeName = `${file.name.replace(/\.[^.]+$/, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40) || "video"}.${ext}`;
-      const blob = await upload(`videos/${safeName}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/admin/video-upload",
-        contentType: file.type || "video/mp4",
-        multipart: file.size > 20 * 1024 * 1024,
-        abortSignal: ctrl.signal,
-        onUploadProgress: (p) => setProgress(Math.round(p.percentage)),
-      });
-      setValue(blob.url);
+      const url = await uploadVideo(file, setProgress, ctrl.signal);
+      setValue(url);
       setProgress(null);
-      await optimise(blob.url);
+      await optimise(url);
     } catch (e) {
       if ((e as Error).name !== "AbortError") setError(`Upload failed: ${(e as Error).message}`);
     } finally {
@@ -60,15 +46,11 @@ export function VideoField({ name, label, defaultValue, hint }: { name: string; 
     }
   }
 
-  /** Convert on the server into the phone-friendly version (~30–90 s). */
   async function optimise(url: string) {
     setOptimising(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/video-optimize", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url }) });
-      const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
-      if (!res.ok || !json.url) throw new Error(json.error ?? `Error ${res.status}`);
-      setValue(json.url);
+      setValue(await optimiseVideo(url));
     } catch (e) {
       setError(`${(e as Error).message} The original is kept, but it may not play on every phone.`);
     } finally {

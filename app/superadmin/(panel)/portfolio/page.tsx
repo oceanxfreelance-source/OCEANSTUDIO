@@ -5,7 +5,9 @@ import { requireAdmin } from "@/lib/auth";
 import { PORTFOLIO_CATEGORIES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/format";
+import { posterFor } from "@/lib/video";
 import { togglePortfolio } from "./actions";
+import { BulkVideoUpload } from "./BulkVideoUpload";
 
 export const metadata = { title: "Portfolio" };
 
@@ -22,6 +24,7 @@ export default async function PortfolioAdmin({ searchParams }: { searchParams: P
   return (
     <>
       <PageHeader title="Portfolio" subtitle="Your work on the Our Work page." actions={<ButtonLink href="/superadmin/portfolio/new">+ Add work</ButtonLink>} />
+      <BulkVideoUpload />
       <div className="mb-5 flex flex-wrap gap-2">
         {[undefined, ...PORTFOLIO_CATEGORIES].map((c) => (
           <Link key={c ?? "all"} href={c ? `/superadmin/portfolio?category=${c}` : "/superadmin/portfolio"} className={cx("rounded-full border px-3 py-1 text-xs", cat === c ? "border-abyss bg-abyss text-white" : "border-slate/25 bg-white hover:bg-foam")}>
@@ -41,6 +44,9 @@ export default async function PortfolioAdmin({ searchParams }: { searchParams: P
                 {w.coverId ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={`/media/${w.coverId}?size=thumb`} alt="" className="h-full w-full object-cover" loading="lazy" />
+                ) : posterFor(w.videoUrl) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={posterFor(w.videoUrl)!} alt="" className="h-full w-full object-cover" loading="lazy" />
                 ) : (
                   <span className="flex h-full items-center justify-center text-xs text-slate">No cover image</span>
                 )}
