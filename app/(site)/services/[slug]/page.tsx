@@ -32,10 +32,13 @@ export default async function ServicePage({ params }: Props) {
   if (!s) notFound();
   const soon = s.status === "COMING_SOON";
   const dm = instagramDmUrl((await getContent())["social.instagram"]);
-  const films = s.films.flatMap((f) => {
-    const source = parseVideoUrl(f.videoUrl);
-    return source ? [{ ...f, source }] : [];
-  });
+  // Every video of every linked portfolio piece, in order.
+  const films = s.films.flatMap((f) =>
+    (f.videoUrls.length ? f.videoUrls : [f.videoUrl]).flatMap((url, i) => {
+      const source = parseVideoUrl(url);
+      return source ? [{ key: `${f.id}-${i}`, slug: f.slug, title: f.title, source }] : [];
+    }),
+  );
 
   return (
     <>
@@ -89,7 +92,7 @@ export default async function ServicePage({ params }: Props) {
             <SectionHeading eyebrow="Films" title={films.length === 1 ? "Watch the film" : `${films.length} films from Machines`} intro="Tap any film to play it." />
             <div className="mt-12 grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {films.map((f) => (
-                <figure key={f.id} data-reveal>
+                <figure key={f.key} data-reveal>
                   <VideoPlayer source={f.source} title={f.title} portrait />
                   <figcaption className="mt-3 flex items-baseline justify-between gap-3 text-sm">
                     <Link href={`/work/${f.slug}`} className="link-underline font-medium">

@@ -171,12 +171,12 @@ test("admin: video upload is offered from the gallery and locked to admins", asy
 
   await login(page);
   await page.goto("/superadmin/portfolio/new");
-  const upload = page.getByRole("button", { name: "Upload video" });
+  const upload = page.getByRole("button", { name: "Add videos" });
   await expect(upload).toBeVisible();
   await expect(page.locator('input[type="file"][accept="video/*"]')).toHaveCount(1);
   const chooser = page.waitForEvent("filechooser");
   await upload.click();
-  expect((await chooser).isMultiple()).toBe(false);
+  expect((await chooser).isMultiple()).toBe(true);
 });
 
 test("admin: editing website text changes the home page", async ({ page }) => {
@@ -226,10 +226,11 @@ test("admin: logout ends the session", async ({ page }) => {
   await expect(page).toHaveURL(/\/superadmin\/login$/);
 });
 
-test("admin: 'Add many videos' publishes each clip as a Drone Videography film", async ({ page }) => {
+test("admin: one portfolio piece holds many videos", async ({ page }) => {
   // Video storage and the optimiser are external services: stand them in so the
-  // test covers the admin flow (pick several clips → each becomes its own item).
+  // test covers the admin flow (pick several clips → all in one piece).
   const web = (n: number) => `https://abc.public.blob.vercel-storage.com/videos/web/${run}${"0".repeat(20 - run.length - 1)}${n}.mp4`;
+  const jpg = (n: number) => web(n).replace(".mp4", ".jpg");
   let uploaded = 0;
   let optimised = 0;
   await page.route("**/api/admin/video-upload", (r) =>
@@ -243,35 +244,42 @@ test("admin: 'Add many videos' publishes each clip as a Drone Videography film",
   await page.route("**/api/admin/video-optimize", (r) => r.fulfill({ json: { url: web(++optimised) } }));
 
   await login(page);
-  await page.goto("/superadmin/portfolio");
+  await page.goto("/superadmin/portfolio/new");
+  await page.getByLabel("Title").fill(`E2E Films ${run}`);
   const chooser = page.waitForEvent("filechooser");
-  await page.getByRole("button", { name: "Choose videos" }).click();
+  await page.getByRole("button", { name: "Add videos" }).click();
   const fc = await chooser;
   expect(fc.isMultiple()).toBe(true);
   const clip = (name: string) => ({ name, mimeType: "video/mp4", buffer: Buffer.from("not really a video") });
-  await fc.setFiles([clip("DJI_0001.MP4"), clip("DJI_0002.MP4"), { name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("x") }]);
+  await fc.setFiles([clip("DJI_0001.MP4"), clip("DJI_0002.MP4"), clip("DJI_0003.MP4"), { name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("x") }]);
 
-  await expect(page.getByText("✓ Done")).toHaveCount(2, { timeout: 30_000 });
+  await expect(page.locator(`img[src="${jpg(3)}"]`)).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText("Please choose a video.")).toBeVisible();
-  expect(optimised).toBe(2);
+  await expect(page.getByText("Videos (3)")).toBeVisible();
+  // Make the third clip the main one, remove the second, save.
+  await page.getByRole("button", { name: "Move video 3 earlier" }).click();
+  await page.getByRole("button", { name: "Move video 2 earlier" }).click();
+  await page.getByRole("button", { name: "Remove video 3" }).click();
+  await page.getByRole("button", { name: "Add to portfolio" }).click();
+  await expect(page).toHaveURL(/\/superadmin\/portfolio\/[^/]+\?created=1$/);
+  await expect(page.getByText("Videos (2)")).toBeVisible();
 
-  // Both clips are on Our Work and in the Drone Videography films, then clean up.
+  // The public piece shows both films (main first); so does Drone Videography.
   await page.goto("/work");
-  for (const n of [1, 2]) await expect(page.locator(`img[src="${web(n).replace(".mp4", ".jpg")}"]`)).not.toHaveCount(0);
+  await page.getByRole("link", { name: new RegExp(`E2E Films ${run}`) }).first().click();
+  const players = page.locator('button[aria-label^="Play video"]');
+  await expect(players).toHaveCount(2);
+  await expect(players.nth(0).locator("img")).toHaveAttribute("src", jpg(3));
+  await expect(players.nth(1).locator("img")).toHaveAttribute("src", jpg(1));
   await page.goto("/services/drone-videography");
-  await expect(page.getByRole("heading", { name: /films from Machines/ })).toBeVisible();
-  for (const n of [1, 2]) await expect(page.locator(`button:has(img[src="${web(n).replace(".mp4", ".jpg")}"])`)).toHaveCount(1);
-  await page.locator(`button:has(img[src="${web(1).replace(".mp4", ".jpg")}"])`).click();
-  await expect(page.locator(`video[src="${web(1)}"]`)).toHaveCount(1);
-  await page.goto("/superadmin/services");
-  await page.getByRole("link", { name: "Drone Videography" }).first().click();
-  await expect(page.getByRole("heading", { name: /Films on this page \(\d+\)/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Choose videos" })).toBeVisible();
+  for (const n of [3, 1]) await expect(page.locator(`button:has(img[src="${jpg(n)}"])`)).toHaveCount(1);
+  await expect(page.locator(`button:has(img[src="${jpg(2)}"])`)).toHaveCount(0);
+
+  // Clean up.
   await page.goto("/superadmin/portfolio");
-  for (const n of [1, 2]) {
-    await page.locator(`a:has(img[src="${web(n).replace(".mp4", ".jpg")}"])`).click();
-    page.once("dialog", (d) => d.accept());
-    await page.getByRole("button", { name: "Delete" }).click();
-    await expect(page).toHaveURL(/\/superadmin\/portfolio$/);
-  }
+  await expect(page.getByText("2 videos").first()).toBeVisible();
+  await page.getByRole("link", { name: `E2E Films ${run}` }).click();
+  page.once("dialog", (d) => d.accept());
+  await page.getByRole("button", { name: "Delete" }).click();
+  await expect(page).toHaveURL(/\/superadmin\/portfolio$/);
 });

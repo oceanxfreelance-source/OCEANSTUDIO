@@ -28,7 +28,7 @@ export const getPublicService = cache((slug: string) =>
       films: {
         where: { published: true, videoUrl: { not: null } },
         orderBy: [{ featured: "desc" }, { displayOrder: "asc" }, { date: "desc" }, { createdAt: "desc" }],
-        select: { id: true, slug: true, title: true, videoUrl: true, date: true },
+        select: { id: true, slug: true, title: true, videoUrl: true, videoUrls: true, date: true },
       },
     },
   }),

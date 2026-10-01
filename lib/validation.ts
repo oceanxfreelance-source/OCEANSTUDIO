@@ -100,6 +100,11 @@ export const serviceSchema = z.object({
   displayOrder: optionalInt(10000),
 });
 
+/** Up to 50 videos per portfolio piece (uploads or links). */
+export const videoUrlList = z
+  .array(z.string().trim().max(500).regex(/^https?:\/\/[^\s]+$/i, "Enter a full link starting with https://"))
+  .max(50, "Up to 50 videos per piece");
+
 export const portfolioSchema = z.object({
   title: trimmed(140).min(2, "Title is required"),
   description: trimmed(8000),
@@ -107,7 +112,6 @@ export const portfolioSchema = z.object({
   locationId: optionalText(40),
   serviceId: optionalText(40),
   date: optionalDate,
-  videoUrl: optionalUrl,
   displayOrder: optionalInt(10000),
 });
 

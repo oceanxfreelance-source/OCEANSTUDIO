@@ -206,7 +206,8 @@ model PortfolioItem {
   coverId      String?          @map("cover_id")
   cover        MediaAsset?      @relation("PortfolioCover", fields: [coverId], references: [id], onDelete: SetNull)
   images       PortfolioImage[]
-  videoUrl     String?          @map("video_url")
+  videoUrl     String?          @map("video_url") // main video = videoUrls[0]
+  videoUrls    String[]         @default([]) @map("video_urls") // all videos, in order
   featured     Boolean          @default(false)
   published    Boolean          @default(true)
   displayOrder Int              @default(0) @map("display_order")

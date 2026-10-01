@@ -15,10 +15,12 @@ export default async function Dashboard() {
   const content = await getContent();
   const instagram = content["social.instagram"];
   const videoRefs = await Promise.all([
-    db.portfolioItem.findMany({ where: { videoUrl: { not: null } }, select: { videoUrl: true } }),
+    db.portfolioItem.findMany({ where: { OR: [{ videoUrl: { not: null } }, { videoUrls: { isEmpty: false } }] }, select: { videoUrl: true, videoUrls: true } }),
     db.location.findMany({ where: { videoUrl: { not: null } }, select: { videoUrl: true } }),
   ]);
-  const toOptimise = [...new Set([...videoRefs.flat().map((r) => r.videoUrl), content["hero.videoUrl"]].filter(needsOptimising) as string[])];
+  const [workVideos, placeVideos] = videoRefs;
+  const allVideos = [...workVideos.flatMap((r) => [r.videoUrl, ...r.videoUrls]), ...placeVideos.map((r) => r.videoUrl), content["hero.videoUrl"]];
+  const toOptimise = [...new Set(allVideos.filter(needsOptimising) as string[])];
   const today = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z");
   const monthStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
 

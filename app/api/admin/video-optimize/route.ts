@@ -26,6 +26,7 @@ export async function POST(req: Request) {
     const optimised = await optimiseVideo(url);
     await db.$transaction([
       db.portfolioItem.updateMany({ where: { videoUrl: url }, data: { videoUrl: optimised.url } }),
+      db.$executeRaw`UPDATE "portfolio_items" SET "video_urls" = array_replace("video_urls", ${url}, ${optimised.url}) WHERE ${url} = ANY("video_urls")`,
       db.location.updateMany({ where: { videoUrl: url }, data: { videoUrl: optimised.url } }),
       db.setting.updateMany({ where: { key: "hero.videoUrl", value: url }, data: { value: optimised.url } }),
     ]);

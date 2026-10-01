@@ -28,7 +28,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function WorkItemPage({ params }: Props) {
   const w = await getPortfolioItem((await params).slug);
   if (!w) notFound();
-  const video = parseVideoUrl(w.videoUrl);
+  const [video, ...moreVideos] = (w.videoUrls.length ? w.videoUrls : [w.videoUrl]).flatMap((url) => {
+    const source = parseVideoUrl(url);
+    return source ? [source] : [];
+  });
   const dm = instagramDmUrl((await getContent())["social.instagram"]);
 
   return (
@@ -64,6 +67,15 @@ export default async function WorkItemPage({ params }: Props) {
               <Img media={w.cover} alt={w.title} priority sizes="(min-width: 1400px) 1300px, 100vw" className="h-auto" />
             </div>
           )
+        )}
+        {moreVideos.length > 0 && (
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {moreVideos.map((source, i) => (
+              <div key={i} data-reveal>
+                <VideoPlayer source={source} title={`${w.title} — film ${i + 2}`} portrait />
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

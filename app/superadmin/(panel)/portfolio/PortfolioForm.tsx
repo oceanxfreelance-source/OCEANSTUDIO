@@ -1,6 +1,6 @@
 import { ActionForm, SubmitButton } from "@/components/admin/ActionForm";
 import { ImagePicker } from "@/components/admin/ImagePicker";
-import { VideoField } from "@/components/admin/VideoField";
+import { MultiVideoField } from "@/components/admin/MultiVideoField";
 import { Card, Checkbox, Select, TextArea, TextField } from "@/components/admin/ui";
 import { PORTFOLIO_CATEGORIES } from "@/lib/constants";
 import { dateInputValue } from "@/lib/format";
@@ -14,6 +14,7 @@ type Values = {
   serviceId: string | null;
   date: Date | null;
   videoUrl: string | null;
+  videoUrls: string[];
   displayOrder: number;
   featured: boolean;
   published: boolean;
@@ -30,7 +31,7 @@ export function PortfolioForm({ action, item, locations, services }: { action: (
           <div className="space-y-5">
             <TextField label="Title" name="title" required defaultValue={w?.title} placeholder="e.g. Morning glass at Machines" />
             <TextArea label="Description" name="description" rows={6} defaultValue={w?.description} />
-            <VideoField label="Video" name="videoUrl" defaultValue={w?.videoUrl} />
+            <MultiVideoField label="Videos" name="videoUrls" defaultValue={w ? (w.videoUrls.length ? w.videoUrls : w.videoUrl ? [w.videoUrl] : []) : []} />
           </div>
         </Card>
         <Card title="Images">

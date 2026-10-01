@@ -6,15 +6,16 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { checkbox, fieldErrors, formToObject, idList, type FormState } from "@/lib/forms";
 import { uniqueSlug } from "@/lib/slug";
-import { formatDate } from "@/lib/format";
-import { deleteVideoIfUnused, isOurVideo } from "@/lib/video-storage";
-import { portfolioSchema } from "@/lib/validation";
+import { deleteVideoIfUnused } from "@/lib/video-storage";
+import { portfolioSchema, videoUrlList } from "@/lib/validation";
 
 export async function savePortfolioItem(id: string | null, _prev: FormState, fd: FormData): Promise<FormState> {
   await requireAdmin();
   const parsed = portfolioSchema.safeParse(formToObject(fd));
   if (!parsed.success) return { error: "Please fix the highlighted fields.", fieldErrors: fieldErrors(parsed.error.issues) };
   const v = parsed.data;
+  const videos = videoUrlList.safeParse([...new Set(fd.getAll("videoUrls").filter((x): x is string => typeof x === "string" && !!x.trim()))]);
+  if (!videos.success) return { error: "Please fix the highlighted fields.", fieldErrors: { videoUrls: videos.error.issues[0]?.message ?? "Invalid video" } };
   const [coverId] = idList(fd, "coverId");
   const imageIds = idList(fd, "imageIds");
   const locationId = v.locationId && (await db.location.findUnique({ where: { id: v.locationId } })) ? v.locationId : null;
@@ -27,7 +28,8 @@ export async function savePortfolioItem(id: string | null, _prev: FormState, fd:
     locationId,
     serviceId,
     date: v.date ?? null,
-    videoUrl: v.videoUrl ?? null,
+    videoUrl: videos.data[0] ?? null,
+    videoUrls: videos.data,
     displayOrder: v.displayOrder ?? 0,
     featured: checkbox(fd, "featured"),
     published: checkbox(fd, "published"),
@@ -36,13 +38,14 @@ export async function savePortfolioItem(id: string | null, _prev: FormState, fd:
 
   let savedId = id;
   if (id) {
-    const before = await db.portfolioItem.findUnique({ where: { id }, select: { videoUrl: true } });
+    const before = await db.portfolioItem.findUnique({ where: { id }, select: { videoUrl: true, videoUrls: true } });
     await db.$transaction([
       db.portfolioItem.update({ where: { id }, data }),
       db.portfolioImage.deleteMany({ where: { itemId: id } }),
       db.portfolioImage.createMany({ data: imageIds.map((mediaId, position) => ({ itemId: id, mediaId, position })) }),
     ]);
-    await deleteVideoIfUnused(before?.videoUrl, data.videoUrl);
+    // Delete uploads that were removed from this piece.
+    for (const old of new Set([...(before?.videoUrls ?? []), before?.videoUrl])) if (old && !data.videoUrls.includes(old)) await deleteVideoIfUnused(old);
   } else {
     const slug = await uniqueSlug(v.title, async (s) => !!(await db.portfolioItem.findUnique({ where: { slug: s } })));
     const created = await db.portfolioItem.create({ data: { ...data, slug, images: { create: imageIds.map((mediaId, position) => ({ mediaId, position })) } } });
@@ -56,7 +59,7 @@ export async function savePortfolioItem(id: string | null, _prev: FormState, fd:
 export async function deletePortfolioItem(id: string) {
   await requireAdmin();
   const item = await db.portfolioItem.delete({ where: { id } });
-  await deleteVideoIfUnused(item.videoUrl);
+  for (const url of new Set([...item.videoUrls, item.videoUrl])) await deleteVideoIfUnused(url);
   revalidatePath("/", "layout");
   redirect("/superadmin/portfolio");
 }
@@ -68,22 +71,3 @@ export async function togglePortfolio(id: string, field: "published" | "featured
   revalidatePath("/", "layout");
 }
 
-/**
- * "Add many videos": one published Surf portfolio item per uploaded clip, at
- * Machines when that location exists, shown on the given service's page
- * (Drone Videography by default). Title and details can be edited later.
- */
-export async function createVideoItem(videoUrl: string, takenAt: number | null, serviceId?: string): Promise<{ id: string; title: string }> {
-  await requireAdmin();
-  if (!isOurVideo(videoUrl)) throw new Error("Only uploaded videos can be added here.");
-  const date = takenAt && Number.isFinite(takenAt) && takenAt > 0 && takenAt <= Date.now() + 86_400_000 ? new Date(takenAt) : null;
-  const title = `Surf session${date ? ` · ${formatDate(date, { day: "numeric", month: "short", year: "numeric", timeZone: "Indian/Maldives" })}` : ""}`;
-  const machines = await db.location.findFirst({ where: { slug: "machines" }, select: { id: true } });
-  const service = await db.service.findFirst({ where: serviceId ? { id: serviceId } : { slug: "drone-videography" }, select: { id: true } });
-  const slug = await uniqueSlug(title, async (s) => !!(await db.portfolioItem.findUnique({ where: { slug: s } })));
-  const item = await db.portfolioItem.create({
-    data: { slug, title, category: "Surf", videoUrl, date, locationId: machines?.id ?? null, serviceId: service?.id ?? null, published: true },
-  });
-  revalidatePath("/", "layout");
-  return { id: item.id, title };
-}

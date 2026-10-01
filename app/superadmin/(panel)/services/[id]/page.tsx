@@ -6,7 +6,6 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { deleteService, saveService } from "../actions";
 import { ServiceForm } from "../ServiceForm";
-import { BulkVideoUpload } from "../../portfolio/BulkVideoUpload";
 import { posterFor } from "@/lib/video";
 
 export const metadata = { title: "Edit service" };
@@ -18,7 +17,7 @@ export default async function EditService({ params, searchParams }: { params: Pr
     where: { id },
     include: {
       images: { orderBy: { position: "asc" } },
-      films: { orderBy: [{ featured: "desc" }, { displayOrder: "asc" }, { date: "desc" }, { createdAt: "desc" }], select: { id: true, title: true, videoUrl: true, published: true } },
+      films: { orderBy: [{ featured: "desc" }, { displayOrder: "asc" }, { date: "desc" }, { createdAt: "desc" }], select: { id: true, title: true, videoUrl: true, videoUrls: true, published: true } },
     },
   });
   if (!service) notFound();
@@ -44,8 +43,13 @@ export default async function EditService({ params, searchParams }: { params: Pr
       />
       {created && <p className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">Service created.</p>}
       <section className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold">Films on this page ({service.films.length})</h2>
-        <BulkVideoUpload serviceId={service.id} serviceName={service.name} />
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold">Films on this page ({service.films.reduce((n, f) => n + Math.max(f.videoUrls.length, f.videoUrl ? 1 : 0), 0)})</h2>
+          <Link href="/superadmin/portfolio" className="text-sm text-gold-deep underline">
+            Add videos in Portfolio →
+          </Link>
+        </div>
+        <p className="mb-3 text-xs text-slate">Videos come from Portfolio pieces set to “Show on service page: {service.name}”. Open a piece to add many videos to it.</p>
         {service.films.length > 0 && (
           <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
             {service.films.map((f) => (
@@ -57,7 +61,10 @@ export default async function EditService({ params, searchParams }: { params: Pr
                       <img src={posterFor(f.videoUrl)!} alt="" loading="lazy" className="h-full w-full object-cover" />
                     )}
                   </span>
-                  <span className="mt-1 block truncate text-xs">{f.title}</span>
+                  <span className="mt-1 block truncate text-xs">
+                    {f.title}
+                    {f.videoUrls.length > 1 && <span className="text-slate"> · {f.videoUrls.length} videos</span>}
+                  </span>
                   {!f.published && <span className="block text-[11px] text-slate">Hidden</span>}
                 </Link>
               </li>

@@ -7,7 +7,6 @@ import { db } from "@/lib/db";
 import { formatDate } from "@/lib/format";
 import { posterFor } from "@/lib/video";
 import { togglePortfolio } from "./actions";
-import { BulkVideoUpload } from "./BulkVideoUpload";
 
 export const metadata = { title: "Portfolio" };
 
@@ -24,7 +23,6 @@ export default async function PortfolioAdmin({ searchParams }: { searchParams: P
   return (
     <>
       <PageHeader title="Portfolio" subtitle="Your work on the Our Work page." actions={<ButtonLink href="/superadmin/portfolio/new">+ Add work</ButtonLink>} />
-      <BulkVideoUpload />
       <div className="mb-5 flex flex-wrap gap-2">
         {[undefined, ...PORTFOLIO_CATEGORIES].map((c) => (
           <Link key={c ?? "all"} href={c ? `/superadmin/portfolio?category=${c}` : "/superadmin/portfolio"} className={cx("rounded-full border px-3 py-1 text-xs", cat === c ? "border-abyss bg-abyss text-white" : "border-slate/25 bg-white hover:bg-foam")}>
@@ -67,7 +65,7 @@ export default async function PortfolioAdmin({ searchParams }: { searchParams: P
                   <form action={togglePortfolio.bind(null, w.id, "featured")}>
                     <button title="Click to toggle">{w.featured ? <Badge tone="purple">★ Featured</Badge> : <Badge>☆ Feature</Badge>}</button>
                   </form>
-                  {w.videoUrl && <Badge tone="blue">Video</Badge>}
+                  {(w.videoUrls.length > 0 || w.videoUrl) && <Badge tone="blue">{w.videoUrls.length > 1 ? `${w.videoUrls.length} videos` : "Video"}</Badge>}
                 </div>
               </div>
             </div>
