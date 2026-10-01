@@ -7,6 +7,10 @@ import { Prose } from "@/components/site/Section";
 import { SERVICE_STATUS_LABEL } from "@/lib/constants";
 import { instagramDmUrl, priceLabel } from "@/lib/format";
 import { getPublicService } from "@/lib/public";
+import { VideoPlayer } from "@/components/site/VideoPlayer";
+import { SectionHeading } from "@/components/site/Section";
+import { parseVideoUrl } from "@/lib/video";
+import Link from "next/link";
 import { InstagramBookButton } from "@/components/site/InstagramBook";
 import { getContent } from "@/lib/content";
 
@@ -28,6 +32,10 @@ export default async function ServicePage({ params }: Props) {
   if (!s) notFound();
   const soon = s.status === "COMING_SOON";
   const dm = instagramDmUrl((await getContent())["social.instagram"]);
+  const films = s.films.flatMap((f) => {
+    const source = parseVideoUrl(f.videoUrl);
+    return source ? [{ ...f, source }] : [];
+  });
 
   return (
     <>
@@ -76,6 +84,23 @@ export default async function ServicePage({ params }: Props) {
             </ButtonLink>
           </aside>
         </div>
+        {films.length > 0 && (
+          <div className="container-x mt-24 md:mt-32">
+            <SectionHeading eyebrow="Films" title={films.length === 1 ? "Watch the film" : `${films.length} films from Machines`} intro="Tap any film to play it." />
+            <div className="mt-12 grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+              {films.map((f) => (
+                <figure key={f.id} data-reveal>
+                  <VideoPlayer source={f.source} title={f.title} portrait />
+                  <figcaption className="mt-3 flex items-baseline justify-between gap-3 text-sm">
+                    <Link href={`/work/${f.slug}`} className="link-underline font-medium">
+                      {f.title}
+                    </Link>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        )}
         {s.images.length > 0 && (
           <div className="container-x mt-20 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {s.images.map((im) => (

@@ -105,6 +105,7 @@ export const portfolioSchema = z.object({
   description: trimmed(8000),
   category: z.enum(PORTFOLIO_CATEGORIES),
   locationId: optionalText(40),
+  serviceId: optionalText(40),
   date: optionalDate,
   videoUrl: optionalUrl,
   displayOrder: optionalInt(10000),

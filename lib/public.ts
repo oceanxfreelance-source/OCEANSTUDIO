@@ -22,7 +22,15 @@ export const getPublicServices = cache(() =>
 export const getPublicService = cache((slug: string) =>
   db.service.findFirst({
     where: { slug, published: true, status: { not: "HIDDEN" } },
-    include: { cover: media, images: { orderBy: { position: "asc" }, include: { media } } },
+    include: {
+      cover: media,
+      images: { orderBy: { position: "asc" }, include: { media } },
+      films: {
+        where: { published: true, videoUrl: { not: null } },
+        orderBy: [{ featured: "desc" }, { displayOrder: "asc" }, { date: "desc" }, { createdAt: "desc" }],
+        select: { id: true, slug: true, title: true, videoUrl: true, date: true },
+      },
+    },
   }),
 );
 

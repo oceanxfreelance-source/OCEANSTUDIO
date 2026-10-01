@@ -226,7 +226,7 @@ test("admin: logout ends the session", async ({ page }) => {
   await expect(page).toHaveURL(/\/superadmin\/login$/);
 });
 
-test("admin: 'Add many videos' publishes one Surf video per clip", async ({ page }) => {
+test("admin: 'Add many videos' publishes each clip as a Drone Videography film", async ({ page }) => {
   // Video storage and the optimiser are external services: stand them in so the
   // test covers the admin flow (pick several clips → each becomes its own item).
   const web = (n: number) => `https://abc.public.blob.vercel-storage.com/videos/web/${run}${"0".repeat(20 - run.length - 1)}${n}.mp4`;
@@ -255,9 +255,18 @@ test("admin: 'Add many videos' publishes one Surf video per clip", async ({ page
   await expect(page.getByText("Please choose a video.")).toBeVisible();
   expect(optimised).toBe(2);
 
-  // Both clips are on the public Our Work page, then clean up.
+  // Both clips are on Our Work and in the Drone Videography films, then clean up.
   await page.goto("/work");
   for (const n of [1, 2]) await expect(page.locator(`img[src="${web(n).replace(".mp4", ".jpg")}"]`)).not.toHaveCount(0);
+  await page.goto("/services/drone-videography");
+  await expect(page.getByRole("heading", { name: /films from Machines/ })).toBeVisible();
+  for (const n of [1, 2]) await expect(page.locator(`button:has(img[src="${web(n).replace(".mp4", ".jpg")}"])`)).toHaveCount(1);
+  await page.locator(`button:has(img[src="${web(1).replace(".mp4", ".jpg")}"])`).click();
+  await expect(page.locator(`video[src="${web(1)}"]`)).toHaveCount(1);
+  await page.goto("/superadmin/services");
+  await page.getByRole("link", { name: "Drone Videography" }).first().click();
+  await expect(page.getByRole("heading", { name: /Films on this page \(\d+\)/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Choose videos" })).toBeVisible();
   await page.goto("/superadmin/portfolio");
   for (const n of [1, 2]) {
     await page.locator(`a:has(img[src="${web(n).replace(".mp4", ".jpg")}"])`).click();

@@ -10,7 +10,7 @@ import { Play } from "./Icons";
  * loads (nothing heavy on mobile data); after tapping, the video plays inline
  * in its own shape — vertical drone clips stay vertical.
  */
-export function VideoPlayer({ source, poster, title }: { source: VideoSource; poster?: string; title: string }) {
+export function VideoPlayer({ source, poster, title, portrait = false }: { source: VideoSource; poster?: string; title: string; portrait?: boolean }) {
   const [playing, setPlaying] = useState(false);
 
   if (source.kind === "link") {
@@ -36,7 +36,7 @@ export function VideoPlayer({ source, poster, title }: { source: VideoSource; po
         type="button"
         onClick={() => setPlaying(true)}
         aria-label={`Play video: ${title}`}
-        className={cx("vf-corners group relative mx-auto flex w-full items-center justify-center overflow-hidden bg-ink text-foam", isFile ? "aspect-[4/5] max-h-[80vh] sm:aspect-video" : "aspect-video")}
+        className={cx("vf-corners group relative mx-auto flex w-full items-center justify-center overflow-hidden bg-ink text-foam", isFile ? (portrait ? "aspect-[4/5]" : "aspect-[4/5] max-h-[80vh] sm:aspect-video") : "aspect-video")}
       >
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element

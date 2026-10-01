@@ -20,7 +20,7 @@ type Job = {
  * uploaded, optimised for every phone, and published as its own portfolio item,
  * one after another, with a status row per clip.
  */
-export function BulkVideoUpload() {
+export function BulkVideoUpload({ serviceId, serviceName }: { serviceId?: string; serviceName?: string } = {}) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [running, setRunning] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -49,7 +49,7 @@ export function BulkVideoUpload() {
         } catch (e) {
           warning = `${(e as Error).message} Added anyway — open it and tap "Optimise for phones".`;
         }
-        const item = await createVideoItem(url, file.lastModified || null);
+        const item = await createVideoItem(url, file.lastModified || null, serviceId);
         update(key, { status: warning ? "error" : "done", itemId: item.id, message: warning ?? `Published as “${item.title}”` });
       } catch (e) {
         update(key, { status: "error", message: `Upload failed: ${(e as Error).message}` });
@@ -65,7 +65,9 @@ export function BulkVideoUpload() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="font-semibold">Add many videos</p>
-          <p className="mt-0.5 text-xs text-slate">Pick several clips from your gallery. Each one becomes its own published Surf video at Machines — rename them later.</p>
+          <p className="mt-0.5 text-xs text-slate">
+            Pick several clips from your gallery. Each one is published as its own film on {serviceName ? `the ${serviceName} page` : "the Drone Videography page"} and on Our Work — rename them later.
+          </p>
         </div>
         <button type="button" disabled={running} onClick={() => fileRef.current?.click()} className="rounded-lg bg-abyss px-5 py-3 text-sm font-semibold text-white hover:bg-ink-3 disabled:opacity-50">
           {running ? "Working…" : "Choose videos"}

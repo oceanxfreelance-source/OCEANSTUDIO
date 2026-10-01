@@ -11,6 +11,7 @@ type Values = {
   description: string;
   category: string;
   locationId: string | null;
+  serviceId: string | null;
   date: Date | null;
   videoUrl: string | null;
   displayOrder: number;
@@ -20,7 +21,7 @@ type Values = {
   images: { mediaId: string }[];
 };
 
-export function PortfolioForm({ action, item, locations }: { action: (p: FormState, fd: FormData) => Promise<FormState>; item?: Values; locations: { id: string; name: string }[] }) {
+export function PortfolioForm({ action, item, locations, services }: { action: (p: FormState, fd: FormData) => Promise<FormState>; item?: Values; locations: { id: string; name: string }[]; services: { id: string; name: string; slug: string }[] }) {
   const w = item;
   return (
     <ActionForm action={action} className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -51,6 +52,13 @@ export function PortfolioForm({ action, item, locations }: { action: (p: FormSta
           <div className="space-y-4">
             <Select label="Category" name="category" required defaultValue={w?.category ?? "Surf"} options={PORTFOLIO_CATEGORIES.map((c) => ({ value: c, label: c }))} />
             <Select label="Location" name="locationId" defaultValue={w?.locationId ?? ""} options={[{ value: "", label: "— None —" }, ...locations.map((l) => ({ value: l.id, label: l.name }))]} hint="Add places under Locations." />
+            <Select
+              label="Show on service page"
+              name="serviceId"
+              defaultValue={w ? (w.serviceId ?? "") : (services.find((s) => s.slug === "drone-videography")?.id ?? "")}
+              options={[{ value: "", label: "— None —" }, ...services.map((s) => ({ value: s.id, label: s.name }))]}
+              hint="The video also appears on that service's page."
+            />
             <TextField label="Date" name="date" type="date" defaultValue={dateInputValue(w?.date)} />
           </div>
         </Card>

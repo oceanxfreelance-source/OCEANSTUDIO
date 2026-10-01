@@ -8,11 +8,14 @@ export const metadata = { title: "Add work" };
 
 export default async function NewWork() {
   await requireAdmin();
-  const locations = await db.location.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });
+  const [locations, services] = await Promise.all([
+    db.location.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    db.service.findMany({ orderBy: { displayOrder: "asc" }, select: { id: true, name: true, slug: true } }),
+  ]);
   return (
     <>
       <PageHeader title="Add work" back={{ href: "/superadmin/portfolio", label: "Portfolio" }} />
-      <PortfolioForm action={savePortfolioItem.bind(null, null)} locations={locations} />
+      <PortfolioForm action={savePortfolioItem.bind(null, null)} locations={locations} services={services} />
     </>
   );
 }

@@ -139,6 +139,7 @@ model Service {
   updatedAt        DateTime       @updatedAt @map("updated_at")
   bookings         Booking[]
   shootSessions    ShootSession[]
+  films            PortfolioItem[] // videos shown on the service page
 
   @@index([published, status, displayOrder])
   @@map("services")
@@ -199,6 +200,8 @@ model PortfolioItem {
   category     String // see PORTFOLIO_CATEGORIES in lib/constants.ts
   locationId   String?          @map("location_id")
   location     Location?        @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  serviceId    String?          @map("service_id") // shown on this service's page
+  service      Service?         @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   date         DateTime?
   coverId      String?          @map("cover_id")
   cover        MediaAsset?      @relation("PortfolioCover", fields: [coverId], references: [id], onDelete: SetNull)
@@ -211,6 +214,7 @@ model PortfolioItem {
   updatedAt    DateTime         @updatedAt @map("updated_at")
 
   @@index([published, category])
+  @@index([serviceId, published])
   @@map("portfolio_items")
 }
 

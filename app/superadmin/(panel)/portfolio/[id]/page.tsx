@@ -12,9 +12,10 @@ export const metadata = { title: "Edit work" };
 export default async function EditWork({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string }> }) {
   await requireAdmin();
   const { id } = await params;
-  const [item, locations] = await Promise.all([
+  const [item, locations, services] = await Promise.all([
     db.portfolioItem.findUnique({ where: { id }, include: { images: { orderBy: { position: "asc" } } } }),
     db.location.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    db.service.findMany({ orderBy: { displayOrder: "asc" }, select: { id: true, name: true, slug: true } }),
   ]);
   if (!item) notFound();
   const { created } = await searchParams;
@@ -37,7 +38,7 @@ export default async function EditWork({ params, searchParams }: { params: Promi
         }
       />
       {created && <p className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">Added to the portfolio.</p>}
-      <PortfolioForm action={savePortfolioItem.bind(null, item.id)} item={item} locations={locations} />
+      <PortfolioForm action={savePortfolioItem.bind(null, item.id)} item={item} locations={locations} services={services} />
     </>
   );
 }

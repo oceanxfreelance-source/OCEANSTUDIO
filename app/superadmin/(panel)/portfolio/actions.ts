@@ -18,12 +18,14 @@ export async function savePortfolioItem(id: string | null, _prev: FormState, fd:
   const [coverId] = idList(fd, "coverId");
   const imageIds = idList(fd, "imageIds");
   const locationId = v.locationId && (await db.location.findUnique({ where: { id: v.locationId } })) ? v.locationId : null;
+  const serviceId = v.serviceId && (await db.service.findUnique({ where: { id: v.serviceId } })) ? v.serviceId : null;
 
   const data = {
     title: v.title,
     description: v.description,
     category: v.category,
     locationId,
+    serviceId,
     date: v.date ?? null,
     videoUrl: v.videoUrl ?? null,
     displayOrder: v.displayOrder ?? 0,
@@ -68,17 +70,19 @@ export async function togglePortfolio(id: string, field: "published" | "featured
 
 /**
  * "Add many videos": one published Surf portfolio item per uploaded clip, at
- * Machines when that location exists. Title and details can be edited later.
+ * Machines when that location exists, shown on the given service's page
+ * (Drone Videography by default). Title and details can be edited later.
  */
-export async function createVideoItem(videoUrl: string, takenAt: number | null): Promise<{ id: string; title: string }> {
+export async function createVideoItem(videoUrl: string, takenAt: number | null, serviceId?: string): Promise<{ id: string; title: string }> {
   await requireAdmin();
   if (!isOurVideo(videoUrl)) throw new Error("Only uploaded videos can be added here.");
   const date = takenAt && Number.isFinite(takenAt) && takenAt > 0 && takenAt <= Date.now() + 86_400_000 ? new Date(takenAt) : null;
   const title = `Surf session${date ? ` · ${formatDate(date, { day: "numeric", month: "short", year: "numeric", timeZone: "Indian/Maldives" })}` : ""}`;
   const machines = await db.location.findFirst({ where: { slug: "machines" }, select: { id: true } });
+  const service = await db.service.findFirst({ where: serviceId ? { id: serviceId } : { slug: "drone-videography" }, select: { id: true } });
   const slug = await uniqueSlug(title, async (s) => !!(await db.portfolioItem.findUnique({ where: { slug: s } })));
   const item = await db.portfolioItem.create({
-    data: { slug, title, category: "Surf", videoUrl, date, locationId: machines?.id ?? null, published: true },
+    data: { slug, title, category: "Surf", videoUrl, date, locationId: machines?.id ?? null, serviceId: service?.id ?? null, published: true },
   });
   revalidatePath("/", "layout");
   return { id: item.id, title };
