@@ -9,6 +9,7 @@ type Values = {
   name: string;
   kind: string;
   atoll: string;
+  code: string | null;
   description: string;
   videoUrl: string | null;
   displayOrder: number;
@@ -49,6 +50,7 @@ export function LocationForm({ action, location }: { action: (p: FormState, fd: 
           <div className="space-y-4">
             <Select label="Type" name="kind" defaultValue={l?.kind ?? "Island"} options={LOCATION_KINDS.map((k) => ({ value: k, label: k }))} />
             <TextField label="Atoll" name="atoll" defaultValue={l?.atoll ?? "Laamu"} hint="Ready for locations beyond Laamu later." />
+            <TextField label="Clip code (surf spots)" name="code" defaultValue={l?.code ?? ""} maxLength={4} placeholder="e.g. MC" hint="Set this for surf spots you film — clips are numbered like MC-2710-07 and the spot appears in the clip shop." />
           </div>
         </Card>
         <SubmitButton className="w-full">{l ? "Save changes" : "Add location"}</SubmitButton>

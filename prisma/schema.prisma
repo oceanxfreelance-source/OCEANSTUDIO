@@ -120,23 +120,23 @@ enum PriceType {
 }
 
 model Service {
-  id               String         @id @default(cuid())
-  slug             String         @unique
+  id               String          @id @default(cuid())
+  slug             String          @unique
   name             String
-  shortDescription String         @default("") @map("short_description")
-  description      String         @default("")
-  status           ServiceStatus  @default(COMING_SOON)
-  price            Decimal?       @db.Decimal(10, 2)
-  priceType        PriceType      @default(ON_REQUEST) @map("price_type")
-  currency         String         @default("USD")
-  coverId          String?        @map("cover_id")
-  cover            MediaAsset?    @relation("ServiceCover", fields: [coverId], references: [id], onDelete: SetNull)
+  shortDescription String          @default("") @map("short_description")
+  description      String          @default("")
+  status           ServiceStatus   @default(COMING_SOON)
+  price            Decimal?        @db.Decimal(10, 2)
+  priceType        PriceType       @default(ON_REQUEST) @map("price_type")
+  currency         String          @default("USD")
+  coverId          String?         @map("cover_id")
+  cover            MediaAsset?     @relation("ServiceCover", fields: [coverId], references: [id], onDelete: SetNull)
   images           ServiceImage[]
-  featured         Boolean        @default(false)
-  displayOrder     Int            @default(0) @map("display_order")
-  published        Boolean        @default(true)
-  createdAt        DateTime       @default(now()) @map("created_at")
-  updatedAt        DateTime       @updatedAt @map("updated_at")
+  featured         Boolean         @default(false)
+  displayOrder     Int             @default(0) @map("display_order")
+  published        Boolean         @default(true)
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
   bookings         Booking[]
   shootSessions    ShootSession[]
   films            PortfolioItem[] // videos shown on the service page
@@ -159,23 +159,26 @@ model ServiceImage {
 /// Places Ocean X works — surf spots, islands, lagoons… `atoll` keeps the model
 /// ready for Maldives-wide expansion beyond Laamu.
 model Location {
-  id           String          @id @default(cuid())
-  slug         String          @unique
-  name         String
-  kind         String          @default("Island")
-  atoll        String          @default("Laamu")
-  description  String          @default("")
-  coverId      String?         @map("cover_id")
-  cover        MediaAsset?     @relation("LocationCover", fields: [coverId], references: [id], onDelete: SetNull)
-  images       LocationImage[]
-  videoUrl     String?         @map("video_url")
-  featured     Boolean         @default(false)
-  published    Boolean         @default(true)
-  displayOrder Int             @default(0) @map("display_order")
-  createdAt    DateTime        @default(now()) @map("created_at")
-  updatedAt    DateTime        @updatedAt @map("updated_at")
-  portfolio    PortfolioItem[]
-  bookings     Booking[]
+  id            String          @id @default(cuid())
+  slug          String          @unique
+  name          String
+  kind          String          @default("Island")
+  atoll         String          @default("Laamu")
+  description   String          @default("")
+  coverId       String?         @map("cover_id")
+  cover         MediaAsset?     @relation("LocationCover", fields: [coverId], references: [id], onDelete: SetNull)
+  images        LocationImage[]
+  videoUrl      String?         @map("video_url")
+  code          String?         @unique // short surf-spot code for clip codes, e.g. "MC" → MC-2710-07
+  featured      Boolean         @default(false)
+  published     Boolean         @default(true)
+  displayOrder  Int             @default(0) @map("display_order")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  portfolio     PortfolioItem[]
+  bookings      Booking[]
+  clips         Clip[]
+  orderSessions OrderSession[]
 
   @@index([published, displayOrder])
   @@map("locations")
@@ -274,12 +277,36 @@ model Customer {
   @@map("customers")
 }
 
+/// NEW = requested by the surfer. FILMED → READY (clips uploaded) → COMPLETED (delivered).
 enum BookingStatus {
   NEW
   CONTACTED
   CONFIRMED
+  FILMED
+  READY
   COMPLETED
+  DECLINED
   CANCELLED
+}
+
+/// The three surf sessions of a day.
+enum DaySlot {
+  MORNING
+  MIDDAY
+  AFTERNOON
+}
+
+enum BookingPackage {
+  SESSION
+  SESSION_REEL
+  DRONE_CAMERA
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  PAYPAL
+  CARD
 }
 
 enum PaymentStatus {
@@ -289,37 +316,51 @@ enum PaymentStatus {
   REFUNDED
 }
 
-/// A booking request. The public booking form was removed (the website is a
-/// showcase, not a booking system); the table is kept so no data is lost and
-/// bookings can return later.
+/// A filming session booked in advance: the surfer picks a date, session and
+/// package, pays a deposit, and their clips are delivered to a private page.
 model Booking {
-  id            String         @id @default(cuid())
-  reference     String         @unique // e.g. OX-B-00012 — friendly ID for the admin
-  customerId    String         @map("customer_id")
-  customer      Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  serviceId     String?        @map("service_id")
-  service       Service?       @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  serviceName   String         @default("") @map("service_name") // snapshot at request time
-  locationId    String?        @map("location_id")
-  location      Location?      @relation(fields: [locationId], references: [id], onDelete: SetNull)
-  locationText  String         @default("") @map("location_text")
-  fullName      String         @map("full_name")
-  instagram     String?
-  email         String?
-  whatsapp      String?
-  preferredDate DateTime?      @map("preferred_date") @db.Date
-  preferredTime String?        @map("preferred_time")
-  people        Int?
-  message       String         @default("")
-  status        BookingStatus  @default(NEW)
-  price         Decimal?       @db.Decimal(10, 2)
-  paymentStatus PaymentStatus  @default(UNPAID) @map("payment_status")
-  notes         String         @default("")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  sessions      ShootSession[]
+  id             String          @id @default(cuid())
+  reference      String          @unique // e.g. OX-B-00012 — friendly ID for the admin
+  customerId     String          @map("customer_id")
+  customer       Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  serviceId      String?         @map("service_id")
+  service        Service?        @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  serviceName    String          @default("") @map("service_name") // snapshot at request time
+  locationId     String?         @map("location_id")
+  location       Location?       @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  locationText   String          @default("") @map("location_text")
+  fullName       String          @map("full_name")
+  instagram      String?
+  email          String?
+  whatsapp       String?
+  preferredDate  DateTime?       @map("preferred_date") @db.Date
+  preferredTime  String?         @map("preferred_time")
+  people         Int?
+  message        String          @default("")
+  status         BookingStatus   @default(NEW)
+  price          Decimal?        @db.Decimal(10, 2)
+  paymentStatus  PaymentStatus   @default(UNPAID) @map("payment_status")
+  notes          String          @default("")
+  // Filming bookings
+  token          String?         @unique // private status-page link
+  slot           DaySlot?
+  package        BookingPackage?
+  recognition    String          @default("") // board / rashguard colour, name to shout
+  deposit        Decimal?        @db.Decimal(10, 2)
+  paymentMethod  PaymentMethod?  @map("payment_method")
+  changeNote     String          @default("") @map("change_note") // shown to the surfer, e.g. "Moved to the morning — better wind"
+  partnerRef     String?         @map("partner_ref")
+  confirmedAt    DateTime?       @map("confirmed_at")
+  downloadsUntil DateTime?       @map("downloads_until")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  sessions       ShootSession[]
+  clips          Clip[]
+  slips          PaymentSlip[]
+  files          DeliveryFile[]
 
   @@index([status, createdAt])
+  @@index([preferredDate, slot])
   @@map("bookings")
 }
 
@@ -372,4 +413,173 @@ model Counter {
   value Int    @default(0)
 
   @@map("counters")
+}
+
+// ─────────────────────────────── Clip shop ───────────────────────────────
+
+/// Open/closed state and capacity for one session of one day. Missing rows
+/// mean "open, default capacity" (set in Website content → Clip shop).
+model Availability {
+  date        DateTime @db.Date
+  slot        DaySlot
+  closed      Boolean  @default(false)
+  maxBookings Int?     @map("max_bookings")
+
+  @@id([date, slot])
+  @@map("availability")
+}
+
+enum ClipStatus {
+  PROCESSING
+  READY
+  FAILED
+}
+
+/// One surf clip. The original is stored privately (originalKey) and only
+/// reaches a buyer through an expiring download link; the public sees a small
+/// watermarked preview. A clip assigned to a booking is private to that booking.
+model Clip {
+  id           String      @id @default(cuid())
+  code         String      @unique // <SPOT>-<DDMM>-<NN>, e.g. MC-2710-07
+  date         DateTime    @db.Date
+  slot         DaySlot
+  locationId   String?     @map("location_id")
+  location     Location?   @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  description  String      @default("") // surfer: board / rashguard colour
+  originalKey  String      @map("original_key")
+  originalName String      @default("") @map("original_name")
+  originalSize Int         @default(0) @map("original_size")
+  previewUrl   String?     @map("preview_url")
+  posterUrl    String?     @map("poster_url")
+  seconds      Float?
+  status       ClipStatus  @default(PROCESSING)
+  error        String?
+  hidden       Boolean     @default(false) // removed / hidden until requested
+  bookingId    String?     @map("booking_id")
+  booking      Booking?    @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  orderItems   OrderItem[]
+
+  @@index([status, hidden, bookingId, date])
+  @@index([date, slot, locationId])
+  @@map("clips")
+}
+
+enum OrderStatus {
+  AWAITING_PAYMENT
+  PAID
+  DELIVERED
+  CANCELLED
+}
+
+/// What the surfer buys for one session (date + spot + time of day).
+enum OrderPackage {
+  CLIPS // chosen clips, price per clip, capped at the session price
+  SESSION // all their clips of that session
+  SESSION_REEL // all clips + an edited reel
+}
+
+/// A clip-shop order. No account: the surfer keeps a private status link.
+model Order {
+  id             String         @id @default(cuid())
+  reference      String         @unique // OX-O-00012
+  token          String         @unique
+  name           String
+  whatsapp       String?
+  email          String?
+  paymentMethod  PaymentMethod  @map("payment_method")
+  status         OrderStatus    @default(AWAITING_PAYMENT)
+  total          Decimal        @db.Decimal(10, 2)
+  currency       String         @default("USD")
+  note           String         @default("")
+  partnerRef     String?        @map("partner_ref")
+  paidAt         DateTime?      @map("paid_at")
+  deliveredAt    DateTime?      @map("delivered_at")
+  downloadsUntil DateTime?      @map("downloads_until")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  sessions       OrderSession[]
+  slips          PaymentSlip[]
+  files          DeliveryFile[]
+
+  @@index([status, createdAt])
+  @@map("orders")
+}
+
+model OrderSession {
+  id         String       @id @default(cuid())
+  orderId    String       @map("order_id")
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  date       DateTime     @db.Date
+  slot       DaySlot
+  locationId String?      @map("location_id")
+  location   Location?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  package    OrderPackage
+  price      Decimal      @db.Decimal(10, 2)
+  items      OrderItem[]
+
+  @@index([orderId])
+  @@map("order_sessions")
+}
+
+model OrderItem {
+  id        String       @id @default(cuid())
+  sessionId String       @map("session_id")
+  session   OrderSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  clipId    String?      @map("clip_id")
+  clip      Clip?        @relation(fields: [clipId], references: [id], onDelete: SetNull)
+  clipCode  String       @map("clip_code") // kept if the clip file is later deleted
+
+  @@unique([sessionId, clipId])
+  @@index([clipId])
+  @@map("order_items")
+}
+
+/// A bank-transfer slip (image or PDF) uploaded by the surfer. Stored privately.
+model PaymentSlip {
+  id        String   @id @default(cuid())
+  orderId   String?  @map("order_id")
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  bookingId String?  @map("booking_id")
+  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  key       String
+  mimeType  String   @map("mime_type")
+  size      Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([orderId])
+  @@index([bookingId])
+  @@map("payment_slips")
+}
+
+/// Extra files delivered to a buyer, e.g. the edited reel. Stored privately.
+model DeliveryFile {
+  id        String   @id @default(cuid())
+  orderId   String?  @map("order_id")
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  bookingId String?  @map("booking_id")
+  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  key       String
+  name      String
+  size      Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([orderId])
+  @@index([bookingId])
+  @@map("delivery_files")
+}
+
+/// "Remove my clip" requests from the public form — handled fast by the admin.
+model RemovalRequest {
+  id        String    @id @default(cuid())
+  clipCode  String    @map("clip_code")
+  reason    String    @default("")
+  contact   String    @default("")
+  clipId    String?   @map("clip_id")
+  doneAt    DateTime? @map("done_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([doneAt, createdAt])
+  @@map("removal_requests")
 }

@@ -14,12 +14,16 @@ export async function saveLocation(id: string | null, _prev: FormState, fd: Form
   const parsed = locationSchema.safeParse(formToObject(fd));
   if (!parsed.success) return { error: "Please fix the highlighted fields.", fieldErrors: fieldErrors(parsed.error.issues) };
   const v = parsed.data;
+  if (v.code && (await db.location.findFirst({ where: { code: v.code, ...(id ? { id: { not: id } } : {}) }, select: { id: true } }))) {
+    return { error: "Please fix the highlighted fields.", fieldErrors: { code: "Another location already uses this code" } };
+  }
   const [coverId] = idList(fd, "coverId");
   const imageIds = idList(fd, "imageIds");
   const data = {
     name: v.name,
     kind: v.kind,
     atoll: v.atoll,
+    code: v.code ?? null,
     description: v.description,
     videoUrl: v.videoUrl ?? null,
     displayOrder: v.displayOrder ?? 0,

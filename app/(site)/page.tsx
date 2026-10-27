@@ -76,10 +76,10 @@ export default async function HomePage() {
               {c["hero.subtitle"]}
             </p>
             <div className="hero-in flex flex-col gap-3 sm:flex-row" style={{ "--delay": "1.05s" } as React.CSSProperties}>
-              <ButtonLink href="/work" variant="light">
+              <ButtonLink href="/clips" variant="light">
                 {c["hero.primaryCta"]}
               </ButtonLink>
-              <ButtonLink href="/reviews" variant="outline-light" arrow>
+              <ButtonLink href="/book" variant="outline-light" arrow>
                 {c["hero.secondaryCta"]}
               </ButtonLink>
             </div>
@@ -154,9 +154,9 @@ export default async function HomePage() {
           <SectionHeading eyebrow="How it works" title="Surf. We film. You keep the clips." />
           <ol className="mt-14 grid gap-px overflow-hidden border border-deep/10 bg-deep/10 md:grid-cols-3">
             {[
-              { n: "01", t: "Send a DM", d: "Message us on Instagram with the day and time you want to surf." },
-              { n: "02", t: "We fly over Machines", d: "The drone follows you wave after wave, from above and from the channel, for your whole session." },
-              { n: "03", t: "Get your clips", d: "Your clips arrive by private link, ready for your phone and your Instagram." },
+              { n: "01", t: "Book us — or just paddle out", d: "Book a session and tell us how to spot you, or simply surf: we film the line-up every session." },
+              { n: "02", t: "We film every wave", d: "From the boat, the channel and (with a permit) the drone above Machines." },
+              { n: "03", t: "Find your clips the same day", d: "Tap to preview, buy, and download the full-quality originals to your phone." },
             ].map((step) => (
               <li key={step.n} data-reveal className="bg-paper p-8 md:p-10">
                 <span className="display text-5xl text-gold-deep/80">{step.n}</span>
@@ -170,7 +170,7 @@ export default async function HomePage() {
               ["Camera", "DJI Air 3S"],
               ["Filmed at", "Machines, Laamu"],
               ["Format", "Vertical & wide"],
-              ["Delivery", "Private link"],
+              ["Delivery", "Same day"],
             ].map(([k, v]) => (
               <div key={k}>
                 <dt className="eyebrow text-slate">{k}</dt>
@@ -178,6 +178,14 @@ export default async function HomePage() {
               </div>
             ))}
           </dl>
+          <div data-reveal className="mt-12 flex flex-col gap-3 sm:flex-row">
+            <ButtonLink href="/clips" variant="dark" arrow>
+              FIND MY CLIPS
+            </ButtonLink>
+            <ButtonLink href="/book" variant="outline-dark">
+              BOOK A SESSION
+            </ButtonLink>
+          </div>
         </div>
       </section>
 
@@ -224,19 +232,22 @@ export default async function HomePage() {
       {/* ── Reviews ───────────────────────────────────────── */}
       {testimonials.length > 0 && <Testimonials items={testimonials} stats={reviewStats} />}
 
-      {/* ── Book via Instagram (shown once the Instagram username is set) ── */}
-      {dm && (
-        <section className="bg-ink py-24 text-foam md:py-32">
-          <div className="container-x flex flex-col items-start justify-between gap-10 md:flex-row md:items-end" data-reveal>
-            <div className="max-w-2xl">
-              <p className="eyebrow eyebrow-line text-gold">Book a session</p>
-              <h2 className="display mt-5 text-4xl [font-stretch:112%] sm:text-5xl lg:text-6xl">{c["book.title"]}</h2>
-              <p className="mt-5 text-lg text-mist">{c["book.body"]}</p>
-            </div>
-            <InstagramBookButton dmUrl={dm} label="DM US TO BOOK" />
+      {/* ── Book a session ── */}
+      <section className="bg-ink py-24 text-foam md:py-32">
+        <div className="container-x flex flex-col items-start justify-between gap-10 md:flex-row md:items-end" data-reveal>
+          <div className="max-w-2xl">
+            <p className="eyebrow eyebrow-line text-gold">Book a session</p>
+            <h2 className="display mt-5 text-4xl [font-stretch:112%] sm:text-5xl lg:text-6xl">{c["book.title"]}</h2>
+            <p className="mt-5 text-lg text-mist">{c["book.body"]}</p>
           </div>
-        </section>
-      )}
+          <div className="flex flex-col gap-3">
+            <ButtonLink href="/book" arrow>
+              BOOK A SESSION
+            </ButtonLink>
+            {dm && <InstagramBookButton dmUrl={dm} label="OR DM US ON INSTAGRAM" variant="outline-light" />}
+          </div>
+        </div>
+      </section>
 
       {/* ── Call to action ────────────────────────────────── */}
       <section className="relative overflow-hidden bg-abyss py-28 text-foam md:py-40">

@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import sharp from "sharp";
 
 /**
- * The public showcase (work, services, reviews — no booking, no accounts) and
+ * The public site (work, services, reviews, clip shop — no accounts) and
  * the Superadmin: review moderation, customer → session → delivery, service
  * status, portfolio upload and website text editing reflecting on the site.
  */
@@ -22,19 +22,17 @@ async function login(page: Page) {
   await expect(page.getByRole("heading", { name: /Hello/ })).toBeVisible();
 }
 
-test("public site: showcase only — no booking, no accounts, no admin link", async ({ page }) => {
+test("public site: find my clips + book, no accounts, no admin link", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("CAPTURED BY THE OCEAN.");
   await expect(page.getByText("MACHINES • MAABAIDHOO • LAAMU").first()).toBeVisible();
-  await expect(page.getByRole("link", { name: "EXPLORE OUR WORK" })).toHaveAttribute("href", "/work");
-  await expect(page.getByRole("link", { name: /READ REVIEWS/ })).toHaveAttribute("href", "/reviews");
+  await expect(page.locator("main").getByRole("link", { name: "FIND MY CLIPS" }).first()).toHaveAttribute("href", "/clips");
+  await expect(page.locator("main").getByRole("link", { name: /BOOK A SESSION/ }).first()).toHaveAttribute("href", "/book");
   const html = await page.content();
-  expect(html).not.toMatch(/superadmin|register|create account|sign up|book a session/i);
+  expect(html).not.toMatch(/superadmin|register|create account|sign up/i);
+  await expect(page.getByRole("link", { name: "Remove my clip" })).toBeVisible();
   await page.goto("/services");
   await expect(page.getByRole("heading", { name: "Drone Videography" })).toBeVisible();
-  const book = await page.request.get("/book", { maxRedirects: 0 });
-  expect(book.status()).toBe(307);
-  expect(book.headers()["location"]).toMatch(/\/contact$/);
 });
 
 test("guest leaves a review; it appears only after the admin approves it", async ({ page }) => {
@@ -195,7 +193,7 @@ test("admin: editing website text changes the home page", async ({ page }) => {
   await expect(page.getByText("Home — hero saved.")).toBeVisible();
 });
 
-test("admin: adding the Instagram username turns on 'Book via Instagram' (DM)", async ({ page, request }) => {
+test("admin: adding the Instagram username adds 'DM us on Instagram' next to booking", async ({ page }) => {
   await login(page);
   await page.goto("/superadmin/content");
   const social = page.locator("form").filter({ has: page.getByRole("button", { name: "Save contact & social" }) });
@@ -204,10 +202,7 @@ test("admin: adding the Instagram username turns on 'Book via Instagram' (DM)", 
   await expect(page.getByText("Contact & social saved.")).toBeVisible();
 
   await page.goto("/");
-  await expect(page.locator("header").getByRole("link", { name: /BOOK VIA INSTAGRAM/ })).toHaveAttribute("href", "https://ig.me/m/oceanx.e2e");
-  await expect(page.getByRole("link", { name: /DM US TO BOOK/ })).toHaveAttribute("href", "https://ig.me/m/oceanx.e2e");
-  const short = await request.get("/book", { maxRedirects: 0 });
-  expect(short.headers()["location"]).toBe("https://ig.me/m/oceanx.e2e");
+  await expect(page.getByRole("link", { name: /OR DM US ON INSTAGRAM/ })).toHaveAttribute("href", "https://ig.me/m/oceanx.e2e");
 
   // restore
   await page.goto("/superadmin/content");
@@ -215,7 +210,7 @@ test("admin: adding the Instagram username turns on 'Book via Instagram' (DM)", 
   await social.getByRole("button", { name: "Save contact & social" }).click();
   await expect(page.getByText("Contact & social saved.")).toBeVisible();
   await page.goto("/");
-  await expect(page.locator("header").getByRole("link", { name: /BOOK VIA INSTAGRAM/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /OR DM US ON INSTAGRAM/ })).toHaveCount(0);
 });
 
 test("admin: logout ends the session", async ({ page }) => {

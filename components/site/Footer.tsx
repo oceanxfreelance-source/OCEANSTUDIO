@@ -22,6 +22,8 @@ export function Footer({ c }: { c: Content }) {
           <p className="eyebrow mt-6 text-foam/50">{c["hero.location"]}</p>
         </div>
         <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-foam/75 md:grid-cols-1">
+          <Link href="/clips" className="link-underline w-fit hover:text-white">Find my clips</Link>
+          <Link href="/book" className="link-underline w-fit hover:text-white">Book a session</Link>
           <Link href="/work" className="link-underline w-fit hover:text-white">Our Work</Link>
           <Link href="/services" className="link-underline w-fit hover:text-white">Services</Link>
           <Link href="/machines" className="link-underline w-fit hover:text-white">Machines & Maabaidhoo</Link>
@@ -58,6 +60,12 @@ export function Footer({ c }: { c: Content }) {
         </div>
       </div>
       <div className="border-t border-white/5">
+        <p className="container-x pt-6 text-xs leading-relaxed text-foam/50">
+          {c["shop.filmingNotice"]}{" "}
+          <Link href="/remove" className="text-gold/80 underline hover:text-gold">
+            Remove my clip
+          </Link>
+        </p>
         <div className="container-x flex flex-col gap-2 py-6 text-xs text-foam/40 sm:flex-row sm:justify-between">
           <p>© {new Date().getFullYear()} OCEAN X. All rights reserved.</p>
           <p>Maabaidhoo, Laamu Atoll, Maldives</p>

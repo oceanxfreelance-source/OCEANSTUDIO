@@ -13,3 +13,4 @@ dump.rdb
 /test-results
 /playwright-report
 *.tmp.mjs
+.data

@@ -46,7 +46,7 @@ const services = [
 ];
 
 const locations = [
-  { slug: "machines", name: "Machines", kind: "Surf spot", featured: true, displayOrder: 1, description: "One of Laamu's best-known surf breaks — and where Ocean X began, with a drone above the waves." },
+  { slug: "machines", name: "Machines", kind: "Surf spot", code: "MC", featured: true, displayOrder: 1, description: "One of Laamu's best-known surf breaks — and where Ocean X began, with a drone above the waves." },
   { slug: "maabaidhoo", name: "Maabaidhoo", kind: "Island", featured: true, displayOrder: 2, description: "Our island in Laamu Atoll — home base for every Ocean X session at Machines." },
 ];
 

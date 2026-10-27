@@ -4,7 +4,11 @@
 
 This repository holds two things:
 
-1. **The public website.** Visitors see Ocean X's work, services and where Ocean X works (Machines & Maabaidhoo), and read and leave reviews. It is a showcase, not a booking system: guests book by sending a DM on Instagram (the “Book via Instagram” buttons and the `/book` short link open a DM once the Instagram username is set in Website content). Visitors never register or log in.
+1. **The public website and clip shop.** Visitors see Ocean X's work, services and Machines & Maabaidhoo, read and leave reviews, and:
+   - **Find my clips** (`/clips`): browse clips filmed at the break by day, session and board/rashguard colour, play the short watermarked preview, add to cart and check out (cash or USD bank transfer with slip upload). A private order page shows the status and, once paid, expiring download links to the originals.
+   - **Book a session** (`/book`): pick a day and session (availability set by the owner), package, surfers and how to spot them; pay a deposit. A private booking page shows Requested → Confirmed → Filmed → Ready, then the clips.
+   - **Remove my clip** (`/remove`): takes a clip out of the gallery at once.
+   Visitors never register or log in.
 2. **The private Superadmin** at `/superadmin`. Only the Ocean X owner uses it, to manage the website and the business.
 
 ```
@@ -36,6 +40,14 @@ PRIVATE  Owner   → /superadmin login → Dashboard → Reviews (approve) · Se
 | Reviews | Guest reviews arrive here as **waiting**; one tap to Approve (shows on the site) or Hide. Feature the best on the home page, or add reviews yourself |
 | Website content | Hero text and image, about text, contact details, Instagram, footer, SEO description |
 | Account | Change your password and sign out all devices |
+
+## Clip shop: how files are kept
+
+- **Originals, payment slips and reels are private** (Vercel Blob private store, `PRIVATE_BLOB_READ_WRITE_TOKEN`). Buyers only get a 15-minute signed link, and only from a paid order before its expiry date.
+- **Previews are public**: max 8 s, 480p, silent, with a tiled “OCEAN X · PREVIEW” watermark (`assets/preview-watermark.png`), made by ffmpeg on upload.
+- Uploads go straight from the admin's phone to storage. ffmpeg reads the original through a local range relay (`lib/range-relay.ts`), so large files never need to fit on the server's disk.
+- Prices, deposit %, bank details, session times, places per session and download days are edited in Superadmin → Website content → *Clip shop*. The server always recalculates prices.
+- Locally (no private token) files go to `./.data`; run the app with `STORAGE_DRIVER=local` for production-mode tests.
 
 ## Technology
 

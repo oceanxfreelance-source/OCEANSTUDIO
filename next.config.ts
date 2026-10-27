@@ -31,6 +31,7 @@ const nextConfig: NextConfig = {
   // Ship the ffmpeg binary with the video-optimising function.
   outputFileTracingIncludes: {
     "/api/admin/video-optimize": ["./node_modules/ffmpeg-static/ffmpeg"],
+    "/api/admin/clips/process": ["./node_modules/ffmpeg-static/ffmpeg", "./assets/preview-watermark.png"],
   },
   async redirects() {
     // The location section used to live at /laamu.

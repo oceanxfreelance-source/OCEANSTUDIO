@@ -20,8 +20,8 @@ export const CONTENT_FIELDS = [
   { group: "Home — hero", key: "hero.title", label: "Hero title", default: "CAPTURED BY THE OCEAN." },
   { group: "Home — hero", key: "hero.subtitle", label: "Hero subtitle", default: "Surf films and surf photography at Machines, Maabaidhoo — Laamu, Maldives." },
   { group: "Home — hero", key: "hero.location", label: "Location line", default: "MACHINES • MAABAIDHOO • LAAMU" },
-  { group: "Home — hero", key: "hero.primaryCta", label: "Main button", default: "EXPLORE OUR WORK" },
-  { group: "Home — hero", key: "hero.secondaryCta", label: "Second button", default: "READ REVIEWS" },
+  { group: "Home — hero", key: "hero.primaryCta", label: "Main button (Find my clips)", default: "FIND MY CLIPS" },
+  { group: "Home — hero", key: "hero.secondaryCta", label: "Second button (Book)", default: "BOOK A SESSION" },
   { group: "Home — hero", key: "hero.imageId", label: "Hero image", default: "", type: "image", help: "A wide, cinematic photo. Shown on all devices." },
   {
     group: "Home — hero",
@@ -72,14 +72,13 @@ export const CONTENT_FIELDS = [
     default: "Machines is the wave. Maabaidhoo is home. Every Ocean X surf session happens here, in Laamu Atoll.",
   },
   // Booking via Instagram DM
-  { group: "Booking by Instagram", key: "book.title", label: "Booking title", default: "Want us to film your session?" },
+  { group: "Booking", key: "book.title", label: "Booking title", default: "Want us to film your session?" },
   {
-    group: "Booking by Instagram",
+    group: "Booking",
     key: "book.body",
     label: "Booking text",
     type: "textarea",
-    help: "The 'Book via Instagram' buttons open a DM to the Instagram username set under Contact & social.",
-    default: "Send us a DM on Instagram with your dates and the number of surfers — we'll check the swell and get back to you.",
+    default: "Pick a day and session, tell us how to spot you in the water, and we'll film every wave. Clips arrive on your private page the same day.",
   },
   // Reviews
   { group: "Reviews", key: "reviews.intro", label: "Reviews page intro", type: "textarea", default: "What surfers say about their drone videography sessions with Ocean X at Machines." },
@@ -98,6 +97,37 @@ export const CONTENT_FIELDS = [
   { group: "Contact & social", key: "social.youtube", label: "YouTube link", default: "", type: "url" },
   { group: "Contact & social", key: "social.tiktok", label: "TikTok link", default: "", type: "url" },
   { group: "Contact & social", key: "social.facebook", label: "Facebook link", default: "", type: "url" },
+  // Clip shop — prices (USD)
+  { group: "Clip shop — prices", key: "shop.priceClip", label: "Single clip price (USD)", default: "20" },
+  { group: "Clip shop — prices", key: "shop.priceSession", label: "Full session price (USD)", default: "60", help: "All clips of one surfer in one session. Also the cap: more single clips than this never cost more." },
+  { group: "Clip shop — prices", key: "shop.priceReel", label: "Session + edited reel price (USD)", default: "100", help: "All clips plus a 30–60 s edited reel with music." },
+  { group: "Clip shop — prices", key: "shop.priceDrone", label: "Drone + camera package price (USD)", default: "", help: "For bookings. Leave empty to hide this package." },
+  { group: "Clip shop — prices", key: "shop.depositPercent", label: "Booking deposit (%)", default: "50" },
+  // Clip shop — payment
+  {
+    group: "Clip shop — payment",
+    key: "pay.bankDetails",
+    label: "USD bank transfer details",
+    type: "textarea",
+    default: "",
+    help: "Account name, bank and USD account number — one per line. Shown at checkout with a copy button. Leave empty to hide bank transfer.",
+  },
+  { group: "Clip shop — payment", key: "pay.cashText", label: "Cash payment note", type: "textarea", default: "Pay cash when we meet on the island — we'll arrange it on WhatsApp." },
+  { group: "Clip shop — payment", key: "pay.paypalLink", label: "PayPal.me link", default: "", type: "url", help: "Not live yet. Leave empty." },
+  // Clip shop — sessions & delivery
+  { group: "Clip shop — sessions", key: "slot.morning", label: "Morning session time", default: "6:00 – 9:30" },
+  { group: "Clip shop — sessions", key: "slot.midday", label: "Midday session time", default: "10:30 – 13:30" },
+  { group: "Clip shop — sessions", key: "slot.afternoon", label: "Afternoon session time", default: "15:00 – 18:00" },
+  { group: "Clip shop — sessions", key: "shop.maxPerSlot", label: "Default bookings per session", default: "2", help: "Change single days under Bookings → Availability." },
+  { group: "Clip shop — sessions", key: "shop.bookAheadDays", label: "How far ahead surfers can book (days)", default: "60" },
+  { group: "Clip shop — sessions", key: "shop.downloadDays", label: "Download links valid for (days)", default: "7" },
+  {
+    group: "Clip shop — sessions",
+    key: "shop.filmingNotice",
+    label: "Filming & privacy notice",
+    type: "textarea",
+    default: "We film surfers at the break from the boat, the channel and (with a permit) the drone. Previews are small and watermarked; full clips go only to the person who buys them. Don't want to be in the gallery? Ask us to remove your clip — we do it fast.",
+  },
   // Footer & SEO
   { group: "Footer & SEO", key: "footer.text", label: "Footer text", default: "Surf films & photography at Machines, Maabaidhoo — Laamu, Maldives." },
   {
@@ -105,7 +135,7 @@ export const CONTENT_FIELDS = [
     key: "seo.description",
     label: "Search engine description",
     type: "textarea",
-    default: "Ocean X — surf films, drone surf videography and surf photography at Machines, Maabaidhoo, in Laamu Atoll, Maldives.",
+    default: "Ocean X — surf video and surf photography in the Maldives: we film every session at Machines, Maabaidhoo (Laamu). Find your surf clips the same day, or book a filmed session.",
   },
 ] as const satisfies readonly ContentField[];
 

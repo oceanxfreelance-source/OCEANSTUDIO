@@ -7,6 +7,16 @@ import { cx } from "@/components/ui/cx";
 
 const GROUPS = [
   {
+    label: "Clip shop",
+    items: [
+      { href: "/superadmin/orders", label: "Orders" },
+      { href: "/superadmin/bookings", label: "Bookings" },
+      { href: "/superadmin/clips/upload", label: "Upload clips" },
+      { href: "/superadmin/clips", label: "Clips", exact: true },
+      { href: "/superadmin/removals", label: "Removal requests" },
+    ],
+  },
+  {
     label: "Business",
     items: [
       { href: "/superadmin", label: "Dashboard", exact: true },
@@ -26,9 +36,10 @@ const GROUPS = [
   },
 ];
 
-export function AdminNav({ pendingReviews, onLogout, adminName }: { pendingReviews: number; onLogout: () => Promise<void>; adminName: string }) {
+export function AdminNav({ counts, onLogout, adminName }: { counts: Record<string, number>; onLogout: () => Promise<void>; adminName: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
   useEffect(() => setOpen(false), [pathname]);
 
   const nav = (
@@ -38,7 +49,7 @@ export function AdminNav({ pendingReviews, onLogout, adminName }: { pendingRevie
           <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-foam/40">{g.label}</p>
           <ul className="mt-2 space-y-0.5">
             {g.items.map((it) => {
-              const active = it.exact ? pathname === it.href : pathname.startsWith(it.href);
+              const active = it.exact ? pathname === it.href || (it.href === "/superadmin/clips" && /^\/superadmin\/clips\/(?!upload)/.test(pathname)) : pathname.startsWith(it.href);
               return (
                 <li key={it.href}>
                   <Link
@@ -46,8 +57,10 @@ export function AdminNav({ pendingReviews, onLogout, adminName }: { pendingRevie
                     className={cx("flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors", active ? "bg-white/10 text-white" : "text-foam/70 hover:bg-white/5 hover:text-white")}
                   >
                     {it.label}
-                    {it.href === "/superadmin/testimonials" && pendingReviews > 0 && (
-                      <span className="rounded-full bg-gold px-2 py-0.5 text-[11px] font-semibold text-abyss" title="Reviews waiting for approval">{pendingReviews}</span>
+                    {(counts[it.href] ?? 0) > 0 && (
+                      <span className="rounded-full bg-gold px-2 py-0.5 text-[11px] font-semibold text-abyss" title="Waiting for you">
+                        {counts[it.href]}
+                      </span>
                     )}
                   </Link>
                 </li>
@@ -84,7 +97,7 @@ export function AdminNav({ pendingReviews, onLogout, adminName }: { pendingRevie
         <Brand />
         <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="rounded-lg px-3 py-1.5 text-sm ring-1 ring-white/20">
           {open ? "Close" : "Menu"}
-          {!open && pendingReviews > 0 && <span className="ml-2 rounded-full bg-gold px-1.5 text-[11px] font-semibold text-abyss">{pendingReviews}</span>}
+          {!open && total > 0 && <span className="ml-2 rounded-full bg-gold px-1.5 text-[11px] font-semibold text-abyss">{total}</span>}
         </button>
       </div>
       {open && <div className="fixed inset-x-0 bottom-0 top-14 z-40 overflow-y-auto bg-abyss px-4 py-6 text-foam lg:hidden">{nav}</div>}

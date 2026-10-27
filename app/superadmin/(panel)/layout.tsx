@@ -8,10 +8,16 @@ export const dynamic = "force-dynamic";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();
-  const pendingReviews = await db.testimonial.count({ where: { pending: true } });
+  const [pendingReviews, newOrders, newBookings, removals] = await Promise.all([
+    db.testimonial.count({ where: { pending: true } }),
+    db.order.count({ where: { status: "AWAITING_PAYMENT" } }),
+    db.booking.count({ where: { token: { not: null }, status: "NEW" } }),
+    db.removalRequest.count({ where: { doneAt: null } }),
+  ]);
+  const counts = { "/superadmin/testimonials": pendingReviews, "/superadmin/orders": newOrders, "/superadmin/bookings": newBookings, "/superadmin/removals": removals };
   return (
     <>
-      <AdminNav pendingReviews={pendingReviews} onLogout={logoutAction} adminName={admin.name} />
+      <AdminNav counts={counts} onLogout={logoutAction} adminName={admin.name} />
       <div className="lg:pl-64">
         <main className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">{children}</main>
       </div>

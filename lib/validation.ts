@@ -119,6 +119,13 @@ export const locationSchema = z.object({
   name: trimmed(100).min(2, "Name is required"),
   kind: z.enum(LOCATION_KINDS),
   atoll: trimmed(60).min(2).default("Laamu"),
+  code: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .optional()
+    .transform((v) => (v ? v : undefined))
+    .refine((v) => !v || /^[A-Z]{2,4}$/.test(v), "2–4 letters, e.g. MC"),
   description: trimmed(8000),
   videoUrl: optionalUrl,
   displayOrder: optionalInt(10000),

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cx } from "@/components/ui/cx";
 import { StarShape } from "./Stars";
+import { useCart } from "./shop/cart";
 
 /**
  * Floating review badge in the bottom-right corner (phones and desktop):
@@ -14,6 +15,7 @@ import { StarShape } from "./Stars";
 export function ReviewBadge({ average, count }: { average: number | null; count: number }) {
   const pathname = usePathname();
   const [show, setShow] = useState(false);
+  const cart = useCart();
 
   useEffect(() => {
     const onScroll = () => setShow(window.scrollY > 280);
@@ -22,7 +24,7 @@ export function ReviewBadge({ average, count }: { average: number | null; count:
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (pathname.startsWith("/reviews")) return null;
+  if (pathname.startsWith("/reviews") || cart.clips.length > 0 || /^\/(checkout|order|booking|book)\b/.test(pathname)) return null;
   const hasReviews = count > 0 && average !== null;
 
   return (

@@ -9,15 +9,16 @@ import { Logo } from "./Logo";
 
 // Public navigation only. The Superadmin is intentionally NOT linked anywhere.
 const NAV = [
+  { href: "/clips", label: "Find my clips" },
+  { href: "/book", label: "Book" },
   { href: "/work", label: "Our Work" },
   { href: "/services", label: "Services" },
   { href: "/machines", label: "Machines" },
   { href: "/reviews", label: "Reviews" },
-  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
 
-export function Header({ instagramUrl, bookUrl }: { instagramUrl: string | null; bookUrl: string | null }) {
+export function Header({ instagramUrl }: { instagramUrl: string | null }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -83,23 +84,12 @@ export function Header({ instagramUrl, bookUrl }: { instagramUrl: string | null;
               <Instagram className="h-5 w-5" />
             </a>
           )}
-          {bookUrl ? (
-            <a
-              href={bookUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-lift hidden items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-[12px] font-semibold tracking-[0.14em] text-abyss hover:bg-[#d8bc86] sm:inline-flex"
-            >
-              <Instagram className="h-4 w-4" /> BOOK VIA INSTAGRAM
-            </a>
-          ) : (
-            <Link
-              href="/reviews#leave-a-review"
-              className="btn-lift hidden rounded-full bg-foam px-5 py-2.5 text-[12px] font-semibold tracking-[0.14em] text-abyss hover:bg-white sm:inline-flex"
-            >
-              LEAVE A REVIEW
-            </Link>
-          )}
+          <Link
+            href="/clips"
+            className="btn-lift hidden items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-[12px] font-semibold tracking-[0.14em] text-abyss hover:bg-[#d8bc86] sm:inline-flex"
+          >
+            FIND MY CLIPS
+          </Link>
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
@@ -126,17 +116,14 @@ export function Header({ instagramUrl, bookUrl }: { instagramUrl: string | null;
             </Link>
           ))}
         </nav>
-        {bookUrl && (
-          <a href={bookUrl} target="_blank" rel="noopener noreferrer" className="mt-8 flex items-center justify-center gap-2 rounded-full bg-gold py-4 text-sm font-semibold tracking-[0.14em] text-abyss">
-            <Instagram className="h-4 w-4" /> BOOK VIA INSTAGRAM
-          </a>
-        )}
-        <Link
-          href="/reviews#leave-a-review"
-          onClick={() => setOpen(false)}
-          className={cx("flex items-center justify-center rounded-full py-4 text-sm font-semibold tracking-[0.14em]", bookUrl ? "mt-3 border border-foam/30 text-foam" : "mt-8 bg-foam text-abyss")}
-        >
-          LEAVE A REVIEW
+        <Link href="/clips" onClick={() => setOpen(false)} className="mt-8 flex items-center justify-center rounded-full bg-gold py-4 text-sm font-semibold tracking-[0.14em] text-abyss">
+          FIND MY CLIPS
+        </Link>
+        <Link href="/book" onClick={() => setOpen(false)} className="mt-3 flex items-center justify-center rounded-full border border-foam/30 py-4 text-sm font-semibold tracking-[0.14em] text-foam">
+          BOOK A SESSION
+        </Link>
+        <Link href="/reviews#leave-a-review" onClick={() => setOpen(false)} className="mt-3 flex items-center justify-center py-3 text-sm text-foam/70 underline">
+          Leave a review
         </Link>
         {instagramUrl && (
           <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="mt-6 flex items-center justify-center gap-2 text-sm text-foam/70">
