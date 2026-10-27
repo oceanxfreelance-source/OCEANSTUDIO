@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { PageHero } from "@/components/site/Section";
 import { firstBookableDay, getAvailability } from "@/lib/availability";
 import { getShopSpots } from "@/lib/clip-shop";
 import { bookingPackagePrice, getShopConfig, paymentMethods } from "@/lib/shop";
+import { getContent } from "@/lib/content";
+import { instagramDmUrl } from "@/lib/format";
 import { BookingForm } from "./BookingForm";
 
 export const metadata: Metadata = {
@@ -14,6 +15,7 @@ export const dynamic = "force-dynamic";
 
 export default async function BookPage() {
   const cfg = await getShopConfig();
+  const dm = instagramDmUrl((await getContent())["social.instagram"]);
   const [days, spots] = await Promise.all([getAvailability(cfg, firstBookableDay(), cfg.bookAheadDays), getShopSpots()]);
   const packages = (["SESSION", "SESSION_REEL", "DRONE_CAMERA"] as const).flatMap((id) => {
     const price = bookingPackagePrice(cfg, id);
@@ -22,9 +24,19 @@ export default async function BookPage() {
 
   return (
     <>
-      <PageHero eyebrow="Book a session" title="We film. You surf." intro="Pick a day and session, tell us how to spot you, and we'll film every wave. Your clips arrive on a private page the same day." />
-      <section className="bg-abyss pb-24 pt-4 text-foam">
+      <section className="min-h-screen bg-abyss pb-24 pt-28 text-foam md:pt-36">
         <div className="container-x">
+          <h1 className="display text-4xl [font-stretch:112%] md:text-6xl">Book a session</h1>
+          <p className="mt-3 max-w-xl text-mist">Pick a day and session, tell us how to spot you, and we&apos;ll film every wave. Your clips arrive on a private page the same day.</p>
+          {dm && (
+            <p className="mt-2 text-sm text-mist">
+              Prefer to chat?{" "}
+              <a href={dm} target="_blank" rel="noopener noreferrer" className="text-gold underline">
+                Or DM us on Instagram
+              </a>
+            </p>
+          )}
+          <div className="mt-10">
           <BookingForm
             days={days.map((d) => ({ date: d.date, slots: { MORNING: d.slots.MORNING, MIDDAY: d.slots.MIDDAY, AFTERNOON: d.slots.AFTERNOON } }))}
             spots={spots.map((s) => ({ id: s.id, name: s.name }))}
@@ -35,6 +47,7 @@ export default async function BookPage() {
             cashText={cfg.cashText}
             slotTimes={cfg.slotTimes}
           />
+          </div>
           <p className="mx-auto mt-16 max-w-2xl border-t border-foam/10 pt-6 text-center text-xs leading-relaxed text-mist">{cfg.notice}</p>
         </div>
       </section>

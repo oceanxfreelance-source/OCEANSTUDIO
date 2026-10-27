@@ -37,19 +37,18 @@ export function BookingForm({
   slotTimes: Record<Slot, string>;
 }) {
   const router = useRouter();
-  const [date, setDate] = useState<string | null>(null);
+  const firstOpen = days.find((d) => SLOTS.some((s) => !d.slots[s].closed && d.slots[s].left > 0))?.date ?? null;
+  const [date, setDate] = useState<string | null>(firstOpen);
   const [slot, setSlot] = useState<Slot | null>(null);
   const [pkg, setPkg] = useState<Pkg>(packages[0]?.id ?? "SESSION");
   const [surfers, setSurfers] = useState(1);
   const [method, setMethod] = useState<Method>(methods[0]!);
-  const [showAll, setShowAll] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
   const price = (packages.find((p) => p.id === pkg)?.price ?? 0) * surfers;
   const deposit = Math.round(price * depositPercent) / 100;
-  const visible = showAll ? days : days.slice(0, 14);
   const input = "mt-1.5 block w-full rounded-lg border border-foam/20 bg-ink px-4 py-3 text-foam placeholder:text-foam/35 focus:border-gold focus:outline-none";
   const label = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 
@@ -90,55 +89,79 @@ export function BookingForm({
       }}
       className="grid gap-12 lg:grid-cols-[1.25fr_1fr]"
     >
-      <div className="space-y-10">
-        <fieldset>
-          <legend className="eyebrow text-gold">1 · Day & session</legend>
-          <p className="mt-2 text-sm text-mist">
-            Morning {slotTimes.MORNING} · Midday {slotTimes.MIDDAY} · Afternoon {slotTimes.AFTERNOON}
-          </p>
-          <div className="mt-4 divide-y divide-foam/10 border-y border-foam/10">
-            {visible.map((d) => (
-              <div key={d.date} className="grid grid-cols-[6.5rem_1fr] items-center gap-3 py-2.5">
-                <span className={cx("text-sm", date === d.date ? "text-gold" : "text-foam/80")}>{label(d.date)}</span>
-                <div className="grid grid-cols-3 gap-2">
-                  {SLOTS.map((s) => {
-                    const st = d.slots[s];
-                    const full = st.closed || st.left <= 0;
-                    const active = date === d.date && slot === s;
-                    return (
-                      <button
-                        key={s}
-                        type="button"
-                        disabled={full}
-                        aria-pressed={active}
-                        aria-label={`${label(d.date)} ${SLOT_LABEL[s]}${full ? " (full)" : ""}`}
-                        onClick={() => {
-                          setDate(d.date);
-                          setSlot(s);
-                        }}
-                        className={cx(
-                          "rounded-full border px-2 py-2 text-[11px] tracking-wide transition-colors",
-                          active ? "border-gold bg-gold text-abyss" : full ? "cursor-not-allowed border-foam/5 text-foam/25 line-through" : "border-foam/20 text-foam hover:border-gold/70",
-                        )}
-                      >
-                        {SLOT_LABEL[s]}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+      <div className="min-w-0 space-y-10">
+        <fieldset className="min-w-0">
+          <legend className="text-lg font-medium">
+            <span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gold text-sm text-abyss">1</span>Choose a day
+          </legend>
+          <div className="no-scrollbar -mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1">
+            {days.map((d) => {
+              const open = SLOTS.some((s) => !d.slots[s].closed && d.slots[s].left > 0);
+              const dt = new Date(`${d.date}T00:00:00Z`);
+              const active = date === d.date;
+              return (
+                <button
+                  key={d.date}
+                  type="button"
+                  disabled={!open}
+                  aria-pressed={active}
+                  aria-label={`${label(d.date)}${open ? "" : " (full)"}`}
+                  onClick={() => {
+                    setDate(d.date);
+                    if (slot && (d.slots[slot].closed || d.slots[slot].left <= 0)) setSlot(null);
+                  }}
+                  className={cx(
+                    "flex w-16 shrink-0 flex-col items-center rounded-2xl border py-3 transition-colors",
+                    active ? "border-gold bg-gold text-abyss" : open ? "border-foam/15 text-foam hover:border-gold/60" : "cursor-not-allowed border-foam/5 text-foam/25",
+                  )}
+                >
+                  <span className="text-[11px] uppercase tracking-wide opacity-75">{dt.toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" })}</span>
+                  <span className="display text-2xl">{dt.getUTCDate()}</span>
+                  <span className="text-[11px] opacity-75">{dt.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" })}</span>
+                </button>
+              );
+            })}
           </div>
-          {!showAll && days.length > 14 && (
-            <button type="button" onClick={() => setShowAll(true)} className="mt-3 text-sm text-gold underline">
-              Show later dates
-            </button>
+
+          <p className="mt-8 text-lg font-medium">
+            <span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gold text-sm text-abyss">2</span>Choose a session
+          </p>
+          {date ? (
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              {SLOTS.map((s) => {
+                const st = days.find((d) => d.date === date)!.slots[s];
+                const full = st.closed || st.left <= 0;
+                const active = slot === s;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    disabled={full}
+                    aria-pressed={active}
+                    aria-label={`${label(date)} ${SLOT_LABEL[s]}${full ? " (full)" : ""}`}
+                    onClick={() => setSlot(s)}
+                    className={cx(
+                      "rounded-2xl border p-3 text-left transition-colors sm:p-4",
+                      active ? "border-gold bg-gold/10" : full ? "cursor-not-allowed border-foam/5 opacity-40" : "border-foam/15 hover:border-gold/60",
+                    )}
+                  >
+                    <span className="block font-medium">{SLOT_LABEL[s]}</span>
+                    <span className="block text-xs text-mist">{slotTimes[s]}</span>
+                    <span className={cx("mt-2 block text-xs", full ? "text-foam/50" : "text-gold")}>{full ? "Full" : st.left === 1 ? "1 place left" : `${st.left} places`}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-mist">Pick a day first.</p>
           )}
           {errors.date && <p className="mt-2 text-xs text-red-300">{errors.date}</p>}
         </fieldset>
 
-        <fieldset>
-          <legend className="eyebrow text-gold">2 · Package</legend>
+        <fieldset className="min-w-0">
+          <legend className="text-lg font-medium">
+            <span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gold text-sm text-abyss">3</span>Package & how to spot you
+          </legend>
           <div className="mt-4 space-y-2">
             {packages.map((p) => (
               <label key={p.id} className={cx("flex cursor-pointer items-start gap-3 rounded-lg border p-4", pkg === p.id ? "border-gold bg-gold/5" : "border-foam/10")}>
@@ -183,8 +206,10 @@ export function BookingForm({
         </fieldset>
       </div>
 
-      <div className="space-y-5 lg:sticky lg:top-28 lg:self-start">
-        <p className="eyebrow text-gold">3 · Your details</p>
+      <div className="min-w-0 space-y-5 lg:sticky lg:top-28 lg:self-start">
+        <p className="text-lg font-medium">
+          <span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gold text-sm text-abyss">4</span>Your details
+        </p>
         <div className="border border-foam/10 bg-ink p-5 text-sm">
           <p className="text-mist">{date && slot ? `${label(date)} · ${SLOT_LABEL[slot]}` : "Choose a day and session"}</p>
           <div className="mt-3 flex items-baseline justify-between">

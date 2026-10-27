@@ -10,11 +10,15 @@ import { Logo } from "./Logo";
 // Public navigation only. The Superadmin is intentionally NOT linked anywhere.
 const NAV = [
   { href: "/clips", label: "Find my clips" },
-  { href: "/book", label: "Book" },
-  { href: "/work", label: "Our Work" },
-  { href: "/services", label: "Services" },
-  { href: "/machines", label: "Machines" },
+  { href: "/book", label: "Book a session" },
+  { href: "/work", label: "Our work" },
   { href: "/reviews", label: "Reviews" },
+  { href: "/about", label: "About" },
+];
+// Also in the phone menu (and the footer).
+const MORE = [
+  { href: "/services", label: "Services" },
+  { href: "/machines", label: "Machines & Maabaidhoo" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -86,9 +90,10 @@ export function Header({ instagramUrl }: { instagramUrl: string | null }) {
           )}
           <Link
             href="/clips"
-            className="btn-lift hidden items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-[12px] font-semibold tracking-[0.14em] text-abyss hover:bg-[#d8bc86] sm:inline-flex"
+            className="btn-lift inline-flex items-center gap-2 rounded-full bg-gold px-4 py-2 text-[11px] font-semibold tracking-[0.14em] text-abyss hover:bg-[#d8bc86] sm:px-5 sm:py-2.5 sm:text-[12px]"
           >
-            FIND MY CLIPS
+            <span className="sm:hidden">MY CLIPS</span>
+            <span className="hidden sm:inline">FIND MY CLIPS</span>
           </Link>
           <button
             type="button"
@@ -116,15 +121,16 @@ export function Header({ instagramUrl }: { instagramUrl: string | null }) {
             </Link>
           ))}
         </nav>
-        <Link href="/clips" onClick={() => setOpen(false)} className="mt-8 flex items-center justify-center rounded-full bg-gold py-4 text-sm font-semibold tracking-[0.14em] text-abyss">
-          FIND MY CLIPS
-        </Link>
-        <Link href="/book" onClick={() => setOpen(false)} className="mt-3 flex items-center justify-center rounded-full border border-foam/30 py-4 text-sm font-semibold tracking-[0.14em] text-foam">
-          BOOK A SESSION
-        </Link>
-        <Link href="/reviews#leave-a-review" onClick={() => setOpen(false)} className="mt-3 flex items-center justify-center py-3 text-sm text-foam/70 underline">
-          Leave a review
-        </Link>
+        <nav aria-label="More" className="mt-6 flex flex-col gap-1">
+          {MORE.map((n) => (
+            <Link key={n.href} href={n.href} className="py-2 text-lg text-foam/70 hover:text-gold">
+              {n.label}
+            </Link>
+          ))}
+          <Link href="/reviews#leave-a-review" className="py-2 text-lg text-foam/70 hover:text-gold">
+            Leave a review
+          </Link>
+        </nav>
         {instagramUrl && (
           <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="mt-6 flex items-center justify-center gap-2 text-sm text-foam/70">
             <Instagram className="h-5 w-5" /> Follow on Instagram

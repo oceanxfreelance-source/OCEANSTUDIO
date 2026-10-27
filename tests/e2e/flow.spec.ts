@@ -201,16 +201,16 @@ test("admin: adding the Instagram username adds 'DM us on Instagram' next to boo
   await social.getByRole("button", { name: "Save contact & social" }).click();
   await expect(page.getByText("Contact & social saved.")).toBeVisible();
 
-  await page.goto("/");
-  await expect(page.getByRole("link", { name: /OR DM US ON INSTAGRAM/ })).toHaveAttribute("href", "https://ig.me/m/oceanx.e2e");
+  await page.goto("/book");
+  await expect(page.getByRole("link", { name: /Or DM us on Instagram/ })).toHaveAttribute("href", "https://ig.me/m/oceanx.e2e");
 
   // restore
   await page.goto("/superadmin/content");
   await social.getByLabel("Instagram username").fill("");
   await social.getByRole("button", { name: "Save contact & social" }).click();
   await expect(page.getByText("Contact & social saved.")).toBeVisible();
-  await page.goto("/");
-  await expect(page.getByRole("link", { name: /OR DM US ON INSTAGRAM/ })).toHaveCount(0);
+  await page.goto("/book");
+  await expect(page.getByRole("link", { name: /Or DM us on Instagram/ })).toHaveCount(0);
 });
 
 test("admin: logout ends the session", async ({ page }) => {

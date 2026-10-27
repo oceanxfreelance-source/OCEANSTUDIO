@@ -45,3 +45,13 @@ export async function getGalleryClips(f: GalleryFilter) {
 }
 
 export type GalleryClip = Awaited<ReturnType<typeof getGalleryClips>>["clips"][number];
+
+/** Newest gallery clips, for the home page strip. */
+export const getLatestClips = cache((take = 10) =>
+  db.clip.findMany({
+    where: GALLERY,
+    orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+    take,
+    select: { id: true, code: true, date: true, slot: true, posterUrl: true, location: { select: { name: true } } },
+  }),
+);

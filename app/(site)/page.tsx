@@ -1,41 +1,48 @@
 import Link from "next/link";
 import { ButtonLink } from "@/components/site/Buttons";
-import { LocationCard, ServiceCard, WorkCard } from "@/components/site/Cards";
+import { WorkCard } from "@/components/site/Cards";
 import { HeroVideo } from "@/components/site/HeroVideo";
 import { AnimatedWords } from "@/components/site/HeroTitle";
-import { Marquee } from "@/components/site/Marquee";
 import { Viewfinder } from "@/components/site/Viewfinder";
-import { ArrowRight, Instagram } from "@/components/site/Icons";
+import { ArrowRight } from "@/components/site/Icons";
 import { Img } from "@/components/site/Img";
 import { OceanBackdrop } from "@/components/site/OceanBackdrop";
-import { Prose, SectionHeading } from "@/components/site/Section";
+import { SectionHeading } from "@/components/site/Section";
 import { Testimonials } from "@/components/site/Testimonials";
+import { getLatestClips } from "@/lib/clip-shop";
 import { getContent } from "@/lib/content";
 import { db } from "@/lib/db";
-import { instagramDmUrl, instagramUrl } from "@/lib/format";
-import { InstagramBookButton } from "@/components/site/InstagramBook";
-import { getFeaturedWork, getLocations, getPublicServices, getReviewStats, getShowcase, getTestimonials } from "@/lib/public";
+import { formatDate } from "@/lib/format";
+import { getFeaturedWork, getReviewStats, getShowcase, getTestimonials } from "@/lib/public";
+import { shopConfigFrom } from "@/lib/shop";
+import { SLOT_LABEL } from "@/lib/shop-rules";
 import { parseVideoUrl, posterFor } from "@/lib/video";
 
+/**
+ * Home: everything points to the two things a surfer comes for —
+ *   "I surfed → find my clips"   and   "I want to be filmed → book a session".
+ */
 export default async function HomePage() {
-  const [c, services, work, locations, testimonials, reviewStats, showcase] = await Promise.all([
+  const [c, work, testimonials, reviewStats, showcase, latest] = await Promise.all([
     getContent(),
-    getPublicServices(),
-    getFeaturedWork(5),
-    getLocations(),
+    getFeaturedWork(3),
     getTestimonials(true),
     getReviewStats(),
     getShowcase(),
+    getLatestClips(10),
   ]);
+  const cfg = shopConfigFrom(c);
   const heroImage = c["hero.imageId"]
     ? await db.mediaAsset.findUnique({ where: { id: c["hero.imageId"] }, select: { id: true, width: true, height: true, alt: true } })
     : null;
   const heroVideo = parseVideoUrl(c["hero.videoUrl"]);
   // No hero photo or video chosen yet: open with Ocean X's own drone footage.
   const reel = !heroImage && heroVideo?.kind !== "file" ? showcase[0] : undefined;
-  const ig = instagramUrl(c["social.instagram"]);
-  const dm = instagramDmUrl(c["social.instagram"]);
-  const [lead, ...rest] = work;
+  const prices = [
+    { name: "One clip", price: cfg.prices.clip, note: "Any clip of you from the gallery" },
+    { name: "Full session", price: cfg.prices.session, note: "Every clip of you in one session", best: true },
+    { name: "Session + reel", price: cfg.prices.reel, note: "All clips + a 30–60 s edit with music" },
+  ];
 
   return (
     <>
@@ -64,121 +71,114 @@ export default async function HomePage() {
         <span aria-hidden className="letterbox letterbox-top" />
         <span aria-hidden className="letterbox letterbox-bottom" />
 
-        <div className="hero-content-scroll container-x relative z-[2] pb-24 pt-36 md:pb-32 md:pt-56">
-          <p className="hero-in eyebrow eyebrow-line text-foam/80" style={{ "--delay": "0.15s" } as React.CSSProperties}>
+        <div className="hero-content-scroll container-x relative z-[2] pb-10 pt-32 md:pb-16 md:pt-48">
+          <p className="hero-in eyebrow eyebrow-line w-fit text-foam/80" style={{ "--delay": "0.15s" } as React.CSSProperties}>
             {c["hero.location"]}
           </p>
-          <h1 className="display mt-6 max-w-[14ch] text-[clamp(3rem,11vw,9.5rem)] [font-stretch:118%]">
+          <h1 className="display mt-5 max-w-[14ch] text-[clamp(2.8rem,10vw,8.5rem)] [font-stretch:118%]">
             <AnimatedWords text={c["hero.title"]} />
           </h1>
-          <div className="mt-8 flex flex-col gap-8 md:mt-10 md:flex-row md:items-end md:justify-between">
-            <p className="hero-in max-w-md text-lg leading-relaxed text-foam/80 md:text-xl" style={{ "--delay": "0.85s" } as React.CSSProperties}>
-              {c["hero.subtitle"]}
-            </p>
-            <div className="hero-in flex flex-col gap-3 sm:flex-row" style={{ "--delay": "1.05s" } as React.CSSProperties}>
-              <ButtonLink href="/clips" variant="light">
-                {c["hero.primaryCta"]}
-              </ButtonLink>
-              <ButtonLink href="/book" variant="outline-light" arrow>
-                {c["hero.secondaryCta"]}
-              </ButtonLink>
-            </div>
-          </div>
-        </div>
-        <div className="hero-in absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-foam/50 md:flex" style={{ "--delay": "1.6s" } as React.CSSProperties} aria-hidden>
-          <span className="text-[10px] uppercase tracking-[0.35em]">Scroll</span>
-          <span className="scroll-cue h-10" />
-        </div>
-      </section>
+          <p className="hero-in mt-5 max-w-md text-base leading-relaxed text-foam/80 md:text-lg" style={{ "--delay": "0.8s" } as React.CSSProperties}>
+            {c["hero.subtitle"]}
+          </p>
 
-      <Marquee items={["Machines", "Surf films", "Maabaidhoo", "Drone videography", "Laamu", "Surf photography"]} />
-
-      {/* ── Intro ─────────────────────────────────────────── */}
-      <section className="bg-paper py-24 md:py-36">
-        <div className="container-x grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-24">
-          <div data-reveal>
-            <p className="eyebrow eyebrow-line text-gold-deep">Ocean X</p>
-            <h2 className="display mt-5 text-4xl [font-stretch:112%] sm:text-5xl lg:text-6xl">{c["home.introTitle"]}</h2>
-          </div>
-          <div data-reveal className="lg:pt-10">
-            <Prose text={c["home.introBody"]} className="text-lg text-slate" />
-            {services.length > 0 && (
-              <ul className="mt-10 divide-y divide-deep/10 border-y border-deep/10">
-                {services.map((s) => (
-                  <li key={s.id}>
-                    <Link href={`/services/${s.slug}`} className="group flex items-center justify-between py-4 transition-[padding] duration-300 hover:px-2">
-                      <span className="font-medium">{s.name}</span>
-                      <span className="flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-slate">
-                        {s.status === "ACTIVE" ? <span className="text-gold-deep">Available</span> : "Coming soon"}
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+          {/* The two choices */}
+          <div className="hero-in mt-8 grid gap-3 md:mt-12 md:max-w-4xl md:grid-cols-2" style={{ "--delay": "1s" } as React.CSSProperties}>
+            <Link href="/clips" className="group flex items-center gap-4 rounded-2xl bg-gold p-5 text-abyss transition-transform duration-300 hover:-translate-y-0.5 md:p-6">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-abyss/10" aria-hidden>
+                <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+              </span>
+              <span className="flex-1">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] opacity-70">Surfed with us?</span>
+                <span className="block text-xl font-semibold">{c["hero.primaryCta"].charAt(0) + c["hero.primaryCta"].slice(1).toLowerCase()}</span>
+                <span className="block text-sm opacity-75">Clips online the same day · from ${cfg.prices.clip}</span>
+              </span>
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Link>
+            <Link href="/book" className="group flex items-center gap-4 rounded-2xl border border-foam/25 bg-abyss/40 p-5 text-foam backdrop-blur-md transition-transform duration-300 hover:-translate-y-0.5 md:p-6">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-foam/10" aria-hidden>
+                <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2" /><path d="M3.5 10h17M8 3v4M16 3v4" /></svg>
+              </span>
+              <span className="flex-1">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">Want to be filmed?</span>
+                <span className="block text-xl font-semibold">{c["hero.secondaryCta"].charAt(0) + c["hero.secondaryCta"].slice(1).toLowerCase()}</span>
+                <span className="block text-sm text-foam/70">Pick a day — we film every wave</span>
+              </span>
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ── Featured work ─────────────────────────────────── */}
-      {lead && (
-        <section className="bg-abyss py-24 text-foam md:py-32">
-          <div className="container-x">
-            <SectionHeading
-              dark
-              eyebrow="Our work"
-              title="Selected work"
-              intro={c["work.intro"]}
-              action={
-                <ButtonLink href="/work" variant="outline-light" arrow className="self-start md:self-auto">
-                  VIEW ALL WORK
-                </ButtonLink>
-              }
-            />
-            <div className="mt-14 grid gap-6 md:grid-cols-3 md:gap-8">
-              <div className="md:col-span-2">
-                <WorkCard w={lead} large dark />
-              </div>
-              {rest.map((w) => (
-                <WorkCard key={w.id} w={w} dark />
-              ))}
+      {/* ── Latest clips (proof that it's live) ─────────────── */}
+      {latest.length > 0 && (
+        <section className="bg-abyss pb-16 pt-14 text-foam md:pb-24">
+          <div className="container-x flex items-end justify-between gap-4">
+            <div>
+              <p className="eyebrow text-gold">Just uploaded</p>
+              <h2 className="display mt-3 text-3xl [font-stretch:112%] md:text-5xl">Is this you?</h2>
             </div>
+            <Link href="/clips" className="link-underline shrink-0 text-sm text-foam/80">
+              See all clips →
+            </Link>
           </div>
+          <ul className="no-scrollbar container-x mt-8 flex snap-x gap-3 overflow-x-auto pb-2">
+            {latest.map((clip) => (
+              <li key={clip.id} className="w-36 shrink-0 snap-start md:w-48">
+                <Link href={`/clips?date=${clip.date.toISOString().slice(0, 10)}&slot=${clip.slot}`} className="group block">
+                  <span className="block aspect-[4/5] overflow-hidden rounded-xl bg-ink">
+                    {clip.posterUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={clip.posterUrl} alt="" loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                    )}
+                  </span>
+                  <span className="mt-2 block text-xs text-mist">
+                    {SLOT_LABEL[clip.slot]} · {formatDate(clip.date, { day: "numeric", month: "short" })}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
       {/* ── How it works ──────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-paper py-24 md:py-32">
+      <section className="bg-paper py-20 md:py-28">
         <div className="container-x">
           <SectionHeading eyebrow="How it works" title="Surf. We film. You keep the clips." />
-          <ol className="mt-14 grid gap-px overflow-hidden border border-deep/10 bg-deep/10 md:grid-cols-3">
+          <ol className="mt-12 grid gap-4 md:grid-cols-3">
             {[
-              { n: "01", t: "Book us — or just paddle out", d: "Book a session and tell us how to spot you, or simply surf: we film the line-up every session." },
-              { n: "02", t: "We film every wave", d: "From the boat, the channel and (with a permit) the drone above Machines." },
-              { n: "03", t: "Find your clips the same day", d: "Tap to preview, buy, and download the full-quality originals to your phone." },
+              { n: "1", t: "Surf", d: "Book a session and tell us how to spot you — or just paddle out. We film the line-up every session." },
+              { n: "2", t: "We film every wave", d: "From the boat, the channel and (with a permit) the drone above Machines." },
+              { n: "3", t: "Find yourself, download", d: "Clips go online the same day. Tap to preview, buy, and save the full-quality video to your phone." },
             ].map((step) => (
-              <li key={step.n} data-reveal className="bg-paper p-8 md:p-10">
-                <span className="display text-5xl text-gold-deep/80">{step.n}</span>
-                <h3 className="mt-6 text-xl font-medium">{step.t}</h3>
-                <p className="mt-3 text-slate">{step.d}</p>
+              <li key={step.n} data-reveal className="flex gap-5 rounded-2xl border border-deep/10 bg-white/60 p-6">
+                <span className="display flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-abyss text-lg text-gold">{step.n}</span>
+                <span>
+                  <span className="block text-lg font-medium">{step.t}</span>
+                  <span className="mt-1 block text-slate">{step.d}</span>
+                </span>
               </li>
             ))}
           </ol>
-          <dl data-reveal className="mt-14 grid grid-cols-2 gap-8 border-t border-deep/10 pt-10 text-sm md:grid-cols-4">
-            {[
-              ["Camera", "DJI Air 3S"],
-              ["Filmed at", "Machines, Laamu"],
-              ["Format", "Vertical & wide"],
-              ["Delivery", "Same day"],
-            ].map(([k, v]) => (
-              <div key={k}>
-                <dt className="eyebrow text-slate">{k}</dt>
-                <dd className="mt-2 text-lg">{v}</dd>
+        </div>
+      </section>
+
+      {/* ── Prices ────────────────────────────────────────── */}
+      <section className="bg-foam py-20 md:py-28">
+        <div className="container-x">
+          <SectionHeading eyebrow="Prices" title="Simple prices, in USD." intro={`Pay cash on the island${cfg.bankDetails ? " or by bank transfer" : ""}. Several clips from one session never cost more than the full session.`} />
+          <div className="mt-12 grid gap-4 md:grid-cols-3">
+            {prices.map((p) => (
+              <div key={p.name} data-reveal className={p.best ? "rounded-2xl bg-abyss p-7 text-foam" : "rounded-2xl border border-deep/10 bg-white/70 p-7"}>
+                <p className={p.best ? "eyebrow text-gold" : "eyebrow text-slate"}>{p.best ? "Most popular" : "\u00a0"}</p>
+                <p className="mt-3 text-lg font-medium">{p.name}</p>
+                <p className="display mt-2 text-5xl">${p.price}</p>
+                <p className={p.best ? "mt-3 text-sm text-mist" : "mt-3 text-sm text-slate"}>{p.note}</p>
               </div>
             ))}
-          </dl>
-          <div data-reveal className="mt-12 flex flex-col gap-3 sm:flex-row">
+          </div>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <ButtonLink href="/clips" variant="dark" arrow>
               FIND MY CLIPS
             </ButtonLink>
@@ -189,88 +189,42 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Services ──────────────────────────────────────── */}
-      {services.length > 0 && (
-        <section className="bg-foam py-24 md:py-32">
+      {/* ── Our work ──────────────────────────────────────── */}
+      {work.length > 0 && (
+        <section className="bg-abyss py-20 text-foam md:py-28">
           <div className="container-x">
-            <SectionHeading eyebrow="Services" title="Surf sessions" intro={c["services.intro"]} />
-            <div className="mt-14 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-              {services.slice(0, 6).map((s, i) => (
-                <ServiceCard key={s.id} s={s} index={i} fallbackImage={showcase[0]?.poster} />
+            <SectionHeading
+              dark
+              eyebrow="Our work"
+              title="Films from Machines"
+              action={
+                <ButtonLink href="/work" variant="outline-light" arrow className="self-start md:self-auto">
+                  ALL FILMS
+                </ButtonLink>
+              }
+            />
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {work.map((w) => (
+                <WorkCard key={w.id} w={w} dark />
               ))}
             </div>
           </div>
         </section>
       )}
 
-      {/* ── Machines & Maabaidhoo ─────────────────────────────────────────── */}
-      <section className="bg-ink py-24 text-foam md:py-32">
-        <div className="container-x">
-          <SectionHeading
-            dark
-            eyebrow="Machines • Maabaidhoo"
-            title="Home waters."
-            intro={c["laamu.intro"]}
-            action={
-              <ButtonLink href="/machines" variant="outline-light" arrow className="self-start md:self-auto">
-                WHERE WE WORK
-              </ButtonLink>
-            }
-          />
-          {locations.length > 0 && (
-            <div className="-mx-5 mt-14 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0">
-              {locations.slice(0, 4).map((l) => (
-                <div key={l.id} className="w-[80vw] shrink-0 snap-start sm:w-auto">
-                  <LocationCard l={l} wide />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
       {/* ── Reviews ───────────────────────────────────────── */}
-      {testimonials.length > 0 && <Testimonials items={testimonials} stats={reviewStats} />}
-
-      {/* ── Book a session ── */}
-      <section className="bg-ink py-24 text-foam md:py-32">
-        <div className="container-x flex flex-col items-start justify-between gap-10 md:flex-row md:items-end" data-reveal>
-          <div className="max-w-2xl">
-            <p className="eyebrow eyebrow-line text-gold">Book a session</p>
-            <h2 className="display mt-5 text-4xl [font-stretch:112%] sm:text-5xl lg:text-6xl">{c["book.title"]}</h2>
-            <p className="mt-5 text-lg text-mist">{c["book.body"]}</p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <ButtonLink href="/book" arrow>
-              BOOK A SESSION
+      {testimonials.length > 0 ? (
+        <Testimonials items={testimonials} stats={reviewStats} />
+      ) : (
+        <section className="bg-paper py-16">
+          <div className="container-x flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+            <p className="display text-2xl [font-stretch:110%] md:text-3xl">{c["cta.title"]}</p>
+            <ButtonLink href="/reviews#leave-a-review" variant="outline-dark">
+              LEAVE A REVIEW
             </ButtonLink>
-            {dm && <InstagramBookButton dmUrl={dm} label="OR DM US ON INSTAGRAM" variant="outline-light" />}
           </div>
-        </div>
-      </section>
-
-      {/* ── Call to action ────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-abyss py-28 text-foam md:py-40">
-        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(60%_80%_at_80%_100%,rgba(201,169,110,0.16),transparent_70%)]" />
-        <div className="container-x relative" data-reveal>
-          <p className="eyebrow text-gold">Reviews</p>
-          <h2 className="display mt-5 max-w-4xl text-5xl [font-stretch:115%] sm:text-6xl lg:text-7xl">{c["cta.title"]}</h2>
-          <p className="mt-6 max-w-xl text-lg text-mist">{c["cta.body"]}</p>
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href="/reviews#leave-a-review">LEAVE A REVIEW</ButtonLink>
-            {ig && (
-              <a
-                href={ig}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-3 rounded-full border border-foam/40 px-7 py-4 text-[12px] font-semibold tracking-[0.16em] hover:border-foam"
-              >
-                <Instagram className="h-4 w-4" /> FOLLOW ON INSTAGRAM
-              </a>
-            )}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   );
 }

@@ -79,14 +79,14 @@ test("clip shop: upload a session → buy by bank transfer → download the orig
   // The surfer finds their clip by board colour. Originals never appear publicly.
   await page.context().clearCookies();
   await page.goto(`/clips?q=red+board+e2e${run}`);
-  await expect(page.getByText("1 clip")).toBeVisible();
+  await expect(page.getByText(/^1 result for/)).toBeVisible();
   const html = await page.content();
   const clip = await db.clip.findUniqueOrThrow({ where: { code: codes[0]! } });
   expect(html).not.toContain(clip.originalKey);
   await page.getByRole("button", { name: `Play preview of clip ${codes[0]}` }).click();
   await expect(page.getByLabel(`Preview of clip ${codes[0]}`)).toBeVisible();
-  await page.getByRole("button", { name: "ADD TO CART" }).click();
-  await expect(page.getByText("$20", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: /ADD — THIS IS ME/ }).click();
+  await expect(page.getByRole("link", { name: "CHECKOUT →" })).toBeVisible();
   await page.getByRole("link", { name: "CHECKOUT →" }).click();
 
   await expect(page.getByRole("heading", { name: "Your clips" })).toBeVisible();
@@ -188,7 +188,7 @@ test("bookings: request → confirm → clips go privately to the surfer → pai
 test("privacy: 'remove my clip' takes it out of the gallery at once", async ({ page }) => {
   const code = created.clipCodes[1]!;
   await page.goto(`/clips?q=${code}`);
-  await expect(page.getByText("1 clip")).toBeVisible();
+  await expect(page.getByText(/^1 result for/)).toBeVisible();
   await page.getByRole("link", { name: "Remove my clip" }).first().click();
   await expect(page).toHaveURL(/\/remove$/);
   await page.waitForLoadState("networkidle");

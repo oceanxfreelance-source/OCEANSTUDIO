@@ -411,3 +411,11 @@
   .letterbox { display: none; }
   .rec-dot { animation: none; }
 }
+
+/* Horizontal strips that scroll with a finger but show no scrollbar. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
