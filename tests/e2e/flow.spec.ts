@@ -25,9 +25,9 @@ async function login(page: Page) {
 test("public site: find my clips + book, no accounts, no admin link", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("CAPTURED BY THE OCEAN.");
-  await expect(page.getByText("MACHINES • MAABAIDHOO • LAAMU").first()).toBeVisible();
+  await expect(page.getByText("Surf filming at Machines, Maldives.")).toBeVisible();
   await expect(page.locator("main").getByRole("link", { name: "FIND MY CLIPS" }).first()).toHaveAttribute("href", "/clips");
-  await expect(page.locator("main").getByRole("link", { name: /BOOK A SESSION/ }).first()).toHaveAttribute("href", "/book");
+  await expect(page.locator("main").getByRole("link", { name: /book a session/i }).first()).toHaveAttribute("href", "/book");
   const html = await page.content();
   expect(html).not.toMatch(/superadmin|register|create account|sign up/i);
   await expect(page.getByRole("link", { name: "Remove my clip" })).toBeVisible();

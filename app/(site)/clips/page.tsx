@@ -63,17 +63,7 @@ export default async function ClipsPage({ searchParams }: { searchParams: Promis
     <section className="min-h-screen bg-abyss pb-32 pt-28 text-foam md:pt-36">
       <div className="container-x">
         <h1 className="display text-4xl [font-stretch:112%] md:text-6xl">Find your clips</h1>
-        <ol className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-mist">
-          <li>
-            <span className="text-gold">1</span> Pick your day & session
-          </li>
-          <li>
-            <span className="text-gold">2</span> Tap to preview
-          </li>
-          <li>
-            <span className="text-gold">3</span> Add yours & check out
-          </li>
-        </ol>
+        <p className="mt-3 text-mist">Pick your day, tap a clip to preview it, and add the ones of you.</p>
 
         {days.length === 0 && !q ? (
           <div className="mt-10 rounded-2xl border border-foam/10 bg-ink p-8 text-center">
@@ -128,8 +118,8 @@ export default async function ClipsPage({ searchParams }: { searchParams: Promis
               </form>
             </div>
 
-            <p className="mt-6 rounded-xl border border-gold/25 bg-gold/5 px-4 py-3 text-sm text-foam/85">
-              <span className="text-gold">${cfg.prices.clip}</span> per clip · never more than <span className="text-gold">${cfg.prices.session}</span> for one session · full-quality download
+            <p className="mt-5 text-sm text-mist">
+              ${cfg.prices.clip} a clip · max ${cfg.prices.session} per session
             </p>
 
             {q && (
@@ -197,12 +187,6 @@ export default async function ClipsPage({ searchParams }: { searchParams: Promis
           </>
         )}
 
-        <p className="mx-auto mt-16 max-w-2xl border-t border-foam/10 pt-6 text-center text-xs leading-relaxed text-mist">
-          {cfg.notice}{" "}
-          <Link href="/remove" className="text-gold underline">
-            Remove my clip
-          </Link>
-        </p>
       </div>
     </section>
   );
