@@ -99,9 +99,15 @@ export const CONTENT_FIELDS = [
   { group: "Contact & social", key: "social.facebook", label: "Facebook link", default: "", type: "url" },
   // Clip shop — prices (USD)
   { group: "Clip shop — prices", key: "shop.priceClip", type: "number", label: "Price per clip (USD)", default: "20", help: "Every clip costs this. The guest pays for the clips they pick." },
-  { group: "Clip shop — prices", key: "shop.priceSession", type: "number", label: "Booked session price (USD)", default: "60", help: "Only for bookings (Book a session), per surfer." },
-  { group: "Clip shop — prices", key: "shop.priceReel", type: "number", label: "Booked session + edited reel price (USD)", default: "100", help: "Only for bookings, per surfer." },
-  { group: "Clip shop — prices", key: "shop.priceDrone", type: "number", label: "Drone + camera package price (USD)", default: "", help: "For bookings. Leave empty to hide this package." },
+  { group: "Clip shop — prices", key: "shop.priceSession", type: "number", label: "Booking package 1 — price (USD)", default: "60", help: "Only for bookings (Book a session), per surfer." },
+  { group: "Clip shop — prices", key: "pkg.session.name", label: "Booking package 1 — name", default: "Full session" },
+  { group: "Clip shop — prices", key: "pkg.session.desc", label: "Booking package 1 — description", default: "Every clip of you, delivered by private link" },
+  { group: "Clip shop — prices", key: "shop.priceReel", type: "number", label: "Booking package 2 — price (USD)", default: "100", help: "Only for bookings, per surfer." },
+  { group: "Clip shop — prices", key: "pkg.reel.name", label: "Booking package 2 — name", default: "Session + edited reel" },
+  { group: "Clip shop — prices", key: "pkg.reel.desc", label: "Booking package 2 — description", default: "All clips + a 30–60 s edited reel with music" },
+  { group: "Clip shop — prices", key: "shop.priceDrone", type: "number", label: "Booking package 3 — price (USD)", default: "", help: "For bookings. Leave empty to hide this package." },
+  { group: "Clip shop — prices", key: "pkg.drone.name", label: "Booking package 3 — name", default: "Drone + camera" },
+  { group: "Clip shop — prices", key: "pkg.drone.desc", label: "Booking package 3 — description", default: "Drone and camera angles of your session" },
   { group: "Clip shop — prices", key: "shop.depositPercent", type: "number", label: "Booking deposit (%)", default: "50" },
   // Clip shop — payment
   {

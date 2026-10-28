@@ -26,6 +26,11 @@ export function shopConfigFrom(c: Content) {
       reel: num(c["shop.priceReel"], 100, 1),
     },
     dronePrice: drone > 0 ? drone : null,
+    packages: {
+      SESSION: { name: c["pkg.session.name"].trim() || "Full session", desc: c["pkg.session.desc"].trim() },
+      SESSION_REEL: { name: c["pkg.reel.name"].trim() || "Session + edited reel", desc: c["pkg.reel.desc"].trim() },
+      DRONE_CAMERA: { name: c["pkg.drone.name"].trim() || "Drone + camera", desc: c["pkg.drone.desc"].trim() },
+    } as Record<BookingPackage, { name: string; desc: string }>,
     depositPercent: num(c["shop.depositPercent"], 50, 0, 100),
     maxPerSlot: Math.round(num(c["shop.maxPerSlot"], 2, 0, 50)),
     bookAheadDays: Math.round(num(c["shop.bookAheadDays"], 60, 1, 365)),

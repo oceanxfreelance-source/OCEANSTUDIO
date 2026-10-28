@@ -18,7 +18,7 @@ export default async function BookPage() {
   const days = await getAvailability(cfg, firstBookableDay(), cfg.bookAheadDays);
   const packages = (["SESSION", "SESSION_REEL", "DRONE_CAMERA"] as const).flatMap((id) => {
     const price = bookingPackagePrice(cfg, id);
-    return price ? [{ id, price }] : [];
+    return price ? [{ id, price, ...cfg.packages[id] }] : [];
   });
 
   return (

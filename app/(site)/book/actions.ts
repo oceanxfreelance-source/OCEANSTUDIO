@@ -10,7 +10,7 @@ import { findOrCreateCustomer } from "@/lib/customers";
 import { db } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { bookingPackagePrice, getShopConfig, paymentMethods } from "@/lib/shop";
-import { BOOKING_PACKAGE_LABEL, SLOT_LABEL } from "@/lib/shop-rules";
+import { SLOT_LABEL } from "@/lib/shop-rules";
 import { privateToken } from "@/lib/tokens";
 
 const input = z.object({
@@ -82,7 +82,7 @@ export async function createBooking(raw: z.input<typeof input>): Promise<BookRes
         locationId: spot?.id ?? null,
         locationText: spot?.name ?? "Machines",
         package: v.package,
-        serviceName: BOOKING_PACKAGE_LABEL[v.package],
+        serviceName: cfg.packages[v.package].name, // name as it was when booked
         people: v.surfers,
         recognition: v.recognition,
         message: v.note,

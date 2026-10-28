@@ -166,7 +166,7 @@ export default async function BookingAdmin({ params }: { params: Promise<{ id: s
               <div>
                 <dt className="text-xs text-slate">Package</dt>
                 <dd>
-                  {b.package ? BOOKING_PACKAGE_LABEL[b.package] : b.serviceName} · {b.people ?? 1} surfer(s)
+                  {b.serviceName || (b.package ? BOOKING_PACKAGE_LABEL[b.package] : "")} · {b.people ?? 1} surfer(s)
                 </dd>
               </div>
               <div>

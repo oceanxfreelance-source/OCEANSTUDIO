@@ -283,3 +283,21 @@ test("bank transfer also explains paying through your guide, with 'send this pag
   const order = await db.order.findUniqueOrThrow({ where: { token: created.orderTokens.at(-1)! } });
   expect(order.paymentMethod).toBe("BANK_TRANSFER");
 });
+
+test("admin: rename a booking package; the booking page shows the new name", async ({ page }) => {
+  await login(page);
+  await page.goto("/superadmin/prices");
+  await page.getByLabel("Booking package 1 — name").fill(`Dawn patrol ${run}`);
+  await page.getByLabel("Booking package 1 — description").fill("Sunrise session from the boat");
+  await page.getByRole("button", { name: "Save prices" }).click();
+  await expect(page.getByText(/prices saved/i)).toBeVisible();
+  await page.goto("/book");
+  await expect(page.getByText(`Dawn patrol ${run}`)).toBeVisible();
+  await expect(page.getByText(/Sunrise session from the boat/)).toBeVisible();
+  // restore defaults
+  await page.goto("/superadmin/prices");
+  await page.getByLabel("Booking package 1 — name").fill("Full session");
+  await page.getByLabel("Booking package 1 — description").fill("Every clip of you, delivered by private link");
+  await page.getByRole("button", { name: "Save prices" }).click();
+  await expect(page.getByText(/prices saved/i)).toBeVisible();
+});

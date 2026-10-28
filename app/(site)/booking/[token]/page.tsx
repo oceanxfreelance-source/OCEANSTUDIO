@@ -41,7 +41,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
   const open = ready && paidAll && !!b.downloadsUntil && b.downloadsUntil > new Date();
   const stopped = b.status === "DECLINED" ? "Sorry — we couldn't take this booking. Message us and we'll find another time." : b.status === "CANCELLED" ? "This booking was cancelled." : undefined;
   const when = `${b.preferredDate ? formatDate(b.preferredDate, { weekday: "long", day: "numeric", month: "long" }) : "—"} · ${b.slot ? `${SLOT_LABEL[b.slot]} (${cfg.slotTimes[b.slot]})` : ""}`;
-  const wa = whatsappUrl(cfg.whatsapp, `Hi Ocean X! Booking ${b.reference} — ${when}, ${b.people ?? 1} surfer(s), ${b.package ? BOOKING_PACKAGE_LABEL[b.package] : ""}. ${siteUrl()}/booking/${token}`);
+  const wa = whatsappUrl(cfg.whatsapp, `Hi Ocean X! Booking ${b.reference} — ${when}, ${b.people ?? 1} surfer(s), ${b.serviceName}. ${siteUrl()}/booking/${token}`);
 
   return (
     <section className="min-h-screen bg-abyss pb-24 pt-32 text-foam md:pt-40">
@@ -72,7 +72,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
           <div>
             <dt className="text-xs uppercase tracking-[0.16em] text-mist">Package</dt>
             <dd className="mt-1">
-              {b.package ? BOOKING_PACKAGE_LABEL[b.package] : b.serviceName} · {b.people ?? 1} surfer{(b.people ?? 1) === 1 ? "" : "s"}
+              {b.serviceName || (b.package ? BOOKING_PACKAGE_LABEL[b.package] : "")} · {b.people ?? 1} surfer{(b.people ?? 1) === 1 ? "" : "s"}
             </dd>
           </div>
           <div>

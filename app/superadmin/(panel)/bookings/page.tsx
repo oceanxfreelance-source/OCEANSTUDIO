@@ -69,7 +69,7 @@ export default async function BookingsAdmin({ searchParams }: { searchParams: Pr
                         <span className="min-w-0 flex-1">
                           <span className="block font-medium">{b.fullName}</span>
                           <span className="block text-xs text-slate">
-                            {b.reference} · {b.package ? BOOKING_PACKAGE_LABEL[b.package] : b.serviceName} · {b.people ?? 1} surfer{(b.people ?? 1) === 1 ? "" : "s"} · {money(b.price)}
+                            {b.reference} · {b.serviceName || (b.package ? BOOKING_PACKAGE_LABEL[b.package] : "")} · {b.people ?? 1} surfer{(b.people ?? 1) === 1 ? "" : "s"} · {money(b.price)}
                             {b._count.clips > 0 && ` · ${b._count.clips} clips`}
                           </span>
                         </span>

@@ -12,11 +12,6 @@ type Pkg = keyof typeof BOOKING_PACKAGE_LABEL;
 type Day = { date: string; slots: Record<Slot, { left: number; closed: boolean }> };
 type Method = PayMethod;
 
-const PKG_HINT: Record<Pkg, string> = {
-  SESSION: "Every clip of you, delivered by private link",
-  SESSION_REEL: "All clips + a 30–60 s edited reel with music",
-  DRONE_CAMERA: "Drone and camera angles of your session",
-};
 
 export function BookingForm({
   days,
@@ -28,7 +23,7 @@ export function BookingForm({
   slotTimes,
 }: {
   days: Day[];
-  packages: { id: Pkg; price: number }[];
+  packages: { id: Pkg; price: number; name: string; desc: string }[];
   depositPercent: number;
   methods: Method[];
   bankDetails: string;
@@ -166,9 +161,9 @@ export function BookingForm({
                 <input type="radio" name="package" checked={pkg === p.id} onChange={() => setPkg(p.id)} className="mt-1 accent-[#c9a96e]" />
                 <span className="flex-1">
                   <span className="flex justify-between gap-3 font-medium">
-                    {BOOKING_PACKAGE_LABEL[p.id]} <span className="text-gold">${p.price}</span>
+                    {p.name} <span className="text-gold">${p.price}</span>
                   </span>
-                  <span className="block text-xs text-mist">{PKG_HINT[p.id]} · per surfer</span>
+                  <span className="block text-xs text-mist">{p.desc ? `${p.desc} · ` : ""}per surfer</span>
                 </span>
               </label>
             ))}
