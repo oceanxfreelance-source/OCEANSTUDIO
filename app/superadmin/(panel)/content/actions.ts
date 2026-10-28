@@ -19,6 +19,10 @@ export async function saveContent(group: string, _prev: FormState, fd: FormData)
     let value = type === "image" ? (idList(fd, f.key)[0] ?? "") : String(fd.get(f.key) ?? "").trim();
     if (value.length > 8000) errors[f.key] = "Too long";
     if (type === "url" && value && !/^https?:\/\/\S+$/i.test(value)) errors[f.key] = "Enter a full link starting with https://";
+    if (type === "number") {
+      value = value.replace(/[$\s,]/g, "");
+      if (value && !/^\d+(\.\d{1,2})?$/.test(value)) errors[f.key] = "Enter a number, e.g. 20";
+    }
     if (f.key === "social.instagram") value = value.replace(/^@/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/[/?#].*$/, "");
     // Values left at the default aren't stored, so improved defaults still reach the site.
     writes.push(

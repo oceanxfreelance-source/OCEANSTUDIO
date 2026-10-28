@@ -5,6 +5,8 @@ import { ACTIVE_BOOKING, bookingLabel } from "@/lib/bookings";
 import { dayString, todayMaldives } from "@/lib/clips";
 import { db } from "@/lib/db";
 import { storageDriver, storageReady } from "@/lib/storage";
+import { getShopConfig } from "@/lib/shop";
+import Link from "next/link";
 import type { Slot } from "@/lib/shop-rules";
 
 export const metadata = { title: "Upload clips" };
@@ -23,12 +25,19 @@ export default async function UploadClips({ searchParams }: { searchParams: Prom
     }),
   ]);
   const pre = bookings.find((b) => b.id === bookingParam);
+  const cfg = await getShopConfig();
   const hour = new Date(Date.now() + 5 * 3600_000).getUTCHours();
   const defaultSlot: Slot = hour < 10 ? "MORNING" : hour < 14 ? "MIDDAY" : "AFTERNOON";
 
   return (
     <>
       <PageHeader title="Upload clips" subtitle="One session at a time: choose the day, time and spot, then pick all the clips." back={{ href: "/superadmin/clips", label: "Clips" }} />
+      <p className="mb-5 rounded-lg border border-slate/15 bg-white px-4 py-3 text-sm">
+        Guests pay <strong>${cfg.prices.clip}</strong> a clip, max <strong>${cfg.prices.session}</strong> per session ·{" "}
+        <Link href="/superadmin/prices" className="text-gold-deep underline">
+          change prices
+        </Link>
+      </p>
       {storageReady() ? (
         <ClipUploader
           spots={spots.map((s) => ({ ...s, code: s.code! }))}

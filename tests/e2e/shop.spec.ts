@@ -241,3 +241,21 @@ test("storage: old unsold clips are deleted; ordered and booked ones are kept", 
     await db.customer.delete({ where: { id: customer.id } });
   }
 });
+
+test("admin: change the clip price on Prices & payment; the shop uses it", async ({ page }) => {
+  await login(page);
+  await page.getByRole("link", { name: "Prices & payment" }).first().click();
+  await page.getByLabel("Single clip price (USD)").fill("$25");
+  await page.getByRole("button", { name: "Save prices" }).click();
+  await expect(page.getByText(/prices saved/i)).toBeVisible();
+  await page.goto("/clips");
+  await expect(page.getByText("$25 a clip", { exact: false })).toBeVisible();
+  // bad input is refused, then restore
+  await page.goto("/superadmin/prices");
+  await page.getByLabel("Single clip price (USD)").fill("twenty");
+  await page.getByRole("button", { name: "Save prices" }).click();
+  await expect(page.getByText("Enter a number, e.g. 20")).toBeVisible();
+  await page.getByLabel("Single clip price (USD)").fill("20");
+  await page.getByRole("button", { name: "Save prices" }).click();
+  await expect(page.getByText(/prices saved/i)).toBeVisible();
+});

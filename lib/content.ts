@@ -11,7 +11,7 @@ export interface ContentField {
   label: string;
   group: string;
   default: string;
-  type?: "text" | "textarea" | "url" | "image";
+  type?: "text" | "textarea" | "url" | "image" | "number";
   help?: string;
 }
 
@@ -98,11 +98,11 @@ export const CONTENT_FIELDS = [
   { group: "Contact & social", key: "social.tiktok", label: "TikTok link", default: "", type: "url" },
   { group: "Contact & social", key: "social.facebook", label: "Facebook link", default: "", type: "url" },
   // Clip shop — prices (USD)
-  { group: "Clip shop — prices", key: "shop.priceClip", label: "Single clip price (USD)", default: "20" },
-  { group: "Clip shop — prices", key: "shop.priceSession", label: "Full session price (USD)", default: "60", help: "All clips of one surfer in one session. Also the cap: more single clips than this never cost more." },
-  { group: "Clip shop — prices", key: "shop.priceReel", label: "Session + edited reel price (USD)", default: "100", help: "All clips plus a 30–60 s edited reel with music." },
-  { group: "Clip shop — prices", key: "shop.priceDrone", label: "Drone + camera package price (USD)", default: "", help: "For bookings. Leave empty to hide this package." },
-  { group: "Clip shop — prices", key: "shop.depositPercent", label: "Booking deposit (%)", default: "50" },
+  { group: "Clip shop — prices", key: "shop.priceClip", type: "number", label: "Single clip price (USD)", default: "20" },
+  { group: "Clip shop — prices", key: "shop.priceSession", type: "number", label: "Full session price (USD)", default: "60", help: "All clips of one surfer in one session. Also the cap: more single clips than this never cost more." },
+  { group: "Clip shop — prices", key: "shop.priceReel", type: "number", label: "Session + edited reel price (USD)", default: "100", help: "All clips plus a 30–60 s edited reel with music." },
+  { group: "Clip shop — prices", key: "shop.priceDrone", type: "number", label: "Drone + camera package price (USD)", default: "", help: "For bookings. Leave empty to hide this package." },
+  { group: "Clip shop — prices", key: "shop.depositPercent", type: "number", label: "Booking deposit (%)", default: "50" },
   // Clip shop — payment
   {
     group: "Clip shop — payment",
@@ -118,12 +118,12 @@ export const CONTENT_FIELDS = [
   { group: "Clip shop — sessions", key: "slot.morning", label: "Morning session time", default: "6:00 – 9:30" },
   { group: "Clip shop — sessions", key: "slot.midday", label: "Midday session time", default: "10:30 – 13:30" },
   { group: "Clip shop — sessions", key: "slot.afternoon", label: "Afternoon session time", default: "15:00 – 18:00" },
-  { group: "Clip shop — sessions", key: "shop.maxPerSlot", label: "Default bookings per session", default: "2", help: "Change single days under Bookings → Availability." },
-  { group: "Clip shop — sessions", key: "shop.bookAheadDays", label: "How far ahead surfers can book (days)", default: "60" },
-  { group: "Clip shop — sessions", key: "shop.downloadDays", label: "Download links valid for (days)", default: "7" },
+  { group: "Clip shop — sessions", key: "shop.maxPerSlot", type: "number", label: "Default bookings per session", default: "2", help: "Change single days under Bookings → Availability." },
+  { group: "Clip shop — sessions", key: "shop.bookAheadDays", type: "number", label: "How far ahead surfers can book (days)", default: "60" },
+  { group: "Clip shop — sessions", key: "shop.downloadDays", type: "number", label: "Download links valid for (days)", default: "7" },
   {
     group: "Clip shop — sessions",
-    key: "shop.keepHours",
+    key: "shop.keepHours", type: "number",
     label: "Delete unsold clips after (hours)",
     default: "24",
     help: "Keeps storage small. Clips someone ordered or booked are kept until their downloads end. Cleanup runs every night.",

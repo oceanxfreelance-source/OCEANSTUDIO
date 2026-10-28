@@ -14,6 +14,7 @@ const GROUPS = [
       { href: "/superadmin/clips/upload", label: "Upload clips" },
       { href: "/superadmin/clips", label: "Clips", exact: true },
       { href: "/superadmin/removals", label: "Removal requests" },
+      { href: "/superadmin/prices", label: "Prices & payment" },
     ],
   },
   {
