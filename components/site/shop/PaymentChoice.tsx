@@ -5,8 +5,7 @@ import { PAYMENT_LABEL, type PayMethod } from "@/lib/shop-rules";
 import { CopyButton } from "./CopyButton";
 
 const HINT: Record<PayMethod, string> = {
-  BANK_TRANSFER: "Transfer to our account, then upload the slip on the next page.",
-  GUIDE: "Give the cash to your guide. They transfer it to our account and upload the slip — we'll give you a link to send them.",
+  BANK_TRANSFER: "Transfer to our account — or give the cash to your guide and they transfer it. Then upload the slip on the next page (you can send that page to your guide).",
   CASH: "",
 };
 
@@ -17,7 +16,6 @@ export function PaymentChoice({
   onChange,
   bankDetails,
   cashText,
-  guideError,
   legend,
 }: {
   methods: PayMethod[];
@@ -25,10 +23,8 @@ export function PaymentChoice({
   onChange: (m: PayMethod) => void;
   bankDetails: string;
   cashText: string;
-  guideError?: string;
   legend: string;
 }) {
-  const input = "mt-1.5 block w-full rounded-lg border border-foam/20 bg-abyss px-3 py-2.5 text-sm text-foam placeholder:text-foam/35 focus:border-gold focus:outline-none";
   return (
     <fieldset className="space-y-2">
       <legend className="text-sm">{legend}</legend>
@@ -48,13 +44,6 @@ export function PaymentChoice({
                     <CopyButton text={bankDetails} label="Copy details" className="rounded-full border border-gold/60 px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-gold" />
                   </div>
                 </div>
-              )}
-              {m === "GUIDE" && (
-                <label className="mt-3 block text-foam/85">
-                  Your guide&apos;s name or guesthouse
-                  <input name="guide" maxLength={100} placeholder="e.g. Ali, Machines Surf Lodge" className={input} />
-                  {guideError && <span className="mt-1 block text-red-300">{guideError}</span>}
-                </label>
               )}
             </div>
           )}

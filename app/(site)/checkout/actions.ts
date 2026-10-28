@@ -19,8 +19,7 @@ const input = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(100),
   whatsapp: z.string().trim().max(30).optional().default(""),
   email: z.string().trim().max(200).optional().default(""),
-  method: z.enum(["CASH", "BANK_TRANSFER", "GUIDE"]),
-  guide: z.string().trim().max(100).optional().default(""),
+  method: z.enum(["CASH", "BANK_TRANSFER"]),
   note: z.string().trim().max(1000).optional().default(""),
   website: z.string().optional(), // honeypot
 });
@@ -47,7 +46,6 @@ export async function placeOrder(raw: z.input<typeof input>): Promise<PlaceOrder
 
   const cfg = await getShopConfig();
   if (!paymentMethods(cfg).includes(v.method)) return { error: "Please choose a payment method." };
-  if (v.method === "GUIDE" && v.guide.length < 2) return { error: "Please check the highlighted fields.", fieldErrors: { guide: "Tell us your guide's name or guesthouse" } };
 
   const h = await headers();
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
@@ -86,7 +84,7 @@ export async function placeOrder(raw: z.input<typeof input>): Promise<PlaceOrder
         email: email || null,
         paymentMethod: v.method,
         total,
-        note: v.method === "GUIDE" ? `Guide: ${v.guide}${v.note ? `\n${v.note}` : ""}` : v.note,
+        note: v.note,
         partnerRef: ref && /^[a-z0-9-]{2,40}$/.test(ref) ? ref : null,
         sessions: {
           create: sessions.map((s) => ({

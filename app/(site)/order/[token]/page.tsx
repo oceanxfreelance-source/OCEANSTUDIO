@@ -63,9 +63,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             </div>
             {order.paymentMethod === "BANK_TRANSFER" || order.paymentMethod === "GUIDE" ? (
               <>
-                {order.paymentMethod === "GUIDE" && (
-                  <p className="text-sm text-mist">Give the cash to your guide. They transfer it to the account below and upload the slip on this page.</p>
-                )}
+                <p className="text-sm text-mist">Transfer to the account below — or give the cash to your guide and send them this page, so they can transfer it and upload the slip here.</p>
                 <div className="rounded bg-abyss p-4 text-sm">
                   <p className="whitespace-pre-line font-mono text-foam/90">{cfg.bankDetails}</p>
                   <p className="mt-2 text-xs text-mist">Reference: {order.reference}</p>
@@ -75,16 +73,14 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                   </div>
                 </div>
                 <SlipUpload token={token} count={order._count.slips} />
-                {order.paymentMethod === "GUIDE" && (
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`Hi! Here's my Ocean X payment page: ${siteUrl()}/order/${token}. Please transfer ${money(order.total)} to the account shown and upload the slip there. Thank you!`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block rounded-full bg-[#25D366] py-3 text-center text-[12px] font-semibold tracking-[0.14em] text-abyss"
-                  >
-                    SEND THIS PAGE TO MY GUIDE
-                  </a>
-                )}
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`Hi! Here's my Ocean X payment page: ${siteUrl()}/order/${token}. Please transfer ${money(order.total)} to the account shown and upload the slip there. Thank you!`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-full bg-[#25D366] py-3 text-center text-[12px] font-semibold tracking-[0.14em] text-abyss"
+                >
+                  SEND THIS PAGE TO MY GUIDE
+                </a>
               </>
             ) : (
               <p className="text-sm text-mist">{cfg.cashText}</p>

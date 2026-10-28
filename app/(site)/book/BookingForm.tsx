@@ -74,7 +74,6 @@ export function BookingForm({
             email: String(fd.get("email") ?? ""),
             method,
             note: String(fd.get("note") ?? ""),
-            guide: String(fd.get("guide") ?? ""),
             website: String(fd.get("website") ?? ""),
           });
           if ("token" in r) {
@@ -232,7 +231,7 @@ export function BookingForm({
           {errors.email && <span className="mt-1 block text-xs text-red-300">{errors.email}</span>}
         </label>
         <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
-        <PaymentChoice methods={methods} method={method} onChange={setMethod} bankDetails={bankDetails} cashText={cashText} guideError={errors.guide} legend="Deposit payment" />
+        <PaymentChoice methods={methods} method={method} onChange={setMethod} bankDetails={bankDetails} cashText={cashText} legend="Deposit payment" />
         <label className="block text-sm">
           Note <span className="text-mist">(optional)</span>
           <textarea name="note" rows={2} maxLength={1000} className={input} />

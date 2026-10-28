@@ -50,7 +50,6 @@ export function CheckoutForm({ prices, methods, bankDetails, cashText }: { price
             email: String(fd.get("email") ?? ""),
             method,
             note: String(fd.get("note") ?? ""),
-            guide: String(fd.get("guide") ?? ""),
             website: String(fd.get("website") ?? ""),
           });
           if ("token" in r) {
@@ -146,7 +145,7 @@ export function CheckoutForm({ prices, methods, bankDetails, cashText }: { price
         </label>
         <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
 
-        <PaymentChoice methods={methods} method={method} onChange={setMethod} bankDetails={bankDetails} cashText={cashText} guideError={errors.guide} legend="How will you pay?" />
+        <PaymentChoice methods={methods} method={method} onChange={setMethod} bankDetails={bankDetails} cashText={cashText} legend="How will you pay?" />
         <label className="block text-sm">
           Note <span className="text-mist">(optional)</span>
           <textarea name="note" rows={2} maxLength={1000} placeholder="Anything we should know — e.g. the clips of your friend too" className={input} />

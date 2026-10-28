@@ -92,7 +92,7 @@ test("clip shop: upload a session → buy by bank transfer → download the orig
   await expect(page.getByRole("heading", { name: "Your clips" })).toBeVisible();
   await page.getByLabel("Your name").fill(`E2E Surfer ${run}`);
   await page.getByLabel("WhatsApp number").fill("+44 7700 900123");
-  await page.getByText("USD bank transfer").click();
+  await page.getByText("Bank transfer (you or your guide)").click();
   await expect(page.getByText("USD 7730000000001")).toBeVisible();
   await page.getByRole("button", { name: /PLACE ORDER · \$20/ }).click();
   await expect(page).toHaveURL(/\/order\/[A-Za-z0-9_-]+\?new=1$/);
@@ -260,7 +260,7 @@ test("admin: change the clip price on Prices & payment; the shop uses it", async
   await expect(page.getByText(/prices saved/i)).toBeVisible();
 });
 
-test("pay through my guide: guide name required, bank details + slip upload + 'send to my guide'", async ({ page }) => {
+test("bank transfer also explains paying through your guide, with 'send this page to my guide'", async ({ page }) => {
   const mc = await db.location.findFirst({ where: { code: "MC" } });
   const clip = await db.clip.create({
     data: { code: `MC-GDE-${run}`, date: new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z"), slot: "MIDDAY", locationId: mc!.id, originalKey: "clips/none", status: "READY", description: `guide test ${run}` },
@@ -269,20 +269,17 @@ test("pay through my guide: guide name required, bank details + slip upload + 's
   await page.goto(`/clips?q=${clip.code}`);
   await page.getByRole("button", { name: /ADD — THIS IS ME/ }).click();
   await page.getByRole("link", { name: "CHECKOUT →" }).click();
+  await expect(page.getByText("Pay through my guide")).toHaveCount(0);
   await page.getByLabel("Your name").fill(`E2E Guide ${run}`);
   await page.getByLabel("WhatsApp number").fill("+44 7700 900789");
-  await page.getByText("Pay through my guide").click();
-  await page.getByRole("button", { name: /PLACE ORDER/ }).click();
-  await expect(page.getByText("Tell us your guide's name or guesthouse")).toBeVisible();
-  await page.getByLabel(/Your guide's name or guesthouse/).fill("Ali, Machines Surf Lodge");
+  await page.getByText("Bank transfer (you or your guide)").click();
+  await expect(page.getByText(/or give the cash to your guide/)).toBeVisible();
   await page.getByRole("button", { name: /PLACE ORDER/ }).click();
   await expect(page).toHaveURL(/\/order\/[A-Za-z0-9_-]+\?new=1$/);
   created.orderTokens.push(page.url().split("/order/")[1]!.split("?")[0]!);
-  await expect(page.getByText(/Give the cash to your guide/)).toBeVisible();
-  await expect(page.getByText("USD 7730000000001")).toBeVisible();
+  await expect(page.getByText(/give the cash to your guide and send them this page/)).toBeVisible();
   await expect(page.getByRole("button", { name: "UPLOAD PAYMENT SLIP" })).toBeVisible();
   await expect(page.getByRole("link", { name: "SEND THIS PAGE TO MY GUIDE" })).toHaveAttribute("href", /wa\.me\/\?text=.*order%2F/);
   const order = await db.order.findUniqueOrThrow({ where: { token: created.orderTokens.at(-1)! } });
-  expect(order.paymentMethod).toBe("GUIDE");
-  expect(order.note).toContain("Guide: Ali, Machines Surf Lodge");
+  expect(order.paymentMethod).toBe("BANK_TRANSFER");
 });

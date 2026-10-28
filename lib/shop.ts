@@ -49,9 +49,9 @@ export function bookingPackagePrice(cfg: ShopConfig, p: BookingPackage): number 
 }
 
 /**
- * Ways to pay. Bank transfer and "through my guide" (the guide transfers to
- * the Ocean X account and uploads the slip) need the bank details filled in.
+ * Ways to pay. Bank transfer (by the surfer or through their guide, who then
+ * uploads the slip) needs the bank details filled in.
  */
 export function paymentMethods(cfg: ShopConfig): PayMethod[] {
-  return cfg.bankDetails ? ["BANK_TRANSFER", "GUIDE", "CASH"] : ["CASH"];
+  return cfg.bankDetails ? ["BANK_TRANSFER", "CASH"] : ["CASH"];
 }
