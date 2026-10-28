@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PAYMENT_LABEL } from "@/lib/shop-rules";
 import { notFound } from "next/navigation";
 import { DeliveryFileUpload } from "@/components/admin/DeliveryFileUpload";
 import { Badge, Card, PageHeader } from "@/components/admin/ui";
@@ -44,7 +45,7 @@ export default async function OrderAdmin({ params }: { params: Promise<{ id: str
     <>
       <PageHeader
         title={`${o.name} · ${money(o.total)}`}
-        subtitle={`${o.reference} · ordered ${formatDateTime(o.createdAt)} · ${o.paymentMethod === "BANK_TRANSFER" ? "bank transfer" : "cash"}`}
+        subtitle={`${o.reference} · ordered ${formatDateTime(o.createdAt)} · ${PAYMENT_LABEL[o.paymentMethod]}`}
         back={{ href: "/superadmin/orders", label: "Orders" }}
         actions={
           <a href={link} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate/30 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-foam">

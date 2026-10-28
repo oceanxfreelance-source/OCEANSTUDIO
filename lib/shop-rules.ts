@@ -54,3 +54,12 @@ export const BOOKING_PACKAGE_LABEL: Record<"SESSION" | "SESSION_REEL" | "DRONE_C
   SESSION_REEL: "Session + edited reel",
   DRONE_CAMERA: "Drone + camera",
 };
+
+export type PayMethod = "BANK_TRANSFER" | "GUIDE" | "CASH";
+export const PAYMENT_LABEL: Record<PayMethod | "PAYPAL" | "CARD", string> = {
+  BANK_TRANSFER: "USD bank transfer",
+  GUIDE: "Pay through my guide",
+  CASH: "Cash to Ocean X",
+  PAYPAL: "PayPal",
+  CARD: "Card",
+};

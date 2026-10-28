@@ -61,8 +61,11 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               <span className="text-sm text-mist">To pay</span>
               <span className="display text-3xl text-gold">{money(order.total)}</span>
             </div>
-            {order.paymentMethod === "BANK_TRANSFER" ? (
+            {order.paymentMethod === "BANK_TRANSFER" || order.paymentMethod === "GUIDE" ? (
               <>
+                {order.paymentMethod === "GUIDE" && (
+                  <p className="text-sm text-mist">Give the cash to your guide. They transfer it to the account below and upload the slip on this page.</p>
+                )}
                 <div className="rounded bg-abyss p-4 text-sm">
                   <p className="whitespace-pre-line font-mono text-foam/90">{cfg.bankDetails}</p>
                   <p className="mt-2 text-xs text-mist">Reference: {order.reference}</p>
@@ -72,6 +75,16 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                   </div>
                 </div>
                 <SlipUpload token={token} count={order._count.slips} />
+                {order.paymentMethod === "GUIDE" && (
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(`Hi! Here's my Ocean X payment page: ${siteUrl()}/order/${token}. Please transfer ${money(order.total)} to the account shown and upload the slip there. Thank you!`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-full bg-[#25D366] py-3 text-center text-[12px] font-semibold tracking-[0.14em] text-abyss"
+                  >
+                    SEND THIS PAGE TO MY GUIDE
+                  </a>
+                )}
               </>
             ) : (
               <p className="text-sm text-mist">{cfg.cashText}</p>

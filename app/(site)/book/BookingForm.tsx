@@ -2,14 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { CopyButton } from "@/components/site/shop/CopyButton";
+import { PaymentChoice } from "@/components/site/shop/PaymentChoice";
+import type { PayMethod } from "@/lib/shop-rules";
 import { cx } from "@/components/ui/cx";
 import { BOOKING_PACKAGE_LABEL, SLOT_LABEL, SLOTS, type Slot } from "@/lib/shop-rules";
 import { createBooking } from "./actions";
 
 type Pkg = keyof typeof BOOKING_PACKAGE_LABEL;
 type Day = { date: string; slots: Record<Slot, { left: number; closed: boolean }> };
-type Method = "CASH" | "BANK_TRANSFER";
+type Method = PayMethod;
 
 const PKG_HINT: Record<Pkg, string> = {
   SESSION: "Every clip of you, delivered by private link",
@@ -73,6 +74,7 @@ export function BookingForm({
             email: String(fd.get("email") ?? ""),
             method,
             note: String(fd.get("note") ?? ""),
+            guide: String(fd.get("guide") ?? ""),
             website: String(fd.get("website") ?? ""),
           });
           if ("token" in r) {
@@ -230,26 +232,7 @@ export function BookingForm({
           {errors.email && <span className="mt-1 block text-xs text-red-300">{errors.email}</span>}
         </label>
         <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
-        <fieldset className="space-y-2">
-          <legend className="text-sm">Deposit payment</legend>
-          {methods.map((m) => (
-            <label key={m} className={cx("block cursor-pointer rounded-lg border p-4", method === m ? "border-gold bg-gold/5" : "border-foam/10")}>
-              <span className="flex items-center gap-3 text-sm font-medium">
-                <input type="radio" name="method" checked={method === m} onChange={() => setMethod(m)} className="accent-[#c9a96e]" />
-                {m === "BANK_TRANSFER" ? "USD bank transfer" : "Cash on the island"}
-              </span>
-              {method === m && m === "BANK_TRANSFER" && (
-                <span className="mt-3 block rounded bg-abyss p-3 text-xs">
-                  <span className="block whitespace-pre-line font-mono">{bankDetails}</span>
-                  <span className="mt-2 flex justify-end">
-                    <CopyButton text={bankDetails} label="Copy details" className="rounded-full border border-gold/60 px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-gold" />
-                  </span>
-                </span>
-              )}
-              {method === m && m === "CASH" && <span className="mt-2 block text-xs text-mist">{cashText}</span>}
-            </label>
-          ))}
-        </fieldset>
+        <PaymentChoice methods={methods} method={method} onChange={setMethod} bankDetails={bankDetails} cashText={cashText} guideError={errors.guide} legend="Deposit payment" />
         <label className="block text-sm">
           Note <span className="text-mist">(optional)</span>
           <textarea name="note" rows={2} maxLength={1000} className={input} />

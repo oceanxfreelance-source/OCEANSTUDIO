@@ -305,6 +305,7 @@ enum BookingPackage {
 enum PaymentMethod {
   CASH
   BANK_TRANSFER
+  GUIDE // guest pays cash to their guide; the guide transfers and uploads the slip
   PAYPAL
   CARD
 }

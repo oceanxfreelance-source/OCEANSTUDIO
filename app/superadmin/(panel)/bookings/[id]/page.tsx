@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PAYMENT_LABEL } from "@/lib/shop-rules";
 import { notFound } from "next/navigation";
 import type { BookingStatus, PaymentStatus } from "@prisma/client";
 import { DeliveryFileUpload } from "@/components/admin/DeliveryFileUpload";
@@ -181,7 +182,7 @@ export default async function BookingAdmin({ params }: { params: Promise<{ id: s
               <div>
                 <dt className="text-xs text-slate">Price</dt>
                 <dd>
-                  {money(price)} · deposit {money(deposit)} · {b.paymentMethod === "BANK_TRANSFER" ? "bank transfer" : "cash"}
+                  {money(price)} · deposit {money(deposit)} · {b.paymentMethod ? PAYMENT_LABEL[b.paymentMethod] : "—"}
                 </dd>
               </div>
               {b.partnerRef && (

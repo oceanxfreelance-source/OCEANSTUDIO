@@ -7,7 +7,8 @@ import { getContent, type Content } from "./content";
  * change them) with safe fallbacks. Pure helpers live in shop-rules.ts so the
  * browser cart can use the same pricing.
  */
-export { BOOKING_PACKAGE_LABEL, cartTotal, ORDER_PACKAGE_LABEL, sessionKey, sessionPrice, SLOT_LABEL, SLOTS, type CartClip, type PriceList } from "./shop-rules";
+import type { PayMethod } from "./shop-rules";
+export { BOOKING_PACKAGE_LABEL, PAYMENT_LABEL, cartTotal, ORDER_PACKAGE_LABEL, sessionKey, sessionPrice, SLOT_LABEL, SLOTS, type CartClip, type PriceList } from "./shop-rules";
 
 function num(v: string, fallback: number, min = 0, max = 100000): number {
   const n = Number(String(v).replace(/[^0-9.]/g, ""));
@@ -47,7 +48,10 @@ export function bookingPackagePrice(cfg: ShopConfig, p: BookingPackage): number 
   return cfg.dronePrice;
 }
 
-/** Bank transfer is offered only when the account details are filled in. */
-export function paymentMethods(cfg: ShopConfig): ("CASH" | "BANK_TRANSFER")[] {
-  return cfg.bankDetails ? ["BANK_TRANSFER", "CASH"] : ["CASH"];
+/**
+ * Ways to pay. Bank transfer and "through my guide" (the guide transfers to
+ * the Ocean X account and uploads the slip) need the bank details filled in.
+ */
+export function paymentMethods(cfg: ShopConfig): PayMethod[] {
+  return cfg.bankDetails ? ["BANK_TRANSFER", "GUIDE", "CASH"] : ["CASH"];
 }

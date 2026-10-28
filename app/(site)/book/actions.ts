@@ -22,7 +22,8 @@ const input = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(100),
   whatsapp: z.string().trim().max(30).optional().default(""),
   email: z.string().trim().max(200).optional().default(""),
-  method: z.enum(["CASH", "BANK_TRANSFER"]),
+  method: z.enum(["CASH", "BANK_TRANSFER", "GUIDE"]),
+  guide: z.string().trim().max(100).optional().default(""),
   note: z.string().trim().max(1000).optional().default(""),
   website: z.string().optional(),
 });
@@ -50,6 +51,7 @@ export async function createBooking(raw: z.input<typeof input>): Promise<BookRes
   const each = bookingPackagePrice(cfg, v.package);
   if (each === null) return { error: "That package isn't available. Please choose another." };
   if (!paymentMethods(cfg).includes(v.method)) return { error: "Please choose how you'll pay the deposit." };
+  if (v.method === "GUIDE" && v.guide.length < 2) return { error: "Please check the highlighted fields.", fieldErrors: { guide: "Tell us your guide's name or guesthouse" } };
   const maxDay = dayString(new Date(Date.now() + cfg.bookAheadDays * 86400_000));
   if (v.date > maxDay) return { error: "That date is too far ahead — message us on WhatsApp." };
 
@@ -85,7 +87,7 @@ export async function createBooking(raw: z.input<typeof input>): Promise<BookRes
         serviceName: BOOKING_PACKAGE_LABEL[v.package],
         people: v.surfers,
         recognition: v.recognition,
-        message: v.note,
+        message: v.method === "GUIDE" ? `Guide: ${v.guide}${v.note ? `\n${v.note}` : ""}` : v.note,
         price,
         deposit,
         paymentMethod: v.method,

@@ -97,8 +97,11 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
                   <span className="text-sm">{b.paymentStatus === "DEPOSIT" ? "Balance due when your clips are ready" : "Deposit to pay now"}</span>
                   <span className="display text-3xl text-gold">{money(due)}</span>
                 </div>
-                {b.paymentMethod === "BANK_TRANSFER" && cfg.bankDetails ? (
+                {(b.paymentMethod === "BANK_TRANSFER" || b.paymentMethod === "GUIDE") && cfg.bankDetails ? (
                   <>
+                    {b.paymentMethod === "GUIDE" && (
+                      <p className="text-sm text-mist">Give the cash to your guide. They transfer it to the account below and upload the slip on this page.</p>
+                    )}
                     <div className="rounded bg-abyss p-4 text-sm">
                       <p className="whitespace-pre-line font-mono">{cfg.bankDetails}</p>
                       <p className="mt-2 text-xs text-mist">Reference: {b.reference}</p>
@@ -107,6 +110,16 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
                       </div>
                     </div>
                     <SlipUpload token={token} count={b._count.slips} />
+                    {b.paymentMethod === "GUIDE" && (
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(`Hi! Here's my Ocean X payment page: ${siteUrl()}/booking/${token}. Please transfer ${money(due)} to the account shown and upload the slip there. Thank you!`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-full bg-[#25D366] py-3 text-center text-[12px] font-semibold tracking-[0.14em] text-abyss"
+                  >
+                    SEND THIS PAGE TO MY GUIDE
+                  </a>
+                )}
                   </>
                 ) : (
                   <p className="text-sm text-mist">{cfg.cashText}</p>

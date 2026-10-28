@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useCart } from "@/components/site/shop/cart";
-import { CopyButton } from "@/components/site/shop/CopyButton";
+import { PaymentChoice } from "@/components/site/shop/PaymentChoice";
+import type { PayMethod } from "@/lib/shop-rules";
 import { cx } from "@/components/ui/cx";
 import { cartTotal, ORDER_PACKAGE_LABEL, SLOT_LABEL, type PriceList, type SessionPackage, type Slot } from "@/lib/shop-rules";
 import { placeOrder } from "./actions";
 
-type Method = "CASH" | "BANK_TRANSFER";
+type Method = PayMethod;
 
 export function CheckoutForm({ prices, methods, bankDetails, cashText }: { prices: PriceList; methods: Method[]; bankDetails: string; cashText: string }) {
   const cart = useCart();
@@ -49,6 +50,7 @@ export function CheckoutForm({ prices, methods, bankDetails, cashText }: { price
             email: String(fd.get("email") ?? ""),
             method,
             note: String(fd.get("note") ?? ""),
+            guide: String(fd.get("guide") ?? ""),
             website: String(fd.get("website") ?? ""),
           });
           if ("token" in r) {
@@ -144,27 +146,7 @@ export function CheckoutForm({ prices, methods, bankDetails, cashText }: { price
         </label>
         <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
 
-        <fieldset className="space-y-2">
-          <legend className="text-sm">How will you pay?</legend>
-          {methods.map((m) => (
-            <label key={m} className={cx("block cursor-pointer rounded-lg border p-4", method === m ? "border-gold bg-gold/5" : "border-foam/10")}>
-              <span className="flex items-center gap-3 text-sm font-medium">
-                <input type="radio" name="method" checked={method === m} onChange={() => setMethod(m)} className="accent-[#c9a96e]" />
-                {m === "BANK_TRANSFER" ? "USD bank transfer" : "Cash on the island"}
-              </span>
-              {method === m && m === "BANK_TRANSFER" && (
-                <span className="mt-3 block rounded bg-abyss p-3 text-xs leading-relaxed text-foam/85">
-                  <span className="block whitespace-pre-line font-mono">{bankDetails}</span>
-                  <span className="mt-3 flex items-center justify-between gap-2">
-                    <span className="text-mist">Upload your slip on the next page.</span>
-                    <CopyButton text={bankDetails} label="Copy details" className="rounded-full border border-gold/60 px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-gold" />
-                  </span>
-                </span>
-              )}
-              {method === m && m === "CASH" && <span className="mt-2 block text-xs text-mist">{cashText}</span>}
-            </label>
-          ))}
-        </fieldset>
+        <PaymentChoice methods={methods} method={method} onChange={setMethod} bankDetails={bankDetails} cashText={cashText} guideError={errors.guide} legend="How will you pay?" />
         <label className="block text-sm">
           Note <span className="text-mist">(optional)</span>
           <textarea name="note" rows={2} maxLength={1000} placeholder="Anything we should know — e.g. the clips of your friend too" className={input} />

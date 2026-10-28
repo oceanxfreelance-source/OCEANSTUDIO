@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PAYMENT_LABEL } from "@/lib/shop-rules";
 import type { OrderStatus } from "@prisma/client";
 import { Badge, Empty, PageHeader } from "@/components/admin/ui";
 import { cx } from "@/components/ui/cx";
@@ -52,7 +53,7 @@ export default async function OrdersAdmin({ searchParams }: { searchParams: Prom
                     <span className="block text-xs text-slate">
                       {o.reference} · {clips} clip{clips === 1 ? "" : "s"}
                       {o.sessions.some((s) => s.package !== "CLIPS") && " · full session"}
-                      {o.sessions.some((s) => s.package === "SESSION_REEL") && " + reel"} · {o.paymentMethod === "BANK_TRANSFER" ? "bank" : "cash"} · {formatDateTime(o.createdAt)}
+                      {o.sessions.some((s) => s.package === "SESSION_REEL") && " + reel"} · {PAYMENT_LABEL[o.paymentMethod]} · {formatDateTime(o.createdAt)}
                     </span>
                   </span>
                   <span className="flex gap-1.5">
