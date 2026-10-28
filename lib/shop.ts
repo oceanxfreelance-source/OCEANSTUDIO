@@ -29,6 +29,7 @@ export function shopConfigFrom(c: Content) {
     maxPerSlot: Math.round(num(c["shop.maxPerSlot"], 2, 0, 50)),
     bookAheadDays: Math.round(num(c["shop.bookAheadDays"], 60, 1, 365)),
     downloadDays: Math.round(num(c["shop.downloadDays"], 7, 1, 90)),
+    keepHours: Math.round(num(c["shop.keepHours"], 24, 6, 24 * 90)),
     bankDetails: c["pay.bankDetails"].trim(),
     cashText: c["pay.cashText"].trim(),
     whatsapp: c["contact.whatsapp"].trim(),

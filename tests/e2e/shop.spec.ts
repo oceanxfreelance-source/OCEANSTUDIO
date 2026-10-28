@@ -204,3 +204,40 @@ test("privacy: 'remove my clip' takes it out of the gallery at once", async ({ p
   await page.goto("/superadmin/removals");
   await expect(page.getByText("It's me, please remove")).toBeVisible();
 });
+
+test("storage: old unsold clips are deleted; ordered and booked ones are kept", async ({ request }) => {
+  const mc = await db.location.findFirst({ where: { code: "MC" } });
+  const old = new Date(Date.now() - 30 * 3600_000);
+  const day = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z");
+  const mk = (code: string, extra: object = {}) =>
+    db.clip.create({ data: { code, date: day, slot: "MORNING", locationId: mc!.id, originalKey: `clips/${code}.mp4`, status: "READY", createdAt: old, ...extra } });
+  const unsold = await mk(`MC-CLN-${run}A`);
+  const fresh = await mk(`MC-CLN-${run}B`, { createdAt: new Date() });
+  const ordered = await mk(`MC-CLN-${run}C`);
+  const customer = await db.customer.create({ data: { name: "Cleanup test" } });
+  const booking = await db.booking.create({ data: { reference: `OX-B-CLN${run}`, token: `cleanupbooking${run}xxxxxxx`, customerId: customer.id, fullName: "Cleanup test", status: "CONFIRMED" } });
+  const booked = await mk(`MC-CLN-${run}D`, { bookingId: booking.id });
+  const order = await db.order.create({
+    data: {
+      reference: `OX-O-CLN${run}`,
+      token: `cleanuporder${run}xxxxxxxxx`,
+      name: "Cleanup test",
+      paymentMethod: "CASH",
+      total: 20,
+      sessions: { create: { date: day, slot: "MORNING", package: "CLIPS", price: 20, items: { create: { clipId: ordered.id, clipCode: ordered.code } } } },
+    },
+  });
+  try {
+    expect((await request.get("/api/cron/cleanup")).status()).toBe(401);
+    const res = await request.get("/api/cron/cleanup", { headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } });
+    expect(res.status()).toBe(200);
+    const left = (await db.clip.findMany({ where: { code: { startsWith: `MC-CLN-${run}` } }, select: { code: true } })).map((c) => c.code).sort();
+    expect(left).toEqual([fresh.code, ordered.code, booked.code].sort());
+    expect(await db.clip.findUnique({ where: { id: unsold.id } })).toBeNull();
+  } finally {
+    await db.order.delete({ where: { id: order.id } });
+    await db.clip.deleteMany({ where: { code: { startsWith: `MC-CLN-${run}` } } });
+    await db.booking.delete({ where: { id: booking.id } });
+    await db.customer.delete({ where: { id: customer.id } });
+  }
+});

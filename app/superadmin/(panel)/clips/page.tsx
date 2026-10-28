@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { after } from "next/server";
+import { cleanupOldFiles } from "@/lib/cleanup";
 import type { Prisma } from "@prisma/client";
 import { Badge, ButtonLink, Empty, PageHeader } from "@/components/admin/ui";
 import { cx } from "@/components/ui/cx";
@@ -15,6 +17,8 @@ type View = keyof typeof VIEWS;
 
 export default async function ClipsAdmin({ searchParams }: { searchParams: Promise<{ view?: string; date?: string }> }) {
   await requireAdmin();
+  // Also tidy up here, so old clips go even between nightly runs.
+  after(() => cleanupOldFiles().catch((e) => console.error("cleanup failed", e)));
   const sp = await searchParams;
   const view: View = sp.view && sp.view in VIEWS ? (sp.view as View) : "all";
   const date = parseDay(sp.date);
@@ -35,7 +39,7 @@ export default async function ClipsAdmin({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageHeader title="Clips" subtitle="Every uploaded clip. Booked clips are private to that surfer; the rest are in the public gallery." actions={<ButtonLink href="/superadmin/clips/upload">+ Upload clips</ButtonLink>} />
+      <PageHeader title="Clips" subtitle="Booked clips are private to that surfer; the rest are in the public gallery. Unsold clips are deleted automatically after 24 hours (change this in Website content → Clip shop)." actions={<ButtonLink href="/superadmin/clips/upload">+ Upload clips</ButtonLink>} />
       <form className="mb-4 flex flex-wrap items-end gap-3" action="/superadmin/clips">
         <input type="hidden" name="view" value={view} />
         <label className="text-xs font-medium text-slate">

@@ -123,6 +123,13 @@ export const CONTENT_FIELDS = [
   { group: "Clip shop — sessions", key: "shop.downloadDays", label: "Download links valid for (days)", default: "7" },
   {
     group: "Clip shop — sessions",
+    key: "shop.keepHours",
+    label: "Delete unsold clips after (hours)",
+    default: "24",
+    help: "Keeps storage small. Clips someone ordered or booked are kept until their downloads end. Cleanup runs every night.",
+  },
+  {
+    group: "Clip shop — sessions",
     key: "shop.filmingNotice",
     label: "Filming & privacy notice",
     type: "textarea",
