@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: oceanx
+          POSTGRES_PASSWORD: oceanx
+          POSTGRES_DB: oceanx
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U oceanx" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://oceanx:oceanx@localhost:5432/oceanx
+      SITE_URL: http://localhost:3000
+      E2E_ADMIN_EMAIL: ci-admin@oceanx.test
+      E2E_ADMIN_PASSWORD: ci-admin-password-123
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npx prisma migrate deploy
+      - run: npx tsx prisma/seed.ts
+      - run: npm test
+      - run: npm run build
+      - name: Create test admin
+        run: ADMIN_PASSWORD="$E2E_ADMIN_PASSWORD" npx tsx scripts/create-admin.ts "$E2E_ADMIN_EMAIL" "CI Admin"
+      - name: Browser tests
+        run: |
+          npx playwright install --with-deps chromium
+          npm start > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:3000 >/dev/null && break; sleep 1; done
+          npx playwright test
+      - if: failure()
+        run: tail -100 server.log || true
