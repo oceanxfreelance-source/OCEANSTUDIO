@@ -113,7 +113,7 @@ export default async function ClipsPage({ searchParams }: { searchParams: Promis
             </div>
 
             <p className="mt-5 text-sm text-mist">
-              ${cfg.prices.clip} a clip · max ${cfg.prices.session} per session
+              ${cfg.prices.clip} a clip · you pay only for the clips you pick
             </p>
 
             {q && (

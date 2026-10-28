@@ -101,7 +101,7 @@ export default async function HomePage() {
             ))}
           </ol>
           <p data-reveal className="mt-12 border-t border-deep/10 pt-8 text-lg">
-            <span className="font-semibold">${cfg.prices.clip}</span> a clip · <span className="font-semibold">${cfg.prices.session}</span> for your whole session
+            <span className="font-semibold">${cfg.prices.clip}</span> a clip — pick the ones you want and pay only for those
           </p>
           {review && (
             <figure data-reveal className="mt-12">

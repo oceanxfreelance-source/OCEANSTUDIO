@@ -5,28 +5,20 @@ import { spawnSync } from "node:child_process";
 import ffmpegPath from "ffmpeg-static";
 import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
-import { cartTotal, sessionPrice, type CartClip } from "@/lib/shop-rules";
+import { cartTotal, clipsPrice, type CartClip } from "@/lib/shop-rules";
 import { makePreview } from "@/lib/clip-preview";
 
 const prices = { clip: 20, session: 60, reel: 100 };
 const clip = (id: string, date = "2026-10-27", slot = "MORNING", spot = "MC"): CartClip => ({ id, code: id, date, slot, spot, spotName: "Machines", poster: null });
 
 describe("clip pricing", () => {
-  it("charges per clip, capped at the session price", () => {
-    expect(sessionPrice(prices, 1, "CLIPS")).toBe(20);
-    expect(sessionPrice(prices, 3, "CLIPS")).toBe(60);
-    expect(sessionPrice(prices, 5, "CLIPS")).toBe(60);
-    expect(sessionPrice(prices, 1, "SESSION")).toBe(60);
-    expect(sessionPrice(prices, 2, "SESSION_REEL")).toBe(100);
-  });
-  it("groups the cart by session and prices each group", () => {
-    const r = cartTotal(prices, [clip("a"), clip("b"), clip("c"), clip("d"), clip("e", "2026-10-27", "AFTERNOON")], {});
+  it("charges the clip price for every clip picked — no cap, no packages", () => {
+    expect(clipsPrice(prices, 1)).toBe(20);
+    expect(clipsPrice(prices, 5)).toBe(100);
+    const r = cartTotal(prices, [clip("a"), clip("b"), clip("c"), clip("d"), clip("e", "2026-10-27", "AFTERNOON")]);
     expect(r.sessions).toHaveLength(2);
-    expect(r.sessions[0]).toMatchObject({ price: 60, capped: true, pkg: "SESSION" });
-    expect(r.sessions[1]).toMatchObject({ price: 20, capped: false });
-    expect(r.total).toBe(80);
-    const up = cartTotal(prices, [clip("a"), clip("e", "2026-10-27", "AFTERNOON")], { "2026-10-27|AFTERNOON|MC": "SESSION_REEL" });
-    expect(up.total).toBe(120);
+    expect(r.sessions.map((s) => s.price)).toEqual([80, 20]);
+    expect(r.total).toBe(100);
   });
 });
 

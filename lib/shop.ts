@@ -8,7 +8,7 @@ import { getContent, type Content } from "./content";
  * browser cart can use the same pricing.
  */
 import type { PayMethod } from "./shop-rules";
-export { BOOKING_PACKAGE_LABEL, PAYMENT_LABEL, cartTotal, ORDER_PACKAGE_LABEL, sessionKey, sessionPrice, SLOT_LABEL, SLOTS, type CartClip, type PriceList } from "./shop-rules";
+export { BOOKING_PACKAGE_LABEL, PAYMENT_LABEL, cartTotal, ORDER_PACKAGE_LABEL, sessionKey, clipsPrice, SLOT_LABEL, SLOTS, type CartClip, type PriceList } from "./shop-rules";
 
 function num(v: string, fallback: number, min = 0, max = 100000): number {
   const n = Number(String(v).replace(/[^0-9.]/g, ""));

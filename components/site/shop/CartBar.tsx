@@ -10,7 +10,7 @@ export function CartBar({ prices }: { prices: PriceList }) {
   const cart = useCart();
   const pathname = usePathname();
   if (!cart.ready || cart.clips.length === 0 || pathname.startsWith("/checkout") || pathname.startsWith("/order") || pathname.startsWith("/book")) return null;
-  const { total } = cartTotal(prices, cart.clips, cart.packages);
+  const { total } = cartTotal(prices, cart.clips);
   const n = cart.clips.length;
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gold/30 bg-abyss/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 text-foam backdrop-blur">

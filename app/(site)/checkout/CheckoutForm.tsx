@@ -6,8 +6,7 @@ import { useState, useTransition } from "react";
 import { useCart } from "@/components/site/shop/cart";
 import { PaymentChoice } from "@/components/site/shop/PaymentChoice";
 import type { PayMethod } from "@/lib/shop-rules";
-import { cx } from "@/components/ui/cx";
-import { cartTotal, ORDER_PACKAGE_LABEL, SLOT_LABEL, type PriceList, type SessionPackage, type Slot } from "@/lib/shop-rules";
+import { cartTotal, SLOT_LABEL, type PriceList, type Slot } from "@/lib/shop-rules";
 import { placeOrder } from "./actions";
 
 type Method = PayMethod;
@@ -19,7 +18,7 @@ export function CheckoutForm({ prices, methods, bankDetails, cashText }: { price
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
-  const { sessions, total } = cartTotal(prices, cart.clips, cart.packages);
+  const { sessions, total } = cartTotal(prices, cart.clips);
 
   if (!cart.ready) return <p className="text-mist">Loading your cart…</p>;
   if (cart.clips.length === 0)
@@ -44,7 +43,6 @@ export function CheckoutForm({ prices, methods, bankDetails, cashText }: { price
         start(async () => {
           const r = await placeOrder({
             clipIds: cart.clips.map((c) => c.id),
-            packages: cart.packages,
             name: String(fd.get("name") ?? ""),
             whatsapp: String(fd.get("whatsapp") ?? ""),
             email: String(fd.get("email") ?? ""),
@@ -88,31 +86,12 @@ export function CheckoutForm({ prices, methods, bankDetails, cashText }: { price
                   </li>
                 ))}
               </ul>
-              <fieldset className="mt-5 space-y-2">
-                <legend className="sr-only">Package for this session</legend>
-                {((s.capped ? ["SESSION", "SESSION_REEL"] : ["CLIPS", "SESSION", "SESSION_REEL"]) as SessionPackage[]).map((pkg) => {
-                  const price = pkg === "CLIPS" ? s.items.length * prices.clip : pkg === "SESSION" ? prices.session : prices.reel;
-                  const hint =
-                    pkg === "CLIPS"
-                      ? `${s.items.length} × $${prices.clip}`
-                      : pkg === "SESSION"
-                        ? s.capped
-                          ? `${s.items.length} clips reach the session price — you get every clip of you that session`
-                          : "Every clip of you that session — we add any you missed"
-                        : "All your clips + a 30–60 s edited reel with music";
-                  return (
-                    <label key={pkg} className={cx("flex cursor-pointer items-start gap-3 rounded-lg border p-3", s.pkg === pkg ? "border-gold bg-gold/5" : "border-foam/10")}>
-                      <input type="radio" name={`pkg-${s.key}`} checked={s.pkg === pkg} onChange={() => cart.setPackage(s.key, pkg)} className="mt-1 accent-[#c9a96e]" />
-                      <span className="flex-1">
-                        <span className="flex justify-between gap-3 text-sm font-medium">
-                          {ORDER_PACKAGE_LABEL[pkg]} <span className="text-gold">${price}</span>
-                        </span>
-                        <span className="block text-xs text-mist">{hint}</span>
-                      </span>
-                    </label>
-                  );
-                })}
-              </fieldset>
+              <p className="mt-4 flex justify-between text-sm">
+                <span className="text-mist">
+                  {s.items.length} clip{s.items.length === 1 ? "" : "s"} × ${prices.clip}
+                </span>
+                <span className="text-gold">${s.price}</span>
+              </p>
             </section>
           );
         })}

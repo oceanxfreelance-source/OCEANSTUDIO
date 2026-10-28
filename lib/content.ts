@@ -98,9 +98,9 @@ export const CONTENT_FIELDS = [
   { group: "Contact & social", key: "social.tiktok", label: "TikTok link", default: "", type: "url" },
   { group: "Contact & social", key: "social.facebook", label: "Facebook link", default: "", type: "url" },
   // Clip shop — prices (USD)
-  { group: "Clip shop — prices", key: "shop.priceClip", type: "number", label: "Single clip price (USD)", default: "20" },
-  { group: "Clip shop — prices", key: "shop.priceSession", type: "number", label: "Full session price (USD)", default: "60", help: "All clips of one surfer in one session. Also the cap: more single clips than this never cost more." },
-  { group: "Clip shop — prices", key: "shop.priceReel", type: "number", label: "Session + edited reel price (USD)", default: "100", help: "All clips plus a 30–60 s edited reel with music." },
+  { group: "Clip shop — prices", key: "shop.priceClip", type: "number", label: "Price per clip (USD)", default: "20", help: "Every clip costs this. The guest pays for the clips they pick." },
+  { group: "Clip shop — prices", key: "shop.priceSession", type: "number", label: "Booked session price (USD)", default: "60", help: "Only for bookings (Book a session), per surfer." },
+  { group: "Clip shop — prices", key: "shop.priceReel", type: "number", label: "Booked session + edited reel price (USD)", default: "100", help: "Only for bookings, per surfer." },
   { group: "Clip shop — prices", key: "shop.priceDrone", type: "number", label: "Drone + camera package price (USD)", default: "", help: "For bookings. Leave empty to hide this package." },
   { group: "Clip shop — prices", key: "shop.depositPercent", type: "number", label: "Booking deposit (%)", default: "50" },
   // Clip shop — payment

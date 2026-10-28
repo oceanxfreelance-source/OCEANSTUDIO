@@ -10,12 +10,11 @@ import { nextReference } from "@/lib/counters";
 import { db } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { getShopConfig, paymentMethods } from "@/lib/shop";
-import { isCapped, sessionKey, sessionPrice } from "@/lib/shop-rules";
+import { clipsPrice, sessionKey } from "@/lib/shop-rules";
 import { privateToken } from "@/lib/tokens";
 
 const input = z.object({
   clipIds: z.array(z.string().max(40)).min(1, "Your cart is empty").max(100),
-  packages: z.record(z.string().max(80), z.enum(["CLIPS", "SESSION", "SESSION_REEL"])).default({}),
   name: z.string().trim().min(2, "Please enter your name").max(100),
   whatsapp: z.string().trim().max(30).optional().default(""),
   email: z.string().trim().max(200).optional().default(""),
@@ -64,12 +63,11 @@ export async function placeOrder(raw: z.input<typeof input>): Promise<PlaceOrder
     const key = sessionKey({ date: dayString(c.date), slot: c.slot, spot: c.location?.code ?? "OX" });
     groups.set(key, [...(groups.get(key) ?? []), c]);
   }
-  const sessions = [...groups.entries()].map(([key, items]) => {
-    const chosen = (v.packages[key] ?? "CLIPS") as OrderPackage;
-    const pkg: OrderPackage = chosen === "CLIPS" && isCapped(cfg.prices, items.length) ? "SESSION" : chosen;
-    return { items, pkg, price: sessionPrice(cfg.prices, items.length, pkg), date: items[0]!.date, slot: items[0]!.slot as DaySlot, locationId: items[0]!.location?.id ?? null };
+  const sessions = [...groups.values()].map((items) => {
+    const pkg: OrderPackage = "CLIPS";
+    return { items, pkg, price: clipsPrice(cfg.prices, items.length), date: items[0]!.date, slot: items[0]!.slot as DaySlot, locationId: items[0]!.location?.id ?? null };
   });
-  const total = sessions.reduce((s, g) => s + g.price, 0);
+  const total = clipsPrice(cfg.prices, clips.length);
   const ref = (await cookies()).get("ox_ref")?.value;
 
   const token = privateToken();
