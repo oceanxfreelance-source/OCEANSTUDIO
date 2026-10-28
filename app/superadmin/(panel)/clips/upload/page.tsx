@@ -42,7 +42,15 @@ export default async function UploadClips({ searchParams }: { searchParams: Prom
           }}
         />
       ) : (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Private clip storage isn&apos;t connected yet, so clips can&apos;t be uploaded.</p>
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+          <p className="font-semibold">Clip storage isn&apos;t connected yet, so clips can&apos;t be uploaded.</p>
+          <ol className="mt-3 list-decimal space-y-1 pl-5">
+            <li>Open vercel.com → Storage → <strong>oceanx-clips-private</strong>.</li>
+            <li>Tap <strong>Connect Project</strong> and choose <strong>oceanx-studio</strong>.</li>
+            <li>Set the environment variable prefix to <strong>PRIVATE_BLOB</strong>, tick Production and Preview, and connect.</li>
+            <li>Redeploy the site (Deployments → ⋯ → Redeploy). Then come back here.</li>
+          </ol>
+        </div>
       )}
     </>
   );

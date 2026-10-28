@@ -67,7 +67,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
           </div>
           <div>
             <dt className="text-xs uppercase tracking-[0.16em] text-mist">Where</dt>
-            <dd className="mt-1">{b.locationText || "Wherever the waves are best"}</dd>
+            <dd className="mt-1">{b.locationText || "Machines"}, Maabaidhoo</dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-[0.16em] text-mist">Package</dt>

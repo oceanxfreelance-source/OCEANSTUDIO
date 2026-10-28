@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { firstBookableDay, getAvailability } from "@/lib/availability";
-import { getShopSpots } from "@/lib/clip-shop";
 import { bookingPackagePrice, getShopConfig, paymentMethods } from "@/lib/shop";
 import { getContent } from "@/lib/content";
 import { instagramDmUrl } from "@/lib/format";
@@ -16,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function BookPage() {
   const cfg = await getShopConfig();
   const dm = instagramDmUrl((await getContent())["social.instagram"]);
-  const [days, spots] = await Promise.all([getAvailability(cfg, firstBookableDay(), cfg.bookAheadDays), getShopSpots()]);
+  const days = await getAvailability(cfg, firstBookableDay(), cfg.bookAheadDays);
   const packages = (["SESSION", "SESSION_REEL", "DRONE_CAMERA"] as const).flatMap((id) => {
     const price = bookingPackagePrice(cfg, id);
     return price ? [{ id, price }] : [];
@@ -39,7 +38,6 @@ export default async function BookPage() {
           <div className="mt-10">
           <BookingForm
             days={days.map((d) => ({ date: d.date, slots: { MORNING: d.slots.MORNING, MIDDAY: d.slots.MIDDAY, AFTERNOON: d.slots.AFTERNOON } }))}
-            spots={spots.map((s) => ({ id: s.id, name: s.name }))}
             packages={packages}
             depositPercent={cfg.depositPercent}
             methods={paymentMethods(cfg)}

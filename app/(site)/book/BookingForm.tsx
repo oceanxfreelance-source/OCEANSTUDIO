@@ -19,7 +19,6 @@ const PKG_HINT: Record<Pkg, string> = {
 
 export function BookingForm({
   days,
-  spots,
   packages,
   depositPercent,
   methods,
@@ -28,7 +27,6 @@ export function BookingForm({
   slotTimes,
 }: {
   days: Day[];
-  spots: { id: string; name: string }[];
   packages: { id: Pkg; price: number }[];
   depositPercent: number;
   methods: Method[];
@@ -67,7 +65,6 @@ export function BookingForm({
           const r = await createBooking({
             date,
             slot,
-            locationId: String(fd.get("locationId") ?? ""),
             package: pkg,
             surfers,
             recognition: String(fd.get("recognition") ?? ""),
@@ -186,17 +183,10 @@ export function BookingForm({
                 ))}
               </select>
             </label>
-            <label className="block text-sm">
-              Surf spot
-              <select name="locationId" className={input}>
-                <option value="">Wherever the waves are best</option>
-                {spots.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="block text-sm">
+              Where
+              <p className="mt-1.5 rounded-lg border border-foam/10 px-4 py-3 text-foam/85">Machines, Maabaidhoo</p>
+            </div>
           </div>
           <label className="mt-4 block text-sm">
             How do we recognise you?

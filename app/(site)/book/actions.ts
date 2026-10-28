@@ -16,7 +16,6 @@ import { privateToken } from "@/lib/tokens";
 const input = z.object({
   date: z.string(),
   slot: z.enum(["MORNING", "MIDDAY", "AFTERNOON"]),
-  locationId: z.string().max(40).optional().default(""),
   package: z.enum(["SESSION", "SESSION_REEL", "DRONE_CAMERA"]),
   surfers: z.coerce.number().int().min(1).max(10),
   recognition: z.string().trim().min(3, "Tell us how to recognise you in the water").max(500),
@@ -60,7 +59,8 @@ export async function createBooking(raw: z.input<typeof input>): Promise<BookRes
 
   if (!(await hasRoom(cfg, v.date, v.slot))) return { error: `The ${SLOT_LABEL[v.slot].toLowerCase()} session on that day just filled up. Please pick another.`, fieldErrors: { date: "Full" } };
 
-  const spot = v.locationId ? await db.location.findFirst({ where: { id: v.locationId, code: { not: null } }, select: { id: true, name: true } }) : null;
+  // Ocean X only works at Machines.
+  const spot = await db.location.findUnique({ where: { slug: "machines" }, select: { id: true, name: true } });
   const price = each * v.surfers;
   const deposit = Math.round(price * cfg.depositPercent) / 100;
   const ref = (await cookies()).get("ox_ref")?.value;
@@ -80,7 +80,7 @@ export async function createBooking(raw: z.input<typeof input>): Promise<BookRes
         preferredDate: date,
         slot: v.slot,
         locationId: spot?.id ?? null,
-        locationText: spot?.name ?? "Wherever the waves are best",
+        locationText: spot?.name ?? "Machines",
         package: v.package,
         serviceName: BOOKING_PACKAGE_LABEL[v.package],
         people: v.surfers,

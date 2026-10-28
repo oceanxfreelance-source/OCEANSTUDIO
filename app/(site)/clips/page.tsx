@@ -53,7 +53,7 @@ export default async function ClipsPage({ searchParams }: { searchParams: Promis
     const key = `${dayString(c.date)}|${c.slot}|${c.location?.id ?? ""}`;
     let g = groups.find((x) => x.key === key);
     if (!g) {
-      g = { key, title: `${SLOT_LABEL[c.slot]}${c.location ? ` · ${c.location.name}` : ""}${dateKey ? "" : ` · ${dayLabel(dayString(c.date))}`}`, clips: [] };
+      g = { key, title: `${SLOT_LABEL[c.slot]} session${dateKey ? "" : ` · ${dayLabel(dayString(c.date))}`}`, clips: [] };
       groups.push(g);
     }
     g.clips.push(c);
@@ -96,12 +96,6 @@ export default async function ClipsPage({ searchParams }: { searchParams: Promis
                     {SLOT_LABEL[s]}
                   </Link>
                 ))}
-                {spots.length > 1 &&
-                  spots.map((s) => (
-                    <Link key={s.id} href={link({ spot: spot?.id === s.id ? undefined : s.code!, page: undefined })} className={chip(spot?.id === s.id)}>
-                      {s.name}
-                    </Link>
-                  ))}
               </nav>
               <form action="/clips" className="flex gap-2">
                 {sp.slot && <input type="hidden" name="slot" value={sp.slot} />}
